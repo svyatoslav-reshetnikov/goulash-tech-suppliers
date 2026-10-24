@@ -13,6 +13,9 @@
 	}
 
 	handle {
+		# страница всегда проверяется заново: после обновления сайта браузер сразу берёт новую сборку
+		@page path / /index.html
+		header @page Cache-Control "no-cache"
 		root * /srv
 		try_files {path} /index.html
 		file_server

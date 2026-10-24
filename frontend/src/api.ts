@@ -153,10 +153,23 @@ export async function fetchRun(id: number): Promise<Run> {
   return (await response.json()) as Run;
 }
 
-export async function fetchRuns(): Promise<Run[]> {
-  const response = await fetch("/api/runs?limit=15");
+export async function fetchRuns(limit = 200): Promise<Run[]> {
+  const response = await fetch(`/api/runs?limit=${limit}`);
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
   return ((await response.json()) as { runs: Run[] }).runs;
+}
+
+/** Последний такой же поиск (категория, место, соседи, тип поставщика), если он уже был и не завершился ошибкой. */
+export async function fetchPreviousRun(body: RunRequest): Promise<Run | null> {
+  const params = new URLSearchParams({ category_id: String(body.category_id), include_neighbors: String(body.include_neighbors) });
+  if (body.location_kind && body.location_key) {
+    params.set("location_kind", body.location_kind);
+    params.set("location_key", body.location_key);
+  }
+  if (body.supplier_type) params.set("supplier_type", body.supplier_type);
+  const response = await fetch(`/api/runs/previous?${params}`);
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  return ((await response.json()) as { run: Run | null }).run;
 }
 
 export async function fetchRunSuppliers(id: number): Promise<SupplierData[]> {

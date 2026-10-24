@@ -1,34 +1,32 @@
-import { useState } from "react";
-import RunHistory from "./RunHistory";
+import { useEffect, useRef, useState } from "react";
 import RunView from "./RunView";
 import SearchForm from "./SearchForm";
 
-/** Вкладка «Поиск»: форма, ход текущего запуска и история. Открытый запуск запоминается в адресе (#search/3). */
+/** Вкладка «Найти поставщика»: форма и ход запуска. Открытый запуск запоминается в адресе (#search/3). */
 export default function SearchPage({ runId, onOpen }: { runId: number | null; onOpen: (id: number) => void }) {
-  const [reload, setReload] = useState(0);
   const [running, setRunning] = useState(false);
+  const view = useRef<HTMLDivElement>(null);
+
+  // открыли запуск (новый или прошлый): показываем его, а не оставляем пользователя наверху формы
+  useEffect(() => {
+    if (runId !== null) setTimeout(() => view.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
+  }, [runId]);
 
   return (
     <div className="space-y-5">
       <SearchForm
         busy={running}
+        onOpenPrevious={onOpen}
         onStarted={(id) => {
           setRunning(true);
           onOpen(id);
-          setReload((k) => k + 1);
         }}
       />
       {runId !== null && (
-        <RunView
-          key={runId}
-          runId={runId}
-          onFinished={() => {
-            setRunning(false);
-            setReload((k) => k + 1);
-          }}
-        />
+        <div ref={view}>
+          <RunView key={runId} runId={runId} onFinished={() => setRunning(false)} />
+        </div>
       )}
-      <RunHistory current={runId} reloadKey={reload} onOpen={onOpen} />
     </div>
   );
 }

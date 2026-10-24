@@ -70,9 +70,32 @@ async def create_run(body: RunCreate, session: AsyncSession = Depends(get_sessio
 
 
 @router.get("")
-async def list_runs(limit: int = Query(20, ge=1, le=100), session: AsyncSession = Depends(get_session)) -> dict:
+async def list_runs(limit: int = Query(20, ge=1, le=200), session: AsyncSession = Depends(get_session)) -> dict:
     rows = (await session.execute(select(Run).order_by(Run.id.desc()).limit(limit))).scalars()
     return {"runs": [_run_dict(r) for r in rows]}
+
+
+@router.get("/previous")
+async def previous_run(
+    category_id: int,
+    location_kind: str | None = Query(None, pattern="^(city|region)$"),
+    location_key: str | None = Query(None, max_length=200),
+    include_neighbors: bool = False,
+    supplier_type: str | None = None,
+    session: AsyncSession = Depends(get_session),
+) -> dict:
+    """Последний такой же поиск (те же категория, место, соседние регионы и тип поставщика), если он уже был: идёт или завершён.
+    Неудавшиеся запуски не считаются: их стоит повторить."""
+    query = select(Run).where(
+        Run.category_id == category_id,
+        Run.include_neighbors == include_neighbors,
+        Run.status.in_(("queued", "running", "done")),
+        Run.location_kind.is_(None) if location_kind is None else Run.location_kind == location_kind,
+        Run.location_key.is_(None) if location_key is None else Run.location_key == location_key,
+        Run.supplier_type.is_(None) if not supplier_type else Run.supplier_type == supplier_type,
+    )
+    run = (await session.execute(query.order_by(Run.id.desc()).limit(1))).scalar_one_or_none()
+    return {"run": _run_dict(run) if run else None}
 
 
 @router.get("/{run_id}")

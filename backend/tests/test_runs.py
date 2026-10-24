@@ -412,3 +412,26 @@ async def test_research_coverage_is_stored_and_returned_with_run_results(factory
         supplier = (await run_suppliers(run_id, session))["suppliers"][0]
     assert supplier["research"]["missing"] == ["moq", "certificates"] and len(supplier["research"]["pages"]) == 2
     assert supplier["research"]["researched_at"]
+
+
+@needs_db
+@with_db
+async def test_previous_run_finds_the_same_search_and_ignores_failed_or_different_ones(factory):
+    from app.routes.runs import previous_run
+
+    first = await new_run(factory, location_kind="city", location_key="RU-TA|Казань", include_neighbors=False)
+    async with factory() as session:
+        category_id = (await session.get(Run, first)).category_id
+        same = dict(category_id=category_id, location_kind="city", location_key="RU-TA|Казань", include_neighbors=False, supplier_type=None)
+        assert (await previous_run(session=session, **same))["run"]["id"] == first  # в очереди тоже считается
+        await session.execute(update(Run).where(Run.id == first).values(status="failed"))
+        await session.commit()
+        assert (await previous_run(session=session, **same))["run"] is None  # неудавшийся запуск не мешает повторить
+        await session.execute(update(Run).where(Run.id == first).values(status="done"))
+        await session.commit()
+        assert (await previous_run(session=session, **same))["run"]["id"] == first
+        assert (await previous_run(session=session, **{**same, "include_neighbors": True}))["run"] is None
+        assert (await previous_run(session=session, **{**same, "supplier_type": "оптовик"}))["run"] is None
+        assert (await previous_run(session=session, **{**same, "location_kind": None, "location_key": None}))["run"] is None  # вся Россия — другой поиск
+        newer = await new_run(factory, location_kind="city", location_key="RU-TA|Казань", include_neighbors=False)
+        assert (await previous_run(session=session, **same))["run"]["id"] == newer  # берётся самый свежий

@@ -1,14 +1,15 @@
 import { useCallback, useEffect, useState } from "react";
 import { fetchHealth, type Health } from "./api";
 import CatalogPage from "./components/CatalogPage";
+import HistoryPage from "./components/HistoryPage";
 import SearchPage from "./components/SearchPage";
 
-type Route = { tab: "search" | "catalog"; runId: number | null };
+type Route = { tab: "search" | "history" | "catalog"; runId: number | null };
 
-/** Адрес вида #search, #search/3 (открыт запуск 3) или #catalog: ссылку на запуск можно сохранить и открыть позже. */
+/** Адрес вида #search, #search/3 (открыт запуск 3), #history, #history/3 или #catalog: ссылку на запуск можно сохранить и открыть позже. */
 const parse = (hash: string): Route => {
   const [tab, id] = hash.replace(/^#/, "").split("/");
-  return { tab: tab === "catalog" ? "catalog" : "search", runId: id && /^\d+$/.test(id) ? Number(id) : null };
+  return { tab: tab === "catalog" ? "catalog" : tab === "history" ? "history" : "search", runId: id && /^\d+$/.test(id) ? Number(id) : null };
 };
 
 export default function App() {
@@ -37,15 +38,14 @@ export default function App() {
       </header>
 
       <nav className="flex gap-2">
-        <button onClick={() => go("search")} className={tabClass(route.tab === "search")}>Поиск</button>
+        <button onClick={() => go("search")} className={tabClass(route.tab === "search")}>Найти поставщика</button>
+        <button onClick={() => go("history")} className={tabClass(route.tab === "history")}>История поисков</button>
         <button onClick={() => go("catalog")} className={tabClass(route.tab === "catalog")}>Справочник</button>
       </nav>
 
-      {route.tab === "search" ? (
-        <SearchPage runId={route.runId} onOpen={(id) => go(`search/${id}`)} />
-      ) : (
-        <CatalogPage />
-      )}
+      {route.tab === "search" && <SearchPage runId={route.runId} onOpen={(id) => go(`search/${id}`)} />}
+      {route.tab === "history" && <HistoryPage runId={route.runId} onOpen={(id) => go(`history/${id}`)} onBack={() => go("history")} />}
+      {route.tab === "catalog" && <CatalogPage />}
 
       <footer className="text-xs text-slate-400">
         {health === null && "Проверяем сервис…"}
