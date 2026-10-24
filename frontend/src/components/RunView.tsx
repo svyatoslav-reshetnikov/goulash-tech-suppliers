@@ -36,11 +36,14 @@ export default function RunView({ runId, onFinished }: { runId: number; onFinish
   const [events, setEvents] = useState<RunEvent[]>([]);
   const [suppliers, setSuppliers] = useState<SupplierData[]>([]);
   const [live, setLive] = useState(true);
+  const [userOpen, setUserOpen] = useState<boolean | null>(null); // null — решает ход поиска: пока идёт, блок раскрыт, после завершения свёрнут
   const [selected, setSelected] = useState<number[]>([]);
   const [comparing, setComparing] = useState(false);
   const feed = useRef<HTMLUListElement>(null);
   const comparison = useRef<HTMLDivElement>(null);
   const shown = events.filter((e) => e.type !== "usage");
+  const inProgress = run === null ? false : run.status === "queued" || run.status === "running";
+  const expanded = userOpen ?? inProgress;
 
   useEffect(() => {
     setRun(null);
@@ -49,6 +52,7 @@ export default function RunView({ runId, onFinished }: { runId: number; onFinish
     setSelected([]);
     setComparing(false);
     setLive(true);
+    setUserOpen(null);
     const refresh = () => {
       void fetchRun(runId).then(setRun);
       void fetchRunSuppliers(runId).then(setSuppliers);
@@ -71,7 +75,7 @@ export default function RunView({ runId, onFinished }: { runId: number; onFinish
 
   useEffect(() => {
     feed.current?.scrollTo({ top: feed.current.scrollHeight });
-  }, [shown.length]);
+  }, [shown.length, expanded]);
 
   const searches = events.filter((e) => e.type === "search").length;
   const pages = events.filter((e) => e.type === "fetch").length;
@@ -82,27 +86,45 @@ export default function RunView({ runId, onFinished }: { runId: number; onFinish
 
   return (
     <section className="space-y-4">
-      <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-lg font-semibold">
-            {run ? run.category : "Запуск"} <span className="text-sm font-normal text-slate-400">№{runId}</span>
-          </h2>
-          <span
-            className={`rounded-full px-3 py-1 text-xs font-medium ${
-              live ? "bg-blue-100 text-blue-800" : run?.status === "failed" ? "bg-red-100 text-red-800" : "bg-emerald-100 text-emerald-800"
-            }`}
-          >
-            {live ? "Идёт поиск…" : run?.status === "failed" ? "Не удалось" : "Завершён"}
+      <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
+        <button
+          onClick={() => setUserOpen(!expanded)}
+          aria-expanded={expanded}
+          className="flex w-full flex-wrap items-center justify-between gap-2 p-5 text-left"
+        >
+          <span className="flex items-baseline gap-2">
+            <svg viewBox="0 0 20 20" className={`h-4 w-4 shrink-0 translate-y-0.5 fill-slate-400 transition-transform ${expanded ? "rotate-90" : ""}`} aria-hidden="true">
+              <path d="M7 4l7 6-7 6z" />
+            </svg>
+            <span className="text-lg font-semibold">
+              {run ? run.category : "Поиск"}
+              <span className="font-normal text-slate-500">
+                {" · "}
+                {run ? (run.location ?? "Вся Россия") : "…"}
+                {run?.include_neighbors && run.regions.length > 1 ? " и соседние регионы" : ""}
+              </span>
+            </span>
           </span>
-        </div>
-        {run && (
-          <p className="mt-1 text-sm text-slate-500">
-            {run.location ? run.location : "Вся Россия"}
-            {run.include_neighbors && run.regions.length > 1 ? ` и соседние регионы (${run.regions.length - 1})` : ""}
-            {run.supplier_type ? ` · ${run.supplier_type}` : ""}
-          </p>
-        )}
-        <p className="mt-2 text-sm text-slate-600">
+          <span className="flex items-center gap-3">
+            {!expanded && suppliers.length > 0 && (
+              <span className="text-sm text-slate-500">
+                поставщиков: {suppliers.length}
+                {liveCost !== null ? ` · ${liveCost.toLocaleString("ru-RU", { maximumFractionDigits: 1 })} ₽` : ""}
+              </span>
+            )}
+            <span
+              className={`rounded-full px-3 py-1 text-xs font-medium ${
+                live ? "bg-blue-100 text-blue-800" : run?.status === "failed" ? "bg-red-100 text-red-800" : "bg-emerald-100 text-emerald-800"
+              }`}
+            >
+              {live ? "Идёт поиск…" : run?.status === "failed" ? "Не удалось" : "Завершён"}
+            </span>
+          </span>
+        </button>
+        {expanded && (
+          <div className="border-t border-slate-100 px-5 pb-5 pt-3">
+        {run?.supplier_type && <p className="text-sm text-slate-500">Тип поставщика: {run.supplier_type}</p>}
+        <p className="mt-1 text-sm text-slate-600">
           Поисков: <b>{searches}</b> · открыто страниц: <b>{pages}</b> · найдено поставщиков: <b>{suppliers.length}</b>
         </p>
 
@@ -138,6 +160,8 @@ export default function RunView({ runId, onFinished }: { runId: number; onFinish
             {run.summary && !run.summary.startsWith("[TOOL_CALL") && !run.summary.startsWith("Сохранено поставщиков:") && (
               <p className="mt-1 text-slate-500">{run.summary}</p>
             )}
+          </div>
+        )}
           </div>
         )}
       </div>

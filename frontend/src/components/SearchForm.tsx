@@ -96,7 +96,7 @@ export default function SearchForm({ onStarted, onOpenPrevious, busy }: { onStar
         <div className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
           <p className="font-semibold">Такой поиск уже осуществлялся</p>
           <p className="mt-1 text-amber-800">
-            №{previous.id} от {new Date(previous.created_at).toLocaleString("ru-RU", { dateStyle: "short", timeStyle: "short" })}
+            Поиск от {new Date(previous.created_at).toLocaleString("ru-RU", { dateStyle: "short", timeStyle: "short" })}
             {previous.status === "done" ? `, найдено поставщиков: ${previous.stats?.suppliers_saved ?? 0}` : ", ещё идёт"}. Новый поиск платный.
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
