@@ -1,0 +1,156 @@
+# При каждом push: тесты и сборка интерфейса. При push в main после успешных проверок:
+# образы собираются на раннере, уходят в ghcr.io, а сервер только скачивает и запускает их
+# (Docker Hub из России отдаёт образы нестабильно, а раннер GitHub тянет их без проблем).
+name: CI/CD
+
+on:
+  push:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Тесты бэкенда
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_HOST_AUTH_METHOD: trust
+          POSTGRES_DB: suppliers_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U test -d suppliers_test"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgresql+asyncpg://test@127.0.0.1:5432/suppliers_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements-dev.txt
+      - name: Установка зависимостей
+        working-directory: backend
+        run: pip install -r requirements-dev.txt -c constraints.txt
+      - name: Тесты (с настоящей базой)
+        working-directory: backend
+        run: pytest -q
+
+  frontend:
+    name: Сборка интерфейса
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+        working-directory: frontend
+      - name: Проверка типов и сборка
+        run: npm run build
+        working-directory: frontend
+
+  images:
+    name: Сборка образов
+    needs: [backend, frontend]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Образ api
+        uses: docker/build-push-action@v6
+        with:
+          context: backend
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/goulash-api:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/goulash-api:latest
+          cache-from: type=gha,scope=api
+          cache-to: type=gha,scope=api,mode=max
+      - name: Образ web
+        uses: docker/build-push-action@v6
+        with:
+          context: frontend
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/goulash-web:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/goulash-web:latest
+          cache-from: type=gha,scope=web
+          cache-to: type=gha,scope=web,mode=max
+
+  deploy:
+    name: Выкладка на сервер
+    needs: [images]
+    runs-on: ubuntu-latest
+    environment: production
+    concurrency:
+      group: deploy
+      cancel-in-progress: false
+    env:
+      SSH_USER: ${{ secrets.SSH_USER }}
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+      SITE_DOMAIN: ${{ secrets.SITE_DOMAIN }}
+      TAG: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Настройка SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+      - name: Копирование compose-файла
+        # на сервер уезжает только compose; .env лежит там и не перезаписывается
+        run: |
+          scp -i ~/.ssh/deploy_key -o IdentitiesOnly=yes docker-compose.prod.yml "$SSH_USER@$SSH_HOST:$DEPLOY_PATH/docker-compose.prod.yml"
+      - name: Запуск новой версии
+        env:
+          GHCR_USER: ${{ github.actor }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          SSH="ssh -i $HOME/.ssh/deploy_key -o IdentitiesOnly=yes $SSH_USER@$SSH_HOST"
+          # токен передаётся через stdin: в аргументах команды и в истории сервера его нет
+          printf '%s' "$GHCR_TOKEN" | $SSH "docker login ghcr.io -u '$GHCR_USER' --password-stdin"
+          $SSH "DEPLOY_PATH='$DEPLOY_PATH' TAG='$TAG' bash -s" <<'REMOTE'
+          set -euo pipefail
+          cd "$DEPLOY_PATH"
+          test -f .env || { echo "На сервере нет $DEPLOY_PATH/.env" >&2; exit 1; }
+          # тег образов записывается в .env: откат = вернуть прежний тег и выполнить up -d
+          if grep -q '^IMAGE_TAG=' .env; then sed -i "s/^IMAGE_TAG=.*/IMAGE_TAG=$TAG/" .env; else echo "IMAGE_TAG=$TAG" >> .env; fi
+          docker compose -f docker-compose.prod.yml pull
+          docker compose -f docker-compose.prod.yml up -d --remove-orphans
+          docker logout ghcr.io
+          docker image prune -f
+          docker compose -f docker-compose.prod.yml ps
+          REMOTE
+      - name: Проверка, что сайт отвечает
+        # без пароля сайт обязан вернуть 401: значит, внешний Caddy, HTTPS и парольная защита работают
+        run: |
+          for i in $(seq 1 18); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "https://$SITE_DOMAIN/" || true)
+            echo "попытка $i: $code"
+            [ "$code" = "401" ] && exit 0
+            sleep 10
+          done
+          echo "Сайт не ответил ожидаемым кодом 401" >&2
+          exit 1

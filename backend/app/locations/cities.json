@@ -1,0 +1,8825 @@
+{
+ "sources": [
+  "Wikidata (CC0): субъекты РФ и общие границы, https://www.wikidata.org",
+  "hflabs/city (CC BY-SA 4.0): города России, https://github.com/hflabs/city"
+ ],
+ "note": "Файл создан скриптом scripts/build_locations.py; вручную добавлено соседство Крым — Краснодарский край.",
+ "items": [
+  {
+   "name": "Алейск",
+   "region": "RU-ALT",
+   "population": 28528,
+   "lat": 52.4923,
+   "lon": 82.7794,
+   "capital": false
+  },
+  {
+   "name": "Барнаул",
+   "region": "RU-ALT",
+   "population": 635585,
+   "lat": 53.348,
+   "lon": 83.7798,
+   "capital": true
+  },
+  {
+   "name": "Белокуриха",
+   "region": "RU-ALT",
+   "population": 15072,
+   "lat": 51.9962,
+   "lon": 84.984,
+   "capital": false
+  },
+  {
+   "name": "Бийск",
+   "region": "RU-ALT",
+   "population": 203826,
+   "lat": 52.5394,
+   "lon": 85.2138,
+   "capital": false
+  },
+  {
+   "name": "Горняк",
+   "region": "RU-ALT",
+   "population": 13040,
+   "lat": 50.998,
+   "lon": 81.4643,
+   "capital": true
+  },
+  {
+   "name": "Заринск",
+   "region": "RU-ALT",
+   "population": 47035,
+   "lat": 53.7063,
+   "lon": 84.9315,
+   "capital": false
+  },
+  {
+   "name": "Змеиногорск",
+   "region": "RU-ALT",
+   "population": 10569,
+   "lat": 51.1581,
+   "lon": 82.1873,
+   "capital": true
+  },
+  {
+   "name": "Камень-на-Оби",
+   "region": "RU-ALT",
+   "population": 41787,
+   "lat": 53.7914,
+   "lon": 81.3545,
+   "capital": true
+  },
+  {
+   "name": "Новоалтайск",
+   "region": "RU-ALT",
+   "population": 73134,
+   "lat": 53.412,
+   "lon": 83.9311,
+   "capital": false
+  },
+  {
+   "name": "Рубцовск",
+   "region": "RU-ALT",
+   "population": 146386,
+   "lat": 51.5012,
+   "lon": 81.2079,
+   "capital": false
+  },
+  {
+   "name": "Славгород",
+   "region": "RU-ALT",
+   "population": 30370,
+   "lat": 52.9995,
+   "lon": 78.6459,
+   "capital": false
+  },
+  {
+   "name": "Яровое",
+   "region": "RU-ALT",
+   "population": 18085,
+   "lat": 52.9252,
+   "lon": 78.573,
+   "capital": false
+  },
+  {
+   "name": "Белогорск",
+   "region": "RU-AMU",
+   "population": 68220,
+   "lat": 50.9213,
+   "lon": 128.4739,
+   "capital": false
+  },
+  {
+   "name": "Благовещенск",
+   "region": "RU-AMU",
+   "population": 214397,
+   "lat": 50.2907,
+   "lon": 127.5272,
+   "capital": true
+  },
+  {
+   "name": "Завитинск",
+   "region": "RU-AMU",
+   "population": 11481,
+   "lat": 50.1064,
+   "lon": 129.4392,
+   "capital": true
+  },
+  {
+   "name": "Зея",
+   "region": "RU-AMU",
+   "population": 25042,
+   "lat": 53.734,
+   "lon": 127.2658,
+   "capital": false
+  },
+  {
+   "name": "Райчихинск",
+   "region": "RU-AMU",
+   "population": 20499,
+   "lat": 49.7942,
+   "lon": 129.4112,
+   "capital": false
+  },
+  {
+   "name": "Свободный",
+   "region": "RU-AMU",
+   "population": 58594,
+   "lat": 51.3614,
+   "lon": 128.122,
+   "capital": false
+  },
+  {
+   "name": "Сковородино",
+   "region": "RU-AMU",
+   "population": 9561,
+   "lat": 53.9871,
+   "lon": 123.9437,
+   "capital": true
+  },
+  {
+   "name": "Тында",
+   "region": "RU-AMU",
+   "population": 35574,
+   "lat": 55.1546,
+   "lon": 124.7469,
+   "capital": false
+  },
+  {
+   "name": "Циолковский",
+   "region": "RU-AMU",
+   "population": 6208,
+   "lat": 51.7625,
+   "lon": 128.122,
+   "capital": false
+  },
+  {
+   "name": "Шимановск",
+   "region": "RU-AMU",
+   "population": 19815,
+   "lat": 52.0052,
+   "lon": 127.7005,
+   "capital": false
+  },
+  {
+   "name": "Архангельск",
+   "region": "RU-ARK",
+   "population": 348716,
+   "lat": 64.5394,
+   "lon": 40.517,
+   "capital": true
+  },
+  {
+   "name": "Вельск",
+   "region": "RU-ARK",
+   "population": 23885,
+   "lat": 61.066,
+   "lon": 42.1033,
+   "capital": true
+  },
+  {
+   "name": "Каргополь",
+   "region": "RU-ARK",
+   "population": 10148,
+   "lat": 61.501,
+   "lon": 38.9637,
+   "capital": true
+  },
+  {
+   "name": "Коряжма",
+   "region": "RU-ARK",
+   "population": 39629,
+   "lat": 61.2886,
+   "lon": 47.1003,
+   "capital": false
+  },
+  {
+   "name": "Котлас",
+   "region": "RU-ARK",
+   "population": 60562,
+   "lat": 61.2529,
+   "lon": 46.6332,
+   "capital": true
+  },
+  {
+   "name": "Мезень",
+   "region": "RU-ARK",
+   "population": 3599,
+   "lat": 65.8398,
+   "lon": 44.2532,
+   "capital": true
+  },
+  {
+   "name": "Мирный",
+   "region": "RU-ARK",
+   "population": 30259,
+   "lat": 62.7645,
+   "lon": 40.336,
+   "capital": false
+  },
+  {
+   "name": "Новодвинск",
+   "region": "RU-ARK",
+   "population": 40612,
+   "lat": 64.4137,
+   "lon": 40.8208,
+   "capital": false
+  },
+  {
+   "name": "Няндома",
+   "region": "RU-ARK",
+   "population": 22354,
+   "lat": 61.6655,
+   "lon": 40.2063,
+   "capital": true
+  },
+  {
+   "name": "Онега",
+   "region": "RU-ARK",
+   "population": 21359,
+   "lat": 63.9163,
+   "lon": 38.0805,
+   "capital": true
+  },
+  {
+   "name": "Северодвинск",
+   "region": "RU-ARK",
+   "population": 192265,
+   "lat": 64.5625,
+   "lon": 39.8181,
+   "capital": false
+  },
+  {
+   "name": "Сольвычегодск",
+   "region": "RU-ARK",
+   "population": 2460,
+   "lat": 61.332,
+   "lon": 46.9204,
+   "capital": false
+  },
+  {
+   "name": "Шенкурск",
+   "region": "RU-ARK",
+   "population": 5702,
+   "lat": 62.1057,
+   "lon": 42.8997,
+   "capital": true
+  },
+  {
+   "name": "Астрахань",
+   "region": "RU-AST",
+   "population": 520662,
+   "lat": 46.3656,
+   "lon": 48.0559,
+   "capital": true
+  },
+  {
+   "name": "Ахтубинск",
+   "region": "RU-AST",
+   "population": 41898,
+   "lat": 48.2752,
+   "lon": 46.1906,
+   "capital": true
+  },
+  {
+   "name": "Знаменск",
+   "region": "RU-AST",
+   "population": 29357,
+   "lat": 48.5866,
+   "lon": 45.7368,
+   "capital": false
+  },
+  {
+   "name": "Камызяк",
+   "region": "RU-AST",
+   "population": 16291,
+   "lat": 46.1106,
+   "lon": 48.0733,
+   "capital": true
+  },
+  {
+   "name": "Нариманов",
+   "region": "RU-AST",
+   "population": 11386,
+   "lat": 46.6917,
+   "lon": 47.8502,
+   "capital": true
+  },
+  {
+   "name": "Харабали",
+   "region": "RU-AST",
+   "population": 18209,
+   "lat": 47.409,
+   "lon": 47.2525,
+   "capital": true
+  },
+  {
+   "name": "Алексеевка",
+   "region": "RU-BEL",
+   "population": 39026,
+   "lat": 50.63,
+   "lon": 38.688,
+   "capital": true
+  },
+  {
+   "name": "Белгород",
+   "region": "RU-BEL",
+   "population": 356426,
+   "lat": 50.5976,
+   "lon": 36.5857,
+   "capital": true
+  },
+  {
+   "name": "Бирюч",
+   "region": "RU-BEL",
+   "population": 7842,
+   "lat": 50.6485,
+   "lon": 38.4005,
+   "capital": true
+  },
+  {
+   "name": "Валуйки",
+   "region": "RU-BEL",
+   "population": 35322,
+   "lat": 50.2111,
+   "lon": 38.0999,
+   "capital": true
+  },
+  {
+   "name": "Грайворон",
+   "region": "RU-BEL",
+   "population": 6234,
+   "lat": 50.4863,
+   "lon": 35.6664,
+   "capital": true
+  },
+  {
+   "name": "Губкин",
+   "region": "RU-BEL",
+   "population": 88562,
+   "lat": 51.2837,
+   "lon": 37.5348,
+   "capital": true
+  },
+  {
+   "name": "Короча",
+   "region": "RU-BEL",
+   "population": 5877,
+   "lat": 50.8129,
+   "lon": 37.1896,
+   "capital": true
+  },
+  {
+   "name": "Новый Оскол",
+   "region": "RU-BEL",
+   "population": 19530,
+   "lat": 50.7634,
+   "lon": 37.8775,
+   "capital": true
+  },
+  {
+   "name": "Старый Оскол",
+   "region": "RU-BEL",
+   "population": 221163,
+   "lat": 51.2967,
+   "lon": 37.835,
+   "capital": true
+  },
+  {
+   "name": "Строитель",
+   "region": "RU-BEL",
+   "population": 23933,
+   "lat": 50.7845,
+   "lon": 36.4888,
+   "capital": true
+  },
+  {
+   "name": "Шебекино",
+   "region": "RU-BEL",
+   "population": 44277,
+   "lat": 50.4005,
+   "lon": 36.8878,
+   "capital": true
+  },
+  {
+   "name": "Брянск",
+   "region": "RU-BRY",
+   "population": 415640,
+   "lat": 53.242,
+   "lon": 34.3652,
+   "capital": true
+  },
+  {
+   "name": "Дятьково",
+   "region": "RU-BRY",
+   "population": 29438,
+   "lat": 53.5958,
+   "lon": 34.3552,
+   "capital": true
+  },
+  {
+   "name": "Жуковка",
+   "region": "RU-BRY",
+   "population": 18269,
+   "lat": 53.534,
+   "lon": 33.7303,
+   "capital": true
+  },
+  {
+   "name": "Злынка",
+   "region": "RU-BRY",
+   "population": 5507,
+   "lat": 52.4267,
+   "lon": 31.736,
+   "capital": true
+  },
+  {
+   "name": "Карачев",
+   "region": "RU-BRY",
+   "population": 19715,
+   "lat": 53.1297,
+   "lon": 34.9889,
+   "capital": true
+  },
+  {
+   "name": "Клинцы",
+   "region": "RU-BRY",
+   "population": 62510,
+   "lat": 52.7529,
+   "lon": 32.2339,
+   "capital": false
+  },
+  {
+   "name": "Мглин",
+   "region": "RU-BRY",
+   "population": 7916,
+   "lat": 53.06,
+   "lon": 32.8468,
+   "capital": true
+  },
+  {
+   "name": "Новозыбков",
+   "region": "RU-BRY",
+   "population": 40552,
+   "lat": 52.5372,
+   "lon": 31.9358,
+   "capital": false
+  },
+  {
+   "name": "Почеп",
+   "region": "RU-BRY",
+   "population": 17933,
+   "lat": 52.9155,
+   "lon": 33.4744,
+   "capital": true
+  },
+  {
+   "name": "Севск",
+   "region": "RU-BRY",
+   "population": 7282,
+   "lat": 52.1483,
+   "lon": 34.4918,
+   "capital": true
+  },
+  {
+   "name": "Сельцо",
+   "region": "RU-BRY",
+   "population": 17933,
+   "lat": 53.374,
+   "lon": 34.1059,
+   "capital": false
+  },
+  {
+   "name": "Стародуб",
+   "region": "RU-BRY",
+   "population": 19010,
+   "lat": 52.5852,
+   "lon": 32.7604,
+   "capital": true
+  },
+  {
+   "name": "Сураж",
+   "region": "RU-BRY",
+   "population": 11640,
+   "lat": 53.0171,
+   "lon": 32.3939,
+   "capital": true
+  },
+  {
+   "name": "Трубчевск",
+   "region": "RU-BRY",
+   "population": 15014,
+   "lat": 52.5792,
+   "lon": 33.7661,
+   "capital": true
+  },
+  {
+   "name": "Унеча",
+   "region": "RU-BRY",
+   "population": 26196,
+   "lat": 52.8461,
+   "lon": 32.6758,
+   "capital": true
+  },
+  {
+   "name": "Фокино",
+   "region": "RU-BRY",
+   "population": 13874,
+   "lat": 53.4554,
+   "lon": 34.4159,
+   "capital": false
+  },
+  {
+   "name": "Александров",
+   "region": "RU-VLA",
+   "population": 61544,
+   "lat": 56.3918,
+   "lon": 38.7111,
+   "capital": true
+  },
+  {
+   "name": "Владимир",
+   "region": "RU-VLA",
+   "population": 348256,
+   "lat": 56.1281,
+   "lon": 40.4084,
+   "capital": true
+  },
+  {
+   "name": "Вязники",
+   "region": "RU-VLA",
+   "population": 41252,
+   "lat": 56.2977,
+   "lon": 42.2687,
+   "capital": true
+  },
+  {
+   "name": "Гороховец",
+   "region": "RU-VLA",
+   "population": 14015,
+   "lat": 56.2021,
+   "lon": 42.6926,
+   "capital": true
+  },
+  {
+   "name": "Гусь-Хрустальный",
+   "region": "RU-VLA",
+   "population": 60773,
+   "lat": 55.6199,
+   "lon": 40.658,
+   "capital": false
+  },
+  {
+   "name": "Камешково",
+   "region": "RU-VLA",
+   "population": 13113,
+   "lat": 56.349,
+   "lon": 40.9955,
+   "capital": true
+  },
+  {
+   "name": "Карабаново",
+   "region": "RU-VLA",
+   "population": 14868,
+   "lat": 56.3132,
+   "lon": 38.7034,
+   "capital": false
+  },
+  {
+   "name": "Киржач",
+   "region": "RU-VLA",
+   "population": 30044,
+   "lat": 56.1487,
+   "lon": 38.8636,
+   "capital": true
+  },
+  {
+   "name": "Ковров",
+   "region": "RU-VLA",
+   "population": 145492,
+   "lat": 56.3554,
+   "lon": 41.3171,
+   "capital": false
+  },
+  {
+   "name": "Кольчугино",
+   "region": "RU-VLA",
+   "population": 45804,
+   "lat": 56.3327,
+   "lon": 39.3913,
+   "capital": true
+  },
+  {
+   "name": "Костерево",
+   "region": "RU-VLA",
+   "population": 9136,
+   "lat": 55.9337,
+   "lon": 39.6247,
+   "capital": false
+  },
+  {
+   "name": "Курлово",
+   "region": "RU-VLA",
+   "population": 6791,
+   "lat": 55.4527,
+   "lon": 40.6124,
+   "capital": false
+  },
+  {
+   "name": "Лакинск",
+   "region": "RU-VLA",
+   "population": 15707,
+   "lat": 56.0181,
+   "lon": 39.9566,
+   "capital": false
+  },
+  {
+   "name": "Меленки",
+   "region": "RU-VLA",
+   "population": 15208,
+   "lat": 55.3388,
+   "lon": 41.634,
+   "capital": true
+  },
+  {
+   "name": "Муром",
+   "region": "RU-VLA",
+   "population": 116078,
+   "lat": 55.563,
+   "lon": 42.0231,
+   "capital": false
+  },
+  {
+   "name": "Петушки",
+   "region": "RU-VLA",
+   "population": 15167,
+   "lat": 55.9298,
+   "lon": 39.4508,
+   "capital": true
+  },
+  {
+   "name": "Покров",
+   "region": "RU-VLA",
+   "population": 17762,
+   "lat": 55.9166,
+   "lon": 39.1735,
+   "capital": false
+  },
+  {
+   "name": "Радужный",
+   "region": "RU-VLA",
+   "population": 18212,
+   "lat": 55.996,
+   "lon": 40.3322,
+   "capital": false
+  },
+  {
+   "name": "Собинка",
+   "region": "RU-VLA",
+   "population": 19482,
+   "lat": 55.9939,
+   "lon": 40.018,
+   "capital": true
+  },
+  {
+   "name": "Струнино",
+   "region": "RU-VLA",
+   "population": 14372,
+   "lat": 56.375,
+   "lon": 38.584,
+   "capital": false
+  },
+  {
+   "name": "Судогда",
+   "region": "RU-VLA",
+   "population": 11848,
+   "lat": 55.9498,
+   "lon": 40.8563,
+   "capital": true
+  },
+  {
+   "name": "Суздаль",
+   "region": "RU-VLA",
+   "population": 10535,
+   "lat": 56.4274,
+   "lon": 40.4526,
+   "capital": true
+  },
+  {
+   "name": "Юрьев-Польский",
+   "region": "RU-VLA",
+   "population": 19588,
+   "lat": 56.4938,
+   "lon": 39.6681,
+   "capital": true
+  },
+  {
+   "name": "Волгоград",
+   "region": "RU-VGG",
+   "population": 1021244,
+   "lat": 48.707,
+   "lon": 44.517,
+   "capital": true
+  },
+  {
+   "name": "Волжский",
+   "region": "RU-VGG",
+   "population": 314436,
+   "lat": 48.7978,
+   "lon": 44.7463,
+   "capital": false
+  },
+  {
+   "name": "Дубовка",
+   "region": "RU-VGG",
+   "population": 14345,
+   "lat": 49.0555,
+   "lon": 44.827,
+   "capital": true
+  },
+  {
+   "name": "Жирновск",
+   "region": "RU-VGG",
+   "population": 16890,
+   "lat": 50.9769,
+   "lon": 44.7858,
+   "capital": true
+  },
+  {
+   "name": "Калач-на-Дону",
+   "region": "RU-VGG",
+   "population": 26892,
+   "lat": 48.6889,
+   "lon": 43.5306,
+   "capital": true
+  },
+  {
+   "name": "Камышин",
+   "region": "RU-VGG",
+   "population": 119924,
+   "lat": 50.0652,
+   "lon": 45.3844,
+   "capital": false
+  },
+  {
+   "name": "Котельниково",
+   "region": "RU-VGG",
+   "population": 20441,
+   "lat": 47.631,
+   "lon": 43.1331,
+   "capital": true
+  },
+  {
+   "name": "Котово",
+   "region": "RU-VGG",
+   "population": 24104,
+   "lat": 50.3206,
+   "lon": 44.8031,
+   "capital": true
+  },
+  {
+   "name": "Краснослободск",
+   "region": "RU-VGG",
+   "population": 16007,
+   "lat": 48.7069,
+   "lon": 44.5631,
+   "capital": false
+  },
+  {
+   "name": "Ленинск",
+   "region": "RU-VGG",
+   "population": 15527,
+   "lat": 48.6936,
+   "lon": 45.1993,
+   "capital": true
+  },
+  {
+   "name": "Михайловка",
+   "region": "RU-VGG",
+   "population": 59153,
+   "lat": 50.0709,
+   "lon": 43.2402,
+   "capital": false
+  },
+  {
+   "name": "Николаевск",
+   "region": "RU-VGG",
+   "population": 15081,
+   "lat": 50.0165,
+   "lon": 45.4732,
+   "capital": true
+  },
+  {
+   "name": "Новоаннинский",
+   "region": "RU-VGG",
+   "population": 17911,
+   "lat": 50.5296,
+   "lon": 42.6666,
+   "capital": true
+  },
+  {
+   "name": "Палласовка",
+   "region": "RU-VGG",
+   "population": 15984,
+   "lat": 50.0501,
+   "lon": 46.8804,
+   "capital": true
+  },
+  {
+   "name": "Петров Вал",
+   "region": "RU-VGG",
+   "population": 13264,
+   "lat": 50.1381,
+   "lon": 45.2091,
+   "capital": false
+  },
+  {
+   "name": "Серафимович",
+   "region": "RU-VGG",
+   "population": 9368,
+   "lat": 49.5663,
+   "lon": 42.736,
+   "capital": true
+  },
+  {
+   "name": "Суровикино",
+   "region": "RU-VGG",
+   "population": 20527,
+   "lat": 48.6189,
+   "lon": 42.8541,
+   "capital": true
+  },
+  {
+   "name": "Урюпинск",
+   "region": "RU-VGG",
+   "population": 41594,
+   "lat": 50.7904,
+   "lon": 42.0289,
+   "capital": false
+  },
+  {
+   "name": "Фролово",
+   "region": "RU-VGG",
+   "population": 39489,
+   "lat": 49.7649,
+   "lon": 43.6649,
+   "capital": false
+  },
+  {
+   "name": "Бабаево",
+   "region": "RU-VLG",
+   "population": 12074,
+   "lat": 59.3893,
+   "lon": 35.9377,
+   "capital": true
+  },
+  {
+   "name": "Белозерск",
+   "region": "RU-VLG",
+   "population": 9614,
+   "lat": 60.0308,
+   "lon": 37.7891,
+   "capital": true
+  },
+  {
+   "name": "Великий Устюг",
+   "region": "RU-VLG",
+   "population": 31664,
+   "lat": 60.7604,
+   "lon": 46.3054,
+   "capital": true
+  },
+  {
+   "name": "Вологда",
+   "region": "RU-VLG",
+   "population": 301642,
+   "lat": 59.2484,
+   "lon": 39.8356,
+   "capital": true
+  },
+  {
+   "name": "Вытегра",
+   "region": "RU-VLG",
+   "population": 10490,
+   "lat": 61.0063,
+   "lon": 36.4495,
+   "capital": true
+  },
+  {
+   "name": "Грязовец",
+   "region": "RU-VLG",
+   "population": 15528,
+   "lat": 58.8758,
+   "lon": 40.2485,
+   "capital": true
+  },
+  {
+   "name": "Кадников",
+   "region": "RU-VLG",
+   "population": 4797,
+   "lat": 59.5038,
+   "lon": 40.3441,
+   "capital": false
+  },
+  {
+   "name": "Кириллов",
+   "region": "RU-VLG",
+   "population": 7735,
+   "lat": 59.8592,
+   "lon": 38.3749,
+   "capital": true
+  },
+  {
+   "name": "Красавино",
+   "region": "RU-VLG",
+   "population": 7003,
+   "lat": 60.9613,
+   "lon": 46.4814,
+   "capital": false
+  },
+  {
+   "name": "Никольск",
+   "region": "RU-VLG",
+   "population": 8515,
+   "lat": 59.5352,
+   "lon": 45.4576,
+   "capital": true
+  },
+  {
+   "name": "Сокол",
+   "region": "RU-VLG",
+   "population": 38454,
+   "lat": 59.4759,
+   "lon": 40.1114,
+   "capital": true
+  },
+  {
+   "name": "Тотьма",
+   "region": "RU-VLG",
+   "population": 9784,
+   "lat": 59.9735,
+   "lon": 42.759,
+   "capital": true
+  },
+  {
+   "name": "Устюжна",
+   "region": "RU-VLG",
+   "population": 9478,
+   "lat": 58.8383,
+   "lon": 36.4425,
+   "capital": true
+  },
+  {
+   "name": "Харовск",
+   "region": "RU-VLG",
+   "population": 10078,
+   "lat": 59.9479,
+   "lon": 40.2,
+   "capital": true
+  },
+  {
+   "name": "Череповец",
+   "region": "RU-VLG",
+   "population": 312311,
+   "lat": 59.1269,
+   "lon": 37.909,
+   "capital": false
+  },
+  {
+   "name": "Бобров",
+   "region": "RU-VOR",
+   "population": 19738,
+   "lat": 51.0902,
+   "lon": 40.0318,
+   "capital": true
+  },
+  {
+   "name": "Богучар",
+   "region": "RU-VOR",
+   "population": 11811,
+   "lat": 49.9352,
+   "lon": 40.5591,
+   "capital": true
+  },
+  {
+   "name": "Борисоглебск",
+   "region": "RU-VOR",
+   "population": 65585,
+   "lat": 51.3656,
+   "lon": 42.1008,
+   "capital": true
+  },
+  {
+   "name": "Бутурлиновка",
+   "region": "RU-VOR",
+   "population": 27208,
+   "lat": 50.8312,
+   "lon": 40.5977,
+   "capital": true
+  },
+  {
+   "name": "Воронеж",
+   "region": "RU-VOR",
+   "population": 889680,
+   "lat": 51.6593,
+   "lon": 39.1969,
+   "capital": true
+  },
+  {
+   "name": "Калач",
+   "region": "RU-VOR",
+   "population": 20046,
+   "lat": 50.4242,
+   "lon": 41.0162,
+   "capital": true
+  },
+  {
+   "name": "Лиски",
+   "region": "RU-VOR",
+   "population": 55864,
+   "lat": 50.9946,
+   "lon": 39.5185,
+   "capital": true
+  },
+  {
+   "name": "Нововоронеж",
+   "region": "RU-VOR",
+   "population": 32635,
+   "lat": 51.3092,
+   "lon": 39.2163,
+   "capital": false
+  },
+  {
+   "name": "Новохоперск",
+   "region": "RU-VOR",
+   "population": 6849,
+   "lat": 51.0952,
+   "lon": 41.6173,
+   "capital": true
+  },
+  {
+   "name": "Острогожск",
+   "region": "RU-VOR",
+   "population": 33842,
+   "lat": 50.8678,
+   "lon": 39.0408,
+   "capital": true
+  },
+  {
+   "name": "Павловск",
+   "region": "RU-VOR",
+   "population": 25126,
+   "lat": 50.4535,
+   "lon": 40.1369,
+   "capital": true
+  },
+  {
+   "name": "Поворино",
+   "region": "RU-VOR",
+   "population": 17692,
+   "lat": 51.1954,
+   "lon": 42.2473,
+   "capital": true
+  },
+  {
+   "name": "Россошь",
+   "region": "RU-VOR",
+   "population": 62865,
+   "lat": 50.1702,
+   "lon": 39.6227,
+   "capital": true
+  },
+  {
+   "name": "Семилуки",
+   "region": "RU-VOR",
+   "population": 26025,
+   "lat": 51.6952,
+   "lon": 39.019,
+   "capital": true
+  },
+  {
+   "name": "Эртиль",
+   "region": "RU-VOR",
+   "population": 11387,
+   "lat": 51.8309,
+   "lon": 40.8074,
+   "capital": true
+  },
+  {
+   "name": "Биробиджан",
+   "region": "RU-YEV",
+   "population": 75419,
+   "lat": 48.7946,
+   "lon": 132.9217,
+   "capital": true
+  },
+  {
+   "name": "Облучье",
+   "region": "RU-YEV",
+   "population": 9379,
+   "lat": 49.0189,
+   "lon": 131.054,
+   "capital": true
+  },
+  {
+   "name": "Балей",
+   "region": "RU-ZAB",
+   "population": 12536,
+   "lat": 51.5824,
+   "lon": 116.638,
+   "capital": true
+  },
+  {
+   "name": "Борзя",
+   "region": "RU-ZAB",
+   "population": 31376,
+   "lat": 50.3876,
+   "lon": 116.5235,
+   "capital": true
+  },
+  {
+   "name": "Краснокаменск",
+   "region": "RU-ZAB",
+   "population": 55668,
+   "lat": 50.093,
+   "lon": 118.0324,
+   "capital": true
+  },
+  {
+   "name": "Могоча",
+   "region": "RU-ZAB",
+   "population": 13228,
+   "lat": 53.7361,
+   "lon": 119.7661,
+   "capital": true
+  },
+  {
+   "name": "Нерчинск",
+   "region": "RU-ZAB",
+   "population": 14976,
+   "lat": 51.9595,
+   "lon": 116.5852,
+   "capital": true
+  },
+  {
+   "name": "Петровск-Забайкальский",
+   "region": "RU-ZAB",
+   "population": 18555,
+   "lat": 51.2749,
+   "lon": 108.8467,
+   "capital": true
+  },
+  {
+   "name": "Сретенск",
+   "region": "RU-ZAB",
+   "population": 6850,
+   "lat": 52.2461,
+   "lon": 117.7118,
+   "capital": true
+  },
+  {
+   "name": "Хилок",
+   "region": "RU-ZAB",
+   "population": 11530,
+   "lat": 51.3635,
+   "lon": 110.4591,
+   "capital": true
+  },
+  {
+   "name": "Чита",
+   "region": "RU-ZAB",
+   "population": 323964,
+   "lat": 52.034,
+   "lon": 113.4994,
+   "capital": true
+  },
+  {
+   "name": "Шилка",
+   "region": "RU-ZAB",
+   "population": 13947,
+   "lat": 51.8497,
+   "lon": 116.0334,
+   "capital": true
+  },
+  {
+   "name": "Вичуга",
+   "region": "RU-IVA",
+   "population": 37609,
+   "lat": 57.2045,
+   "lon": 41.9132,
+   "capital": true
+  },
+  {
+   "name": "Гаврилов Посад",
+   "region": "RU-IVA",
+   "population": 6434,
+   "lat": 56.5587,
+   "lon": 40.1229,
+   "capital": true
+  },
+  {
+   "name": "Заволжск",
+   "region": "RU-IVA",
+   "population": 12045,
+   "lat": 57.4918,
+   "lon": 42.1376,
+   "capital": true
+  },
+  {
+   "name": "Иваново",
+   "region": "RU-IVA",
+   "population": 409277,
+   "lat": 56.9994,
+   "lon": 40.9728,
+   "capital": true
+  },
+  {
+   "name": "Кинешма",
+   "region": "RU-IVA",
+   "population": 88113,
+   "lat": 57.4425,
+   "lon": 42.1689,
+   "capital": false
+  },
+  {
+   "name": "Комсомольск",
+   "region": "RU-IVA",
+   "population": 8693,
+   "lat": 57.0273,
+   "lon": 40.3777,
+   "capital": true
+  },
+  {
+   "name": "Кохма",
+   "region": "RU-IVA",
+   "population": 29408,
+   "lat": 56.9325,
+   "lon": 41.0932,
+   "capital": true
+  },
+  {
+   "name": "Наволоки",
+   "region": "RU-IVA",
+   "population": 10207,
+   "lat": 57.4679,
+   "lon": 41.9608,
+   "capital": false
+  },
+  {
+   "name": "Плес",
+   "region": "RU-IVA",
+   "population": 2341,
+   "lat": 57.4606,
+   "lon": 41.5123,
+   "capital": false
+  },
+  {
+   "name": "Приволжск",
+   "region": "RU-IVA",
+   "population": 16749,
+   "lat": 57.3806,
+   "lon": 41.2809,
+   "capital": true
+  },
+  {
+   "name": "Пучеж",
+   "region": "RU-IVA",
+   "population": 8583,
+   "lat": 56.9821,
+   "lon": 43.1683,
+   "capital": true
+  },
+  {
+   "name": "Родники",
+   "region": "RU-IVA",
+   "population": 26318,
+   "lat": 57.1026,
+   "lon": 41.7299,
+   "capital": true
+  },
+  {
+   "name": "Тейково",
+   "region": "RU-IVA",
+   "population": 34993,
+   "lat": 56.8543,
+   "lon": 40.5354,
+   "capital": true
+  },
+  {
+   "name": "Фурманов",
+   "region": "RU-IVA",
+   "population": 36149,
+   "lat": 57.2539,
+   "lon": 41.1054,
+   "capital": true
+  },
+  {
+   "name": "Шуя",
+   "region": "RU-IVA",
+   "population": 58528,
+   "lat": 56.856,
+   "lon": 41.3801,
+   "capital": true
+  },
+  {
+   "name": "Южа",
+   "region": "RU-IVA",
+   "population": 14170,
+   "lat": 56.5927,
+   "lon": 42.0458,
+   "capital": true
+  },
+  {
+   "name": "Юрьевец",
+   "region": "RU-IVA",
+   "population": 10205,
+   "lat": 57.3178,
+   "lon": 43.111,
+   "capital": true
+  },
+  {
+   "name": "Алзамай",
+   "region": "RU-IRK",
+   "population": 6751,
+   "lat": 55.5551,
+   "lon": 98.6644,
+   "capital": false
+  },
+  {
+   "name": "Ангарск",
+   "region": "RU-IRK",
+   "population": 233765,
+   "lat": 52.5449,
+   "lon": 103.8885,
+   "capital": false
+  },
+  {
+   "name": "Байкальск",
+   "region": "RU-IRK",
+   "population": 13589,
+   "lat": 51.523,
+   "lon": 104.1488,
+   "capital": false
+  },
+  {
+   "name": "Бирюсинск",
+   "region": "RU-IRK",
+   "population": 8981,
+   "lat": 55.9609,
+   "lon": 97.8205,
+   "capital": false
+  },
+  {
+   "name": "Бодайбо",
+   "region": "RU-IRK",
+   "population": 15331,
+   "lat": 57.8469,
+   "lon": 114.1866,
+   "capital": false
+  },
+  {
+   "name": "Братск",
+   "region": "RU-IRK",
+   "population": 246348,
+   "lat": 56.1513,
+   "lon": 101.634,
+   "capital": false
+  },
+  {
+   "name": "Вихоревка",
+   "region": "RU-IRK",
+   "population": 22528,
+   "lat": 56.1208,
+   "lon": 101.1703,
+   "capital": false
+  },
+  {
+   "name": "Железногорск-Илимский",
+   "region": "RU-IRK",
+   "population": 26134,
+   "lat": 56.5848,
+   "lon": 104.1143,
+   "capital": true
+  },
+  {
+   "name": "Зима",
+   "region": "RU-IRK",
+   "population": 32522,
+   "lat": 53.9207,
+   "lon": 102.0492,
+   "capital": false
+  },
+  {
+   "name": "Иркутск",
+   "region": "RU-IRK",
+   "population": 587225,
+   "lat": 52.2864,
+   "lon": 104.2807,
+   "capital": true
+  },
+  {
+   "name": "Киренск",
+   "region": "RU-IRK",
+   "population": 12652,
+   "lat": 57.7757,
+   "lon": 108.1109,
+   "capital": true
+  },
+  {
+   "name": "Нижнеудинск",
+   "region": "RU-IRK",
+   "population": 37056,
+   "lat": 54.8969,
+   "lon": 99.0314,
+   "capital": false
+  },
+  {
+   "name": "Саянск",
+   "region": "RU-IRK",
+   "population": 40786,
+   "lat": 54.1107,
+   "lon": 102.1801,
+   "capital": false
+  },
+  {
+   "name": "Свирск",
+   "region": "RU-IRK",
+   "population": 13649,
+   "lat": 53.0843,
+   "lon": 103.3364,
+   "capital": false
+  },
+  {
+   "name": "Слюдянка",
+   "region": "RU-IRK",
+   "population": 18542,
+   "lat": 51.6564,
+   "lon": 103.7188,
+   "capital": true
+  },
+  {
+   "name": "Тайшет",
+   "region": "RU-IRK",
+   "population": 35481,
+   "lat": 55.9405,
+   "lon": 98.003,
+   "capital": false
+  },
+  {
+   "name": "Тулун",
+   "region": "RU-IRK",
+   "population": 44603,
+   "lat": 54.5572,
+   "lon": 100.5781,
+   "capital": false
+  },
+  {
+   "name": "Усолье-Сибирское",
+   "region": "RU-IRK",
+   "population": 83364,
+   "lat": 52.7566,
+   "lon": 103.6388,
+   "capital": false
+  },
+  {
+   "name": "Усть-Илимск",
+   "region": "RU-IRK",
+   "population": 86591,
+   "lat": 57.9431,
+   "lon": 102.7416,
+   "capital": false
+  },
+  {
+   "name": "Усть-Кут",
+   "region": "RU-IRK",
+   "population": 45061,
+   "lat": 56.7928,
+   "lon": 105.7757,
+   "capital": false
+  },
+  {
+   "name": "Черемхово",
+   "region": "RU-IRK",
+   "population": 52650,
+   "lat": 53.1369,
+   "lon": 103.0901,
+   "capital": false
+  },
+  {
+   "name": "Шелехов",
+   "region": "RU-IRK",
+   "population": 47960,
+   "lat": 52.2103,
+   "lon": 104.0973,
+   "capital": false
+  },
+  {
+   "name": "Баксан",
+   "region": "RU-KB",
+   "population": 36857,
+   "lat": 43.6819,
+   "lon": 43.5345,
+   "capital": true
+  },
+  {
+   "name": "Майский",
+   "region": "RU-KB",
+   "population": 26755,
+   "lat": 43.6282,
+   "lon": 44.0517,
+   "capital": true
+  },
+  {
+   "name": "Нальчик",
+   "region": "RU-KB",
+   "population": 240095,
+   "lat": 43.4845,
+   "lon": 43.6071,
+   "capital": true
+  },
+  {
+   "name": "Нарткала",
+   "region": "RU-KB",
+   "population": 31679,
+   "lat": 43.5578,
+   "lon": 43.8576,
+   "capital": true
+  },
+  {
+   "name": "Прохладный",
+   "region": "RU-KB",
+   "population": 59595,
+   "lat": 43.759,
+   "lon": 44.0102,
+   "capital": false
+  },
+  {
+   "name": "Терек",
+   "region": "RU-KB",
+   "population": 19170,
+   "lat": 43.4839,
+   "lon": 44.1402,
+   "capital": true
+  },
+  {
+   "name": "Тырныауз",
+   "region": "RU-KB",
+   "population": 21000,
+   "lat": 43.3982,
+   "lon": 42.9214,
+   "capital": true
+  },
+  {
+   "name": "Чегем",
+   "region": "RU-KB",
+   "population": 17988,
+   "lat": 43.5672,
+   "lon": 43.5866,
+   "capital": true
+  },
+  {
+   "name": "Багратионовск",
+   "region": "RU-KGD",
+   "population": 6399,
+   "lat": 54.3867,
+   "lon": 20.6418,
+   "capital": true
+  },
+  {
+   "name": "Балтийск",
+   "region": "RU-KGD",
+   "population": 32670,
+   "lat": 54.6513,
+   "lon": 19.9141,
+   "capital": true
+  },
+  {
+   "name": "Гвардейск",
+   "region": "RU-KGD",
+   "population": 13888,
+   "lat": 54.6588,
+   "lon": 21.0501,
+   "capital": true
+  },
+  {
+   "name": "Гурьевск",
+   "region": "RU-KGD",
+   "population": 12433,
+   "lat": 54.7706,
+   "lon": 20.604,
+   "capital": true
+  },
+  {
+   "name": "Гусев",
+   "region": "RU-KGD",
+   "population": 28260,
+   "lat": 54.5915,
+   "lon": 22.1942,
+   "capital": true
+  },
+  {
+   "name": "Зеленоградск",
+   "region": "RU-KGD",
+   "population": 13015,
+   "lat": 54.96,
+   "lon": 20.4754,
+   "capital": true
+  },
+  {
+   "name": "Калининград",
+   "region": "RU-KGD",
+   "population": 431491,
+   "lat": 54.7075,
+   "lon": 20.5073,
+   "capital": true
+  },
+  {
+   "name": "Краснознаменск",
+   "region": "RU-KGD",
+   "population": 3522,
+   "lat": 54.9453,
+   "lon": 22.4929,
+   "capital": true
+  },
+  {
+   "name": "Ладушкин",
+   "region": "RU-KGD",
+   "population": 3788,
+   "lat": 54.5692,
+   "lon": 20.169,
+   "capital": false
+  },
+  {
+   "name": "Мамоново",
+   "region": "RU-KGD",
+   "population": 7757,
+   "lat": 54.4646,
+   "lon": 19.9453,
+   "capital": false
+  },
+  {
+   "name": "Неман",
+   "region": "RU-KGD",
+   "population": 11794,
+   "lat": 55.0317,
+   "lon": 22.0324,
+   "capital": true
+  },
+  {
+   "name": "Нестеров",
+   "region": "RU-KGD",
+   "population": 4584,
+   "lat": 54.6314,
+   "lon": 22.5714,
+   "capital": true
+  },
+  {
+   "name": "Озерск",
+   "region": "RU-KGD",
+   "population": 4740,
+   "lat": 54.4085,
+   "lon": 22.0134,
+   "capital": true
+  },
+  {
+   "name": "Пионерский",
+   "region": "RU-KGD",
+   "population": 11017,
+   "lat": 54.9517,
+   "lon": 20.2277,
+   "capital": false
+  },
+  {
+   "name": "Полесск",
+   "region": "RU-KGD",
+   "population": 7580,
+   "lat": 54.8625,
+   "lon": 21.0998,
+   "capital": true
+  },
+  {
+   "name": "Правдинск",
+   "region": "RU-KGD",
+   "population": 4323,
+   "lat": 54.4431,
+   "lon": 21.0085,
+   "capital": true
+  },
+  {
+   "name": "Приморск",
+   "region": "RU-KGD",
+   "population": 1956,
+   "lat": 54.7311,
+   "lon": 19.9982,
+   "capital": false
+  },
+  {
+   "name": "Светлогорск",
+   "region": "RU-KGD",
+   "population": 10775,
+   "lat": 54.9439,
+   "lon": 20.1514,
+   "capital": true
+  },
+  {
+   "name": "Светлый",
+   "region": "RU-KGD",
+   "population": 21380,
+   "lat": 54.6773,
+   "lon": 20.1358,
+   "capital": false
+  },
+  {
+   "name": "Славск",
+   "region": "RU-KGD",
+   "population": 4614,
+   "lat": 55.045,
+   "lon": 21.6742,
+   "capital": true
+  },
+  {
+   "name": "Советск",
+   "region": "RU-KGD",
+   "population": 41709,
+   "lat": 55.0809,
+   "lon": 21.8886,
+   "capital": false
+  },
+  {
+   "name": "Черняховск",
+   "region": "RU-KGD",
+   "population": 40464,
+   "lat": 54.6245,
+   "lon": 21.7969,
+   "capital": true
+  },
+  {
+   "name": "Балабаново",
+   "region": "RU-KLU",
+   "population": 26337,
+   "lat": 55.1774,
+   "lon": 36.6567,
+   "capital": false
+  },
+  {
+   "name": "Белоусово",
+   "region": "RU-KLU",
+   "population": 8432,
+   "lat": 55.0957,
+   "lon": 36.6776,
+   "capital": false
+  },
+  {
+   "name": "Боровск",
+   "region": "RU-KLU",
+   "population": 12283,
+   "lat": 55.213,
+   "lon": 36.4926,
+   "capital": true
+  },
+  {
+   "name": "Ермолино",
+   "region": "RU-KLU",
+   "population": 10409,
+   "lat": 55.1972,
+   "lon": 36.5953,
+   "capital": false
+  },
+  {
+   "name": "Жиздра",
+   "region": "RU-KLU",
+   "population": 5585,
+   "lat": 53.7522,
+   "lon": 34.7387,
+   "capital": true
+  },
+  {
+   "name": "Жуков",
+   "region": "RU-KLU",
+   "population": 12150,
+   "lat": 55.0302,
+   "lon": 36.7395,
+   "capital": true
+  },
+  {
+   "name": "Калуга",
+   "region": "RU-KLU",
+   "population": 325185,
+   "lat": 54.506,
+   "lon": 36.2516,
+   "capital": true
+  },
+  {
+   "name": "Киров",
+   "region": "RU-KLU",
+   "population": 31888,
+   "lat": 54.079,
+   "lon": 34.3076,
+   "capital": true
+  },
+  {
+   "name": "Козельск",
+   "region": "RU-KLU",
+   "population": 18203,
+   "lat": 54.0347,
+   "lon": 35.7808,
+   "capital": true
+  },
+  {
+   "name": "Кондрово",
+   "region": "RU-KLU",
+   "population": 16672,
+   "lat": 54.7959,
+   "lon": 35.9275,
+   "capital": true
+  },
+  {
+   "name": "Кременки",
+   "region": "RU-KLU",
+   "population": 11617,
+   "lat": 54.8862,
+   "lon": 37.1169,
+   "capital": false
+  },
+  {
+   "name": "Людиново",
+   "region": "RU-KLU",
+   "population": 40550,
+   "lat": 53.8701,
+   "lon": 34.4386,
+   "capital": true
+  },
+  {
+   "name": "Малоярославец",
+   "region": "RU-KLU",
+   "population": 30401,
+   "lat": 55.0177,
+   "lon": 36.4634,
+   "capital": true
+  },
+  {
+   "name": "Медынь",
+   "region": "RU-KLU",
+   "population": 8298,
+   "lat": 54.969,
+   "lon": 35.8872,
+   "capital": true
+  },
+  {
+   "name": "Мещовск",
+   "region": "RU-KLU",
+   "population": 4101,
+   "lat": 54.3191,
+   "lon": 35.2817,
+   "capital": true
+  },
+  {
+   "name": "Мосальск",
+   "region": "RU-KLU",
+   "population": 4285,
+   "lat": 54.4825,
+   "lon": 34.9872,
+   "capital": true
+  },
+  {
+   "name": "Обнинск",
+   "region": "RU-KLU",
+   "population": 104798,
+   "lat": 55.0943,
+   "lon": 36.6122,
+   "capital": false
+  },
+  {
+   "name": "Сосенский",
+   "region": "RU-KLU",
+   "population": 12394,
+   "lat": 54.0566,
+   "lon": 35.9622,
+   "capital": false
+  },
+  {
+   "name": "Спас-Деменск",
+   "region": "RU-KLU",
+   "population": 4904,
+   "lat": 54.4099,
+   "lon": 34.019,
+   "capital": true
+  },
+  {
+   "name": "Сухиничи",
+   "region": "RU-KLU",
+   "population": 16295,
+   "lat": 54.0973,
+   "lon": 35.3444,
+   "capital": true
+  },
+  {
+   "name": "Таруса",
+   "region": "RU-KLU",
+   "population": 9656,
+   "lat": 54.7236,
+   "lon": 37.1671,
+   "capital": false
+  },
+  {
+   "name": "Юхнов",
+   "region": "RU-KLU",
+   "population": 7056,
+   "lat": 54.7446,
+   "lon": 35.2424,
+   "capital": true
+  },
+  {
+   "name": "Вилючинск",
+   "region": "RU-KAM",
+   "population": 22905,
+   "lat": 52.9302,
+   "lon": 158.4058,
+   "capital": false
+  },
+  {
+   "name": "Елизово",
+   "region": "RU-KAM",
+   "population": 39548,
+   "lat": 53.183,
+   "lon": 158.3884,
+   "capital": true
+  },
+  {
+   "name": "Петропавловск-Камчатский",
+   "region": "RU-KAM",
+   "population": 179526,
+   "lat": 53.0369,
+   "lon": 158.6559,
+   "capital": true
+  },
+  {
+   "name": "Карачаевск",
+   "region": "RU-KC",
+   "population": 23848,
+   "lat": 43.7733,
+   "lon": 41.9143,
+   "capital": true
+  },
+  {
+   "name": "Теберда",
+   "region": "RU-KC",
+   "population": 9097,
+   "lat": 43.4438,
+   "lon": 41.7415,
+   "capital": false
+  },
+  {
+   "name": "Усть-Джегута",
+   "region": "RU-KC",
+   "population": 30602,
+   "lat": 44.0838,
+   "lon": 41.9711,
+   "capital": true
+  },
+  {
+   "name": "Черкесск",
+   "region": "RU-KC",
+   "population": 121439,
+   "lat": 44.2269,
+   "lon": 42.0467,
+   "capital": true
+  },
+  {
+   "name": "Анжеро-Судженск",
+   "region": "RU-KEM",
+   "population": 76669,
+   "lat": 56.0786,
+   "lon": 86.0201,
+   "capital": false
+  },
+  {
+   "name": "Белово",
+   "region": "RU-KEM",
+   "population": 76752,
+   "lat": 54.4221,
+   "lon": 86.3037,
+   "capital": false
+  },
+  {
+   "name": "Березовский",
+   "region": "RU-KEM",
+   "population": 47292,
+   "lat": 55.6694,
+   "lon": 86.2744,
+   "capital": false
+  },
+  {
+   "name": "Гурьевск",
+   "region": "RU-KEM",
+   "population": 24816,
+   "lat": 54.2859,
+   "lon": 85.9476,
+   "capital": true
+  },
+  {
+   "name": "Калтан",
+   "region": "RU-KEM",
+   "population": 21893,
+   "lat": 53.5211,
+   "lon": 87.2772,
+   "capital": false
+  },
+  {
+   "name": "Кемерово",
+   "region": "RU-KEM",
+   "population": 532884,
+   "lat": 55.3911,
+   "lon": 86.0468,
+   "capital": true
+  },
+  {
+   "name": "Киселевск",
+   "region": "RU-KEM",
+   "population": 98382,
+   "lat": 54.006,
+   "lon": 86.6366,
+   "capital": false
+  },
+  {
+   "name": "Ленинск-Кузнецкий",
+   "region": "RU-KEM",
+   "population": 101666,
+   "lat": 54.6674,
+   "lon": 86.1797,
+   "capital": false
+  },
+  {
+   "name": "Мариинск",
+   "region": "RU-KEM",
+   "population": 40522,
+   "lat": 56.2127,
+   "lon": 87.7455,
+   "capital": true
+  },
+  {
+   "name": "Междуреченск",
+   "region": "RU-KEM",
+   "population": 101995,
+   "lat": 53.6865,
+   "lon": 88.0703,
+   "capital": false
+  },
+  {
+   "name": "Мыски",
+   "region": "RU-KEM",
+   "population": 43029,
+   "lat": 53.7126,
+   "lon": 87.8056,
+   "capital": false
+  },
+  {
+   "name": "Новокузнецк",
+   "region": "RU-KEM",
+   "population": 547885,
+   "lat": 53.7943,
+   "lon": 87.2143,
+   "capital": false
+  },
+  {
+   "name": "Осинники",
+   "region": "RU-KEM",
+   "population": 45997,
+   "lat": 53.5988,
+   "lon": 87.3371,
+   "capital": false
+  },
+  {
+   "name": "Полысаево",
+   "region": "RU-KEM",
+   "population": 27624,
+   "lat": 54.6055,
+   "lon": 86.2809,
+   "capital": false
+  },
+  {
+   "name": "Прокопьевск",
+   "region": "RU-KEM",
+   "population": 210150,
+   "lat": 53.8604,
+   "lon": 86.7184,
+   "capital": false
+  },
+  {
+   "name": "Салаир",
+   "region": "RU-KEM",
+   "population": 8263,
+   "lat": 54.2352,
+   "lon": 85.8031,
+   "capital": false
+  },
+  {
+   "name": "Тайга",
+   "region": "RU-KEM",
+   "population": 25330,
+   "lat": 56.0622,
+   "lon": 85.6207,
+   "capital": false
+  },
+  {
+   "name": "Таштагол",
+   "region": "RU-KEM",
+   "population": 23114,
+   "lat": 52.7593,
+   "lon": 87.8477,
+   "capital": true
+  },
+  {
+   "name": "Топки",
+   "region": "RU-KEM",
+   "population": 28642,
+   "lat": 55.2765,
+   "lon": 85.6153,
+   "capital": true
+  },
+  {
+   "name": "Юрга",
+   "region": "RU-KEM",
+   "population": 81536,
+   "lat": 55.7203,
+   "lon": 84.8886,
+   "capital": false
+  },
+  {
+   "name": "Белая Холуница",
+   "region": "RU-KIR",
+   "population": 11232,
+   "lat": 58.8415,
+   "lon": 50.8461,
+   "capital": true
+  },
+  {
+   "name": "Вятские Поляны",
+   "region": "RU-KIR",
+   "population": 35159,
+   "lat": 56.2285,
+   "lon": 51.0615,
+   "capital": true
+  },
+  {
+   "name": "Зуевка",
+   "region": "RU-KIR",
+   "population": 11198,
+   "lat": 58.4032,
+   "lon": 51.1332,
+   "capital": true
+  },
+  {
+   "name": "Киров",
+   "region": "RU-KIR",
+   "population": 473668,
+   "lat": 58.6035,
+   "lon": 49.6679,
+   "capital": true
+  },
+  {
+   "name": "Кирово-Чепецк",
+   "region": "RU-KIR",
+   "population": 80920,
+   "lat": 58.5559,
+   "lon": 50.0317,
+   "capital": true
+  },
+  {
+   "name": "Кирс",
+   "region": "RU-KIR",
+   "population": 10420,
+   "lat": 59.3401,
+   "lon": 52.2414,
+   "capital": true
+  },
+  {
+   "name": "Котельнич",
+   "region": "RU-KIR",
+   "population": 24979,
+   "lat": 58.3035,
+   "lon": 48.3476,
+   "capital": true
+  },
+  {
+   "name": "Луза",
+   "region": "RU-KIR",
+   "population": 11262,
+   "lat": 60.6291,
+   "lon": 47.2612,
+   "capital": true
+  },
+  {
+   "name": "Малмыж",
+   "region": "RU-KIR",
+   "population": 8265,
+   "lat": 56.5244,
+   "lon": 50.6783,
+   "capital": true
+  },
+  {
+   "name": "Мураши",
+   "region": "RU-KIR",
+   "population": 6752,
+   "lat": 59.3955,
+   "lon": 48.9638,
+   "capital": true
+  },
+  {
+   "name": "Нолинск",
+   "region": "RU-KIR",
+   "population": 9556,
+   "lat": 57.5597,
+   "lon": 49.9357,
+   "capital": true
+  },
+  {
+   "name": "Омутнинск",
+   "region": "RU-KIR",
+   "population": 23618,
+   "lat": 58.6699,
+   "lon": 52.1895,
+   "capital": true
+  },
+  {
+   "name": "Орлов",
+   "region": "RU-KIR",
+   "population": 6959,
+   "lat": 58.539,
+   "lon": 48.8928,
+   "capital": true
+  },
+  {
+   "name": "Слободской",
+   "region": "RU-KIR",
+   "population": 33983,
+   "lat": 58.7312,
+   "lon": 50.1669,
+   "capital": true
+  },
+  {
+   "name": "Советск",
+   "region": "RU-KIR",
+   "population": 16592,
+   "lat": 57.5842,
+   "lon": 48.959,
+   "capital": true
+  },
+  {
+   "name": "Сосновка",
+   "region": "RU-KIR",
+   "population": 11960,
+   "lat": 56.2533,
+   "lon": 51.2834,
+   "capital": false
+  },
+  {
+   "name": "Уржум",
+   "region": "RU-KIR",
+   "population": 10213,
+   "lat": 57.1097,
+   "lon": 50.0058,
+   "capital": true
+  },
+  {
+   "name": "Яранск",
+   "region": "RU-KIR",
+   "population": 17252,
+   "lat": 57.304,
+   "lon": 47.8479,
+   "capital": true
+  },
+  {
+   "name": "Буй",
+   "region": "RU-KOS",
+   "population": 25763,
+   "lat": 58.4733,
+   "lon": 41.5307,
+   "capital": true
+  },
+  {
+   "name": "Волгореченск",
+   "region": "RU-KOS",
+   "population": 17108,
+   "lat": 57.4425,
+   "lon": 41.1594,
+   "capital": false
+  },
+  {
+   "name": "Галич",
+   "region": "RU-KOS",
+   "population": 17346,
+   "lat": 58.3828,
+   "lon": 42.3654,
+   "capital": true
+  },
+  {
+   "name": "Кологрив",
+   "region": "RU-KOS",
+   "population": 3314,
+   "lat": 58.8269,
+   "lon": 44.3185,
+   "capital": true
+  },
+  {
+   "name": "Кострома",
+   "region": "RU-KOS",
+   "population": 268617,
+   "lat": 57.768,
+   "lon": 40.927,
+   "capital": true
+  },
+  {
+   "name": "Макарьев",
+   "region": "RU-KOS",
+   "population": 7114,
+   "lat": 57.8807,
+   "lon": 43.8014,
+   "capital": true
+  },
+  {
+   "name": "Мантурово",
+   "region": "RU-KOS",
+   "population": 17479,
+   "lat": 58.3265,
+   "lon": 44.7575,
+   "capital": true
+  },
+  {
+   "name": "Нерехта",
+   "region": "RU-KOS",
+   "population": 22817,
+   "lat": 57.4543,
+   "lon": 40.5724,
+   "capital": true
+  },
+  {
+   "name": "Нея",
+   "region": "RU-KOS",
+   "population": 9827,
+   "lat": 58.2943,
+   "lon": 43.8781,
+   "capital": true
+  },
+  {
+   "name": "Солигалич",
+   "region": "RU-KOS",
+   "population": 6438,
+   "lat": 59.0785,
+   "lon": 42.2878,
+   "capital": true
+  },
+  {
+   "name": "Чухлома",
+   "region": "RU-KOS",
+   "population": 5209,
+   "lat": 58.7534,
+   "lon": 42.6885,
+   "capital": true
+  },
+  {
+   "name": "Шарья",
+   "region": "RU-KOS",
+   "population": 23668,
+   "lat": 58.3761,
+   "lon": 45.4062,
+   "capital": true
+  },
+  {
+   "name": "Абинск",
+   "region": "RU-KDA",
+   "population": 34926,
+   "lat": 44.868,
+   "lon": 38.1618,
+   "capital": true
+  },
+  {
+   "name": "Анапа",
+   "region": "RU-KDA",
+   "population": 58983,
+   "lat": 44.895,
+   "lon": 37.3163,
+   "capital": true
+  },
+  {
+   "name": "Апшеронск",
+   "region": "RU-KDA",
+   "population": 40229,
+   "lat": 44.4584,
+   "lon": 39.73,
+   "capital": true
+  },
+  {
+   "name": "Армавир",
+   "region": "RU-KDA",
+   "population": 188897,
+   "lat": 45.0012,
+   "lon": 41.1324,
+   "capital": false
+  },
+  {
+   "name": "Белореченск",
+   "region": "RU-KDA",
+   "population": 53891,
+   "lat": 44.7652,
+   "lon": 39.8781,
+   "capital": true
+  },
+  {
+   "name": "Геленджик",
+   "region": "RU-KDA",
+   "population": 54813,
+   "lat": 44.563,
+   "lon": 38.0791,
+   "capital": false
+  },
+  {
+   "name": "Горячий Ключ",
+   "region": "RU-KDA",
+   "population": 30093,
+   "lat": 44.6345,
+   "lon": 39.1355,
+   "capital": false
+  },
+  {
+   "name": "Гулькевичи",
+   "region": "RU-KDA",
+   "population": 35225,
+   "lat": 45.3605,
+   "lon": 40.6918,
+   "capital": true
+  },
+  {
+   "name": "Ейск",
+   "region": "RU-KDA",
+   "population": 87771,
+   "lat": 46.7116,
+   "lon": 38.2764,
+   "capital": true
+  },
+  {
+   "name": "Кореновск",
+   "region": "RU-KDA",
+   "population": 41179,
+   "lat": 45.4642,
+   "lon": 39.4589,
+   "capital": true
+  },
+  {
+   "name": "Краснодар",
+   "region": "RU-KDA",
+   "population": 744933,
+   "lat": 45.0402,
+   "lon": 38.976,
+   "capital": true
+  },
+  {
+   "name": "Кропоткин",
+   "region": "RU-KDA",
+   "population": 80743,
+   "lat": 45.4333,
+   "lon": 40.5728,
+   "capital": false
+  },
+  {
+   "name": "Крымск",
+   "region": "RU-KDA",
+   "population": 57370,
+   "lat": 44.9344,
+   "lon": 37.9856,
+   "capital": true
+  },
+  {
+   "name": "Курганинск",
+   "region": "RU-KDA",
+   "population": 47974,
+   "lat": 44.8877,
+   "lon": 40.5913,
+   "capital": true
+  },
+  {
+   "name": "Лабинск",
+   "region": "RU-KDA",
+   "population": 62822,
+   "lat": 44.6354,
+   "lon": 40.7245,
+   "capital": true
+  },
+  {
+   "name": "Новокубанск",
+   "region": "RU-KDA",
+   "population": 34847,
+   "lat": 45.1039,
+   "lon": 41.0475,
+   "capital": true
+  },
+  {
+   "name": "Новороссийск",
+   "region": "RU-KDA",
+   "population": 241788,
+   "lat": 44.7235,
+   "lon": 37.7686,
+   "capital": false
+  },
+  {
+   "name": "Приморско-Ахтарск",
+   "region": "RU-KDA",
+   "population": 32253,
+   "lat": 46.0515,
+   "lon": 38.1705,
+   "capital": true
+  },
+  {
+   "name": "Славянск-на-Кубани",
+   "region": "RU-KDA",
+   "population": 63768,
+   "lat": 45.2604,
+   "lon": 38.126,
+   "capital": true
+  },
+  {
+   "name": "Сочи",
+   "region": "RU-KDA",
+   "population": 343285,
+   "lat": 43.5855,
+   "lon": 39.7232,
+   "capital": false
+  },
+  {
+   "name": "Темрюк",
+   "region": "RU-KDA",
+   "population": 38014,
+   "lat": 45.2611,
+   "lon": 37.4454,
+   "capital": true
+  },
+  {
+   "name": "Тимашевск",
+   "region": "RU-KDA",
+   "population": 53921,
+   "lat": 45.6159,
+   "lon": 38.9352,
+   "capital": true
+  },
+  {
+   "name": "Тихорецк",
+   "region": "RU-KDA",
+   "population": 61825,
+   "lat": 45.8546,
+   "lon": 40.126,
+   "capital": true
+  },
+  {
+   "name": "Туапсе",
+   "region": "RU-KDA",
+   "population": 63233,
+   "lat": 44.1105,
+   "lon": 39.0825,
+   "capital": true
+  },
+  {
+   "name": "Усть-Лабинск",
+   "region": "RU-KDA",
+   "population": 43268,
+   "lat": 45.2227,
+   "lon": 39.693,
+   "capital": true
+  },
+  {
+   "name": "Хадыженск",
+   "region": "RU-KDA",
+   "population": 21580,
+   "lat": 44.4123,
+   "lon": 39.532,
+   "capital": false
+  },
+  {
+   "name": "Артемовск",
+   "region": "RU-KYA",
+   "population": 2180,
+   "lat": 54.3473,
+   "lon": 93.4358,
+   "capital": false
+  },
+  {
+   "name": "Ачинск",
+   "region": "RU-KYA",
+   "population": 109156,
+   "lat": 56.2539,
+   "lon": 90.4794,
+   "capital": false
+  },
+  {
+   "name": "Боготол",
+   "region": "RU-KYA",
+   "population": 21029,
+   "lat": 56.2098,
+   "lon": 89.5299,
+   "capital": false
+  },
+  {
+   "name": "Бородино",
+   "region": "RU-KYA",
+   "population": 17423,
+   "lat": 55.9054,
+   "lon": 94.9021,
+   "capital": false
+  },
+  {
+   "name": "Дивногорск",
+   "region": "RU-KYA",
+   "population": 28271,
+   "lat": 55.9577,
+   "lon": 92.3801,
+   "capital": false
+  },
+  {
+   "name": "Дудинка",
+   "region": "RU-KYA",
+   "population": 22207,
+   "lat": 69.4031,
+   "lon": 86.1907,
+   "capital": true
+  },
+  {
+   "name": "Енисейск",
+   "region": "RU-KYA",
+   "population": 18769,
+   "lat": 58.4485,
+   "lon": 92.1651,
+   "capital": false
+  },
+  {
+   "name": "Железногорск",
+   "region": "RU-KYA",
+   "population": 85559,
+   "lat": 56.2529,
+   "lon": 93.5323,
+   "capital": false
+  },
+  {
+   "name": "Заозерный",
+   "region": "RU-KYA",
+   "population": 10683,
+   "lat": 55.9618,
+   "lon": 94.7091,
+   "capital": false
+  },
+  {
+   "name": "Зеленогорск",
+   "region": "RU-KYA",
+   "population": 66018,
+   "lat": 56.1132,
+   "lon": 94.5888,
+   "capital": false
+  },
+  {
+   "name": "Игарка",
+   "region": "RU-KYA",
+   "population": 6183,
+   "lat": 67.4667,
+   "lon": 86.5813,
+   "capital": false
+  },
+  {
+   "name": "Иланский",
+   "region": "RU-KYA",
+   "population": 16108,
+   "lat": 56.2374,
+   "lon": 96.0673,
+   "capital": true
+  },
+  {
+   "name": "Канск",
+   "region": "RU-KYA",
+   "population": 94230,
+   "lat": 56.2051,
+   "lon": 95.7051,
+   "capital": false
+  },
+  {
+   "name": "Кодинск",
+   "region": "RU-KYA",
+   "population": 14835,
+   "lat": 58.6033,
+   "lon": 99.1798,
+   "capital": true
+  },
+  {
+   "name": "Красноярск",
+   "region": "RU-KYA",
+   "population": 973826,
+   "lat": 56.0094,
+   "lon": 92.8525,
+   "capital": true
+  },
+  {
+   "name": "Лесосибирск",
+   "region": "RU-KYA",
+   "population": 61146,
+   "lat": 58.2217,
+   "lon": 92.5038,
+   "capital": false
+  },
+  {
+   "name": "Минусинск",
+   "region": "RU-KYA",
+   "population": 71171,
+   "lat": 53.7105,
+   "lon": 91.6873,
+   "capital": false
+  },
+  {
+   "name": "Назарово",
+   "region": "RU-KYA",
+   "population": 52829,
+   "lat": 56.0114,
+   "lon": 90.4169,
+   "capital": false
+  },
+  {
+   "name": "Норильск",
+   "region": "RU-KYA",
+   "population": 175301,
+   "lat": 69.349,
+   "lon": 88.201,
+   "capital": false
+  },
+  {
+   "name": "Сосновоборск",
+   "region": "RU-KYA",
+   "population": 33090,
+   "lat": 56.1203,
+   "lon": 93.3354,
+   "capital": false
+  },
+  {
+   "name": "Ужур",
+   "region": "RU-KYA",
+   "population": 16079,
+   "lat": 55.3142,
+   "lon": 89.8334,
+   "capital": true
+  },
+  {
+   "name": "Уяр",
+   "region": "RU-KYA",
+   "population": 12666,
+   "lat": 55.8131,
+   "lon": 94.3283,
+   "capital": true
+  },
+  {
+   "name": "Шарыпово",
+   "region": "RU-KYA",
+   "population": 38570,
+   "lat": 55.539,
+   "lon": 89.1801,
+   "capital": false
+  },
+  {
+   "name": "Далматово",
+   "region": "RU-KGN",
+   "population": 13913,
+   "lat": 56.2621,
+   "lon": 62.9387,
+   "capital": true
+  },
+  {
+   "name": "Катайск",
+   "region": "RU-KGN",
+   "population": 14017,
+   "lat": 56.2908,
+   "lon": 62.58,
+   "capital": true
+  },
+  {
+   "name": "Курган",
+   "region": "RU-KGN",
+   "population": 333640,
+   "lat": 55.4444,
+   "lon": 65.3162,
+   "capital": true
+  },
+  {
+   "name": "Куртамыш",
+   "region": "RU-KGN",
+   "population": 17098,
+   "lat": 54.9369,
+   "lon": 64.4204,
+   "capital": true
+  },
+  {
+   "name": "Макушино",
+   "region": "RU-KGN",
+   "population": 8337,
+   "lat": 55.2154,
+   "lon": 67.2452,
+   "capital": true
+  },
+  {
+   "name": "Петухово",
+   "region": "RU-KGN",
+   "population": 11291,
+   "lat": 55.065,
+   "lon": 67.8873,
+   "capital": true
+  },
+  {
+   "name": "Шадринск",
+   "region": "RU-KGN",
+   "population": 77744,
+   "lat": 56.087,
+   "lon": 63.6297,
+   "capital": false
+  },
+  {
+   "name": "Шумиха",
+   "region": "RU-KGN",
+   "population": 17821,
+   "lat": 55.228,
+   "lon": 63.2901,
+   "capital": true
+  },
+  {
+   "name": "Щучье",
+   "region": "RU-KGN",
+   "population": 10971,
+   "lat": 55.2088,
+   "lon": 62.7479,
+   "capital": true
+  },
+  {
+   "name": "Дмитриев",
+   "region": "RU-KRS",
+   "population": 7721,
+   "lat": 52.1268,
+   "lon": 35.0739,
+   "capital": false
+  },
+  {
+   "name": "Железногорск",
+   "region": "RU-KRS",
+   "population": 95057,
+   "lat": 52.338,
+   "lon": 35.3517,
+   "capital": true
+  },
+  {
+   "name": "Курск",
+   "region": "RU-KRS",
+   "population": 414595,
+   "lat": 51.7304,
+   "lon": 36.1926,
+   "capital": true
+  },
+  {
+   "name": "Курчатов",
+   "region": "RU-KRS",
+   "population": 42691,
+   "lat": 51.6604,
+   "lon": 35.6572,
+   "capital": true
+  },
+  {
+   "name": "Льгов",
+   "region": "RU-KRS",
+   "population": 21452,
+   "lat": 51.6597,
+   "lon": 35.2612,
+   "capital": true
+  },
+  {
+   "name": "Обоянь",
+   "region": "RU-KRS",
+   "population": 13562,
+   "lat": 51.2119,
+   "lon": 36.2755,
+   "capital": true
+  },
+  {
+   "name": "Рыльск",
+   "region": "RU-KRS",
+   "population": 15667,
+   "lat": 51.5681,
+   "lon": 34.6803,
+   "capital": true
+  },
+  {
+   "name": "Суджа",
+   "region": "RU-KRS",
+   "population": 6036,
+   "lat": 51.1919,
+   "lon": 35.2721,
+   "capital": true
+  },
+  {
+   "name": "Фатеж",
+   "region": "RU-KRS",
+   "population": 5404,
+   "lat": 52.0918,
+   "lon": 35.8539,
+   "capital": true
+  },
+  {
+   "name": "Щигры",
+   "region": "RU-KRS",
+   "population": 17043,
+   "lat": 51.8786,
+   "lon": 36.8911,
+   "capital": true
+  },
+  {
+   "name": "Бокситогорск",
+   "region": "RU-LEN",
+   "population": 16593,
+   "lat": 59.4735,
+   "lon": 33.8457,
+   "capital": true
+  },
+  {
+   "name": "Волосово",
+   "region": "RU-LEN",
+   "population": 12162,
+   "lat": 59.4445,
+   "lon": 29.4923,
+   "capital": true
+  },
+  {
+   "name": "Волхов",
+   "region": "RU-LEN",
+   "population": 47344,
+   "lat": 59.9006,
+   "lon": 32.3521,
+   "capital": true
+  },
+  {
+   "name": "Всеволожск",
+   "region": "RU-LEN",
+   "population": 59689,
+   "lat": 60.0191,
+   "lon": 30.6457,
+   "capital": true
+  },
+  {
+   "name": "Выборг",
+   "region": "RU-LEN",
+   "population": 80013,
+   "lat": 60.7131,
+   "lon": 28.7328,
+   "capital": true
+  },
+  {
+   "name": "Высоцк",
+   "region": "RU-LEN",
+   "population": 1244,
+   "lat": 60.6296,
+   "lon": 28.5709,
+   "capital": false
+  },
+  {
+   "name": "Гатчина",
+   "region": "RU-LEN",
+   "population": 92566,
+   "lat": 59.5652,
+   "lon": 30.1282,
+   "capital": true
+  },
+  {
+   "name": "Ивангород",
+   "region": "RU-LEN",
+   "population": 9797,
+   "lat": 59.3766,
+   "lon": 28.2232,
+   "capital": false
+  },
+  {
+   "name": "Каменногорск",
+   "region": "RU-LEN",
+   "population": 6761,
+   "lat": 60.9509,
+   "lon": 29.1308,
+   "capital": false
+  },
+  {
+   "name": "Кингисепп",
+   "region": "RU-LEN",
+   "population": 48667,
+   "lat": 59.374,
+   "lon": 28.6112,
+   "capital": true
+  },
+  {
+   "name": "Кириши",
+   "region": "RU-LEN",
+   "population": 52826,
+   "lat": 59.4743,
+   "lon": 32.0625,
+   "capital": true
+  },
+  {
+   "name": "Кировск",
+   "region": "RU-LEN",
+   "population": 25633,
+   "lat": 59.8754,
+   "lon": 30.9814,
+   "capital": true
+  },
+  {
+   "name": "Коммунар",
+   "region": "RU-LEN",
+   "population": 20265,
+   "lat": 59.6215,
+   "lon": 30.3934,
+   "capital": false
+  },
+  {
+   "name": "Кудрово",
+   "region": "RU-LEN",
+   "population": 13501,
+   "lat": 59.9075,
+   "lon": 30.5121,
+   "capital": false
+  },
+  {
+   "name": "Лодейное Поле",
+   "region": "RU-LEN",
+   "population": 21053,
+   "lat": 60.7321,
+   "lon": 33.5521,
+   "capital": true
+  },
+  {
+   "name": "Луга",
+   "region": "RU-LEN",
+   "population": 36409,
+   "lat": 58.7374,
+   "lon": 29.8466,
+   "capital": true
+  },
+  {
+   "name": "Любань",
+   "region": "RU-LEN",
+   "population": 4188,
+   "lat": 59.3494,
+   "lon": 31.2485,
+   "capital": false
+  },
+  {
+   "name": "Мурино",
+   "region": "RU-LEN",
+   "population": 19775,
+   "lat": 60.0449,
+   "lon": 30.4571,
+   "capital": false
+  },
+  {
+   "name": "Никольское",
+   "region": "RU-LEN",
+   "population": 19345,
+   "lat": 59.7043,
+   "lon": 30.7875,
+   "capital": false
+  },
+  {
+   "name": "Новая Ладога",
+   "region": "RU-LEN",
+   "population": 8890,
+   "lat": 60.11,
+   "lon": 32.3141,
+   "capital": false
+  },
+  {
+   "name": "Отрадное",
+   "region": "RU-LEN",
+   "population": 23874,
+   "lat": 59.7727,
+   "lon": 30.7989,
+   "capital": false
+  },
+  {
+   "name": "Пикалево",
+   "region": "RU-LEN",
+   "population": 21567,
+   "lat": 59.5132,
+   "lon": 34.1773,
+   "capital": false
+  },
+  {
+   "name": "Подпорожье",
+   "region": "RU-LEN",
+   "population": 18729,
+   "lat": 60.9128,
+   "lon": 34.1568,
+   "capital": true
+  },
+  {
+   "name": "Приморск",
+   "region": "RU-LEN",
+   "population": 6122,
+   "lat": 60.366,
+   "lon": 28.6136,
+   "capital": false
+  },
+  {
+   "name": "Приозерск",
+   "region": "RU-LEN",
+   "population": 18929,
+   "lat": 61.0331,
+   "lon": 30.1588,
+   "capital": true
+  },
+  {
+   "name": "Светогорск",
+   "region": "RU-LEN",
+   "population": 15973,
+   "lat": 61.1111,
+   "lon": 28.8726,
+   "capital": false
+  },
+  {
+   "name": "Сертолово",
+   "region": "RU-LEN",
+   "population": 47854,
+   "lat": 60.1447,
+   "lon": 30.2096,
+   "capital": false
+  },
+  {
+   "name": "Сланцы",
+   "region": "RU-LEN",
+   "population": 33587,
+   "lat": 59.1178,
+   "lon": 28.0881,
+   "capital": true
+  },
+  {
+   "name": "Сосновый Бор",
+   "region": "RU-LEN",
+   "population": 65901,
+   "lat": 59.8773,
+   "lon": 29.1292,
+   "capital": false
+  },
+  {
+   "name": "Сясьстрой",
+   "region": "RU-LEN",
+   "population": 13747,
+   "lat": 60.1402,
+   "lon": 32.5602,
+   "capital": false
+  },
+  {
+   "name": "Тихвин",
+   "region": "RU-LEN",
+   "population": 58843,
+   "lat": 59.6273,
+   "lon": 33.5073,
+   "capital": true
+  },
+  {
+   "name": "Тосно",
+   "region": "RU-LEN",
+   "population": 39127,
+   "lat": 59.5407,
+   "lon": 30.8778,
+   "capital": true
+  },
+  {
+   "name": "Шлиссельбург",
+   "region": "RU-LEN",
+   "population": 13305,
+   "lat": 59.9444,
+   "lon": 31.0333,
+   "capital": false
+  },
+  {
+   "name": "Грязи",
+   "region": "RU-LIP",
+   "population": 46798,
+   "lat": 52.4874,
+   "lon": 39.9331,
+   "capital": true
+  },
+  {
+   "name": "Данков",
+   "region": "RU-LIP",
+   "population": 21056,
+   "lat": 53.2577,
+   "lon": 39.1456,
+   "capital": true
+  },
+  {
+   "name": "Елец",
+   "region": "RU-LIP",
+   "population": 108404,
+   "lat": 52.6152,
+   "lon": 38.5289,
+   "capital": false
+  },
+  {
+   "name": "Задонск",
+   "region": "RU-LIP",
+   "population": 9695,
+   "lat": 52.4004,
+   "lon": 38.9205,
+   "capital": true
+  },
+  {
+   "name": "Лебедянь",
+   "region": "RU-LIP",
+   "population": 20991,
+   "lat": 53.0156,
+   "lon": 39.1435,
+   "capital": true
+  },
+  {
+   "name": "Липецк",
+   "region": "RU-LIP",
+   "population": 508124,
+   "lat": 52.6102,
+   "lon": 39.5948,
+   "capital": true
+  },
+  {
+   "name": "Усмань",
+   "region": "RU-LIP",
+   "population": 18752,
+   "lat": 52.0443,
+   "lon": 39.7264,
+   "capital": true
+  },
+  {
+   "name": "Чаплыгин",
+   "region": "RU-LIP",
+   "population": 12656,
+   "lat": 53.2405,
+   "lon": 39.9671,
+   "capital": true
+  },
+  {
+   "name": "Магадан",
+   "region": "RU-MAG",
+   "population": 95925,
+   "lat": 59.5681,
+   "lon": 150.8085,
+   "capital": true
+  },
+  {
+   "name": "Сусуман",
+   "region": "RU-MAG",
+   "population": 5865,
+   "lat": 62.7806,
+   "lon": 148.154,
+   "capital": true
+  },
+  {
+   "name": "Апрелевка",
+   "region": "RU-MOS",
+   "population": 18467,
+   "lat": 55.5277,
+   "lon": 37.0651,
+   "capital": false
+  },
+  {
+   "name": "Балашиха",
+   "region": "RU-MOS",
+   "population": 215353,
+   "lat": 55.7964,
+   "lon": 37.9383,
+   "capital": false
+  },
+  {
+   "name": "Белоозёрский",
+   "region": "RU-MOS",
+   "population": 17842,
+   "lat": 55.4596,
+   "lon": 38.439,
+   "capital": false
+  },
+  {
+   "name": "Бронницы",
+   "region": "RU-MOS",
+   "population": 21102,
+   "lat": 55.4255,
+   "lon": 38.2641,
+   "capital": false
+  },
+  {
+   "name": "Верея",
+   "region": "RU-MOS",
+   "population": 5368,
+   "lat": 55.3434,
+   "lon": 36.1857,
+   "capital": false
+  },
+  {
+   "name": "Видное",
+   "region": "RU-MOS",
+   "population": 56798,
+   "lat": 55.5517,
+   "lon": 37.7062,
+   "capital": true
+  },
+  {
+   "name": "Волоколамск",
+   "region": "RU-MOS",
+   "population": 23386,
+   "lat": 56.0356,
+   "lon": 35.9585,
+   "capital": true
+  },
+  {
+   "name": "Высоковск",
+   "region": "RU-MOS",
+   "population": 10642,
+   "lat": 56.336,
+   "lon": 36.5252,
+   "capital": false
+  },
+  {
+   "name": "Голицыно",
+   "region": "RU-MOS",
+   "population": 17447,
+   "lat": 55.6191,
+   "lon": 36.9857,
+   "capital": false
+  },
+  {
+   "name": "Дедовск",
+   "region": "RU-MOS",
+   "population": 29280,
+   "lat": 55.8703,
+   "lon": 37.1245,
+   "capital": false
+  },
+  {
+   "name": "Дзержинский",
+   "region": "RU-MOS",
+   "population": 47125,
+   "lat": 55.6241,
+   "lon": 37.844,
+   "capital": false
+  },
+  {
+   "name": "Долгопрудный",
+   "region": "RU-MOS",
+   "population": 90976,
+   "lat": 55.9386,
+   "lon": 37.5101,
+   "capital": false
+  },
+  {
+   "name": "Домодедово",
+   "region": "RU-MOS",
+   "population": 96123,
+   "lat": 55.4363,
+   "lon": 37.7665,
+   "capital": false
+  },
+  {
+   "name": "Дрезна",
+   "region": "RU-MOS",
+   "population": 11815,
+   "lat": 55.7443,
+   "lon": 38.8498,
+   "capital": false
+  },
+  {
+   "name": "Дубна",
+   "region": "RU-MOS",
+   "population": 70569,
+   "lat": 56.7418,
+   "lon": 37.1757,
+   "capital": false
+  },
+  {
+   "name": "Егорьевск",
+   "region": "RU-MOS",
+   "population": 70133,
+   "lat": 55.383,
+   "lon": 39.0358,
+   "capital": false
+  },
+  {
+   "name": "Жуковский",
+   "region": "RU-MOS",
+   "population": 102729,
+   "lat": 55.5998,
+   "lon": 38.1224,
+   "capital": false
+  },
+  {
+   "name": "Зарайск",
+   "region": "RU-MOS",
+   "population": 24648,
+   "lat": 54.7625,
+   "lon": 38.8851,
+   "capital": true
+  },
+  {
+   "name": "Звенигород",
+   "region": "RU-MOS",
+   "population": 16395,
+   "lat": 55.7297,
+   "lon": 36.8554,
+   "capital": false
+  },
+  {
+   "name": "Ивантеевка",
+   "region": "RU-MOS",
+   "population": 58594,
+   "lat": 55.9742,
+   "lon": 37.9208,
+   "capital": false
+  },
+  {
+   "name": "Кашира",
+   "region": "RU-MOS",
+   "population": 41880,
+   "lat": 54.8533,
+   "lon": 38.1904,
+   "capital": false
+  },
+  {
+   "name": "Коломна",
+   "region": "RU-MOS",
+   "population": 144642,
+   "lat": 55.1028,
+   "lon": 38.7531,
+   "capital": false
+  },
+  {
+   "name": "Королёв",
+   "region": "RU-MOS",
+   "population": 183452,
+   "lat": 55.9162,
+   "lon": 37.8545,
+   "capital": false
+  },
+  {
+   "name": "Котельники",
+   "region": "RU-MOS",
+   "population": 32347,
+   "lat": 55.6598,
+   "lon": 37.8631,
+   "capital": false
+  },
+  {
+   "name": "Красноармейск",
+   "region": "RU-MOS",
+   "population": 26294,
+   "lat": 56.1054,
+   "lon": 38.1408,
+   "capital": false
+  },
+  {
+   "name": "Красногорск",
+   "region": "RU-MOS",
+   "population": 116738,
+   "lat": 55.8317,
+   "lon": 37.3295,
+   "capital": true
+  },
+  {
+   "name": "Краснозаводск",
+   "region": "RU-MOS",
+   "population": 13432,
+   "lat": 56.441,
+   "lon": 38.232,
+   "capital": false
+  },
+  {
+   "name": "Краснознаменск",
+   "region": "RU-MOS",
+   "population": 36057,
+   "lat": 55.5979,
+   "lon": 37.0394,
+   "capital": false
+  },
+  {
+   "name": "Кубинка",
+   "region": "RU-MOS",
+   "population": 22918,
+   "lat": 55.5755,
+   "lon": 36.6952,
+   "capital": false
+  },
+  {
+   "name": "Куровское",
+   "region": "RU-MOS",
+   "population": 21821,
+   "lat": 55.5792,
+   "lon": 38.9208,
+   "capital": false
+  },
+  {
+   "name": "Ликино-Дулёво",
+   "region": "RU-MOS",
+   "population": 31331,
+   "lat": 55.7078,
+   "lon": 38.9578,
+   "capital": false
+  },
+  {
+   "name": "Лобня",
+   "region": "RU-MOS",
+   "population": 74350,
+   "lat": 56.0329,
+   "lon": 37.4614,
+   "capital": false
+  },
+  {
+   "name": "Лосино-Петровский",
+   "region": "RU-MOS",
+   "population": 22550,
+   "lat": 55.8713,
+   "lon": 38.2006,
+   "capital": false
+  },
+  {
+   "name": "Луховицы",
+   "region": "RU-MOS",
+   "population": 29849,
+   "lat": 54.9652,
+   "lon": 39.026,
+   "capital": true
+  },
+  {
+   "name": "Лыткарино",
+   "region": "RU-MOS",
+   "population": 55147,
+   "lat": 55.5778,
+   "lon": 37.9034,
+   "capital": false
+  },
+  {
+   "name": "Люберцы",
+   "region": "RU-MOS",
+   "population": 171978,
+   "lat": 55.6765,
+   "lon": 37.8981,
+   "capital": true
+  },
+  {
+   "name": "Можайск",
+   "region": "RU-MOS",
+   "population": 31388,
+   "lat": 55.5069,
+   "lon": 36.024,
+   "capital": true
+  },
+  {
+   "name": "Мытищи",
+   "region": "RU-MOS",
+   "population": 173341,
+   "lat": 55.9106,
+   "lon": 37.7364,
+   "capital": false
+  },
+  {
+   "name": "Озёры",
+   "region": "RU-MOS",
+   "population": 25788,
+   "lat": 54.8541,
+   "lon": 38.5599,
+   "capital": false
+  },
+  {
+   "name": "Павловский Посад",
+   "region": "RU-MOS",
+   "population": 63771,
+   "lat": 55.7807,
+   "lon": 38.6597,
+   "capital": true
+  },
+  {
+   "name": "Пересвет",
+   "region": "RU-MOS",
+   "population": 14142,
+   "lat": 56.4158,
+   "lon": 38.1734,
+   "capital": false
+  },
+  {
+   "name": "Подольск",
+   "region": "RU-MOS",
+   "population": 187956,
+   "lat": 55.4389,
+   "lon": 37.5703,
+   "capital": false
+  },
+  {
+   "name": "Протвино",
+   "region": "RU-MOS",
+   "population": 37308,
+   "lat": 54.8706,
+   "lon": 37.2183,
+   "capital": false
+  },
+  {
+   "name": "Пушкино",
+   "region": "RU-MOS",
+   "population": 102840,
+   "lat": 56.0104,
+   "lon": 37.8471,
+   "capital": true
+  },
+  {
+   "name": "Пущино",
+   "region": "RU-MOS",
+   "population": 20263,
+   "lat": 54.8324,
+   "lon": 37.621,
+   "capital": false
+  },
+  {
+   "name": "Раменское",
+   "region": "RU-MOS",
+   "population": 96355,
+   "lat": 55.5495,
+   "lon": 38.2729,
+   "capital": true
+  },
+  {
+   "name": "Реутов",
+   "region": "RU-MOS",
+   "population": 87195,
+   "lat": 55.7583,
+   "lon": 37.8619,
+   "capital": false
+  },
+  {
+   "name": "Рошаль",
+   "region": "RU-MOS",
+   "population": 21265,
+   "lat": 55.6633,
+   "lon": 39.8656,
+   "capital": false
+  },
+  {
+   "name": "Руза",
+   "region": "RU-MOS",
+   "population": 13495,
+   "lat": 55.7015,
+   "lon": 36.1959,
+   "capital": true
+  },
+  {
+   "name": "Серпухов",
+   "region": "RU-MOS",
+   "population": 126496,
+   "lat": 54.9226,
+   "lon": 37.4034,
+   "capital": false
+  },
+  {
+   "name": "Солнечногорск",
+   "region": "RU-MOS",
+   "population": 52996,
+   "lat": 56.1851,
+   "lon": 36.9776,
+   "capital": true
+  },
+  {
+   "name": "Старая Купавна",
+   "region": "RU-MOS",
+   "population": 21859,
+   "lat": 55.8106,
+   "lon": 38.1756,
+   "capital": false
+  },
+  {
+   "name": "Ступино",
+   "region": "RU-MOS",
+   "population": 66942,
+   "lat": 54.8863,
+   "lon": 38.0782,
+   "capital": true
+  },
+  {
+   "name": "Талдом",
+   "region": "RU-MOS",
+   "population": 13819,
+   "lat": 56.7309,
+   "lon": 37.5276,
+   "capital": true
+  },
+  {
+   "name": "Фрязино",
+   "region": "RU-MOS",
+   "population": 55449,
+   "lat": 55.9591,
+   "lon": 38.041,
+   "capital": false
+  },
+  {
+   "name": "Химки",
+   "region": "RU-MOS",
+   "population": 207125,
+   "lat": 55.8887,
+   "lon": 37.4304,
+   "capital": false
+  },
+  {
+   "name": "Хотьково",
+   "region": "RU-MOS",
+   "population": 21612,
+   "lat": 56.2517,
+   "lon": 37.9396,
+   "capital": false
+  },
+  {
+   "name": "Черноголовка",
+   "region": "RU-MOS",
+   "population": 20986,
+   "lat": 56.01,
+   "lon": 38.3792,
+   "capital": false
+  },
+  {
+   "name": "Чехов",
+   "region": "RU-MOS",
+   "population": 60677,
+   "lat": 55.1508,
+   "lon": 37.4533,
+   "capital": true
+  },
+  {
+   "name": "Щёлково",
+   "region": "RU-MOS",
+   "population": 110380,
+   "lat": 55.9234,
+   "lon": 37.9784,
+   "capital": true
+  },
+  {
+   "name": "Электрогорск",
+   "region": "RU-MOS",
+   "population": 22120,
+   "lat": 55.878,
+   "lon": 38.7807,
+   "capital": false
+  },
+  {
+   "name": "Электросталь",
+   "region": "RU-MOS",
+   "population": 155324,
+   "lat": 55.7847,
+   "lon": 38.4447,
+   "capital": false
+  },
+  {
+   "name": "Электроугли",
+   "region": "RU-MOS",
+   "population": 20120,
+   "lat": 55.7171,
+   "lon": 38.2193,
+   "capital": false
+  },
+  {
+   "name": "Яхрома",
+   "region": "RU-MOS",
+   "population": 13248,
+   "lat": 56.2891,
+   "lon": 37.4832,
+   "capital": false
+  },
+  {
+   "name": "Апатиты",
+   "region": "RU-MUR",
+   "population": 59690,
+   "lat": 67.5678,
+   "lon": 33.4068,
+   "capital": false
+  },
+  {
+   "name": "Гаджиево",
+   "region": "RU-MUR",
+   "population": 11089,
+   "lat": 69.2491,
+   "lon": 33.3153,
+   "capital": false
+  },
+  {
+   "name": "Заозерск",
+   "region": "RU-MUR",
+   "population": 11206,
+   "lat": 69.4004,
+   "lon": 32.4501,
+   "capital": false
+  },
+  {
+   "name": "Заполярный",
+   "region": "RU-MUR",
+   "population": 15835,
+   "lat": 69.4133,
+   "lon": 30.7984,
+   "capital": false
+  },
+  {
+   "name": "Кандалакша",
+   "region": "RU-MUR",
+   "population": 35659,
+   "lat": 67.1568,
+   "lon": 32.4143,
+   "capital": true
+  },
+  {
+   "name": "Кировск",
+   "region": "RU-MUR",
+   "population": 28659,
+   "lat": 67.615,
+   "lon": 33.6637,
+   "capital": false
+  },
+  {
+   "name": "Ковдор",
+   "region": "RU-MUR",
+   "population": 18836,
+   "lat": 67.5661,
+   "lon": 30.4742,
+   "capital": true
+  },
+  {
+   "name": "Кола",
+   "region": "RU-MUR",
+   "population": 10447,
+   "lat": 68.8786,
+   "lon": 33.0262,
+   "capital": true
+  },
+  {
+   "name": "Мончегорск",
+   "region": "RU-MUR",
+   "population": 45381,
+   "lat": 67.9386,
+   "lon": 32.936,
+   "capital": false
+  },
+  {
+   "name": "Мурманск",
+   "region": "RU-MUR",
+   "population": 307664,
+   "lat": 69.0077,
+   "lon": 33.0686,
+   "capital": true
+  },
+  {
+   "name": "Оленегорск",
+   "region": "RU-MUR",
+   "population": 23079,
+   "lat": 68.1422,
+   "lon": 33.2669,
+   "capital": false
+  },
+  {
+   "name": "Островной",
+   "region": "RU-MUR",
+   "population": 2177,
+   "lat": 68.051,
+   "lon": 39.5078,
+   "capital": false
+  },
+  {
+   "name": "Полярные Зори",
+   "region": "RU-MUR",
+   "population": 15106,
+   "lat": 67.3731,
+   "lon": 32.4976,
+   "capital": false
+  },
+  {
+   "name": "Полярный",
+   "region": "RU-MUR",
+   "population": 17304,
+   "lat": 69.199,
+   "lon": 33.4509,
+   "capital": false
+  },
+  {
+   "name": "Североморск",
+   "region": "RU-MUR",
+   "population": 50076,
+   "lat": 69.0767,
+   "lon": 33.4178,
+   "capital": false
+  },
+  {
+   "name": "Снежногорск",
+   "region": "RU-MUR",
+   "population": 12698,
+   "lat": 69.1921,
+   "lon": 33.2384,
+   "capital": false
+  },
+  {
+   "name": "Нарьян-Мар",
+   "region": "RU-NEN",
+   "population": 21296,
+   "lat": 67.638,
+   "lon": 53.007,
+   "capital": true
+  },
+  {
+   "name": "Арзамас",
+   "region": "RU-NIZ",
+   "population": 106367,
+   "lat": 55.3946,
+   "lon": 43.8408,
+   "capital": false
+  },
+  {
+   "name": "Балахна",
+   "region": "RU-NIZ",
+   "population": 51526,
+   "lat": 56.495,
+   "lon": 43.5758,
+   "capital": true
+  },
+  {
+   "name": "Богородск",
+   "region": "RU-NIZ",
+   "population": 25497,
+   "lat": 56.1021,
+   "lon": 43.5135,
+   "capital": true
+  },
+  {
+   "name": "Бор",
+   "region": "RU-NIZ",
+   "population": 78079,
+   "lat": 56.3565,
+   "lon": 44.0646,
+   "capital": false
+  },
+  {
+   "name": "Ветлуга",
+   "region": "RU-NIZ",
+   "population": 8956,
+   "lat": 57.8559,
+   "lon": 45.7762,
+   "capital": true
+  },
+  {
+   "name": "Володарск",
+   "region": "RU-NIZ",
+   "population": 9924,
+   "lat": 56.217,
+   "lon": 43.1596,
+   "capital": true
+  },
+  {
+   "name": "Ворсма",
+   "region": "RU-NIZ",
+   "population": 11622,
+   "lat": 55.9899,
+   "lon": 43.2719,
+   "capital": false
+  },
+  {
+   "name": "Выкса",
+   "region": "RU-NIZ",
+   "population": 56196,
+   "lat": 55.3208,
+   "lon": 42.1679,
+   "capital": true
+  },
+  {
+   "name": "Горбатов",
+   "region": "RU-NIZ",
+   "population": 2278,
+   "lat": 56.1308,
+   "lon": 43.0626,
+   "capital": false
+  },
+  {
+   "name": "Городец",
+   "region": "RU-NIZ",
+   "population": 30699,
+   "lat": 56.6449,
+   "lon": 43.4723,
+   "capital": true
+  },
+  {
+   "name": "Дзержинск",
+   "region": "RU-NIZ",
+   "population": 240762,
+   "lat": 56.2376,
+   "lon": 43.4599,
+   "capital": false
+  },
+  {
+   "name": "Заволжье",
+   "region": "RU-NIZ",
+   "population": 40265,
+   "lat": 56.6404,
+   "lon": 43.3872,
+   "capital": false
+  },
+  {
+   "name": "Княгинино",
+   "region": "RU-NIZ",
+   "population": 6708,
+   "lat": 55.8206,
+   "lon": 45.0323,
+   "capital": true
+  },
+  {
+   "name": "Кстово",
+   "region": "RU-NIZ",
+   "population": 66641,
+   "lat": 56.1432,
+   "lon": 44.1664,
+   "capital": true
+  },
+  {
+   "name": "Кулебаки",
+   "region": "RU-NIZ",
+   "population": 35762,
+   "lat": 55.4296,
+   "lon": 42.5126,
+   "capital": true
+  },
+  {
+   "name": "Лукоянов",
+   "region": "RU-NIZ",
+   "population": 14949,
+   "lat": 55.0326,
+   "lon": 44.4934,
+   "capital": true
+  },
+  {
+   "name": "Лысково",
+   "region": "RU-NIZ",
+   "population": 21882,
+   "lat": 56.0262,
+   "lon": 45.0358,
+   "capital": true
+  },
+  {
+   "name": "Навашино",
+   "region": "RU-NIZ",
+   "population": 16413,
+   "lat": 55.5438,
+   "lon": 42.1887,
+   "capital": true
+  },
+  {
+   "name": "Нижний Новгород",
+   "region": "RU-NIZ",
+   "population": 1250615,
+   "lat": 56.3241,
+   "lon": 44.0054,
+   "capital": true
+  },
+  {
+   "name": "Павлово",
+   "region": "RU-NIZ",
+   "population": 60699,
+   "lat": 55.9798,
+   "lon": 43.0995,
+   "capital": true
+  },
+  {
+   "name": "Первомайск",
+   "region": "RU-NIZ",
+   "population": 14567,
+   "lat": 54.8676,
+   "lon": 43.8014,
+   "capital": false
+  },
+  {
+   "name": "Перевоз",
+   "region": "RU-NIZ",
+   "population": 9201,
+   "lat": 55.5968,
+   "lon": 44.5448,
+   "capital": true
+  },
+  {
+   "name": "Саров",
+   "region": "RU-NIZ",
+   "population": 92073,
+   "lat": 54.9228,
+   "lon": 43.3448,
+   "capital": false
+  },
+  {
+   "name": "Семенов",
+   "region": "RU-NIZ",
+   "population": 24472,
+   "lat": 56.789,
+   "lon": 44.4903,
+   "capital": false
+  },
+  {
+   "name": "Сергач",
+   "region": "RU-NIZ",
+   "population": 21387,
+   "lat": 55.5202,
+   "lon": 45.4813,
+   "capital": true
+  },
+  {
+   "name": "Урень",
+   "region": "RU-NIZ",
+   "population": 12311,
+   "lat": 57.4613,
+   "lon": 45.7833,
+   "capital": true
+  },
+  {
+   "name": "Чкаловск",
+   "region": "RU-NIZ",
+   "population": 12371,
+   "lat": 56.7651,
+   "lon": 43.2421,
+   "capital": true
+  },
+  {
+   "name": "Шахунья",
+   "region": "RU-NIZ",
+   "population": 21337,
+   "lat": 57.6764,
+   "lon": 46.6129,
+   "capital": false
+  },
+  {
+   "name": "Боровичи",
+   "region": "RU-NGR",
+   "population": 54731,
+   "lat": 58.384,
+   "lon": 33.9176,
+   "capital": true
+  },
+  {
+   "name": "Валдай",
+   "region": "RU-NGR",
+   "population": 16099,
+   "lat": 57.9824,
+   "lon": 33.2369,
+   "capital": true
+  },
+  {
+   "name": "Великий Новгород",
+   "region": "RU-NGR",
+   "population": 218724,
+   "lat": 58.5214,
+   "lon": 31.2755,
+   "capital": true
+  },
+  {
+   "name": "Малая Вишера",
+   "region": "RU-NGR",
+   "population": 12461,
+   "lat": 58.8458,
+   "lon": 32.2247,
+   "capital": true
+  },
+  {
+   "name": "Окуловка",
+   "region": "RU-NGR",
+   "population": 12464,
+   "lat": 58.391,
+   "lon": 33.2902,
+   "capital": true
+  },
+  {
+   "name": "Пестово",
+   "region": "RU-NGR",
+   "population": 15911,
+   "lat": 58.5974,
+   "lon": 35.8144,
+   "capital": true
+  },
+  {
+   "name": "Сольцы",
+   "region": "RU-NGR",
+   "population": 10317,
+   "lat": 58.1201,
+   "lon": 30.3094,
+   "capital": true
+  },
+  {
+   "name": "Старая Русса",
+   "region": "RU-NGR",
+   "population": 32235,
+   "lat": 57.9907,
+   "lon": 31.3555,
+   "capital": true
+  },
+  {
+   "name": "Холм",
+   "region": "RU-NGR",
+   "population": 3829,
+   "lat": 57.1451,
+   "lon": 31.1787,
+   "capital": true
+  },
+  {
+   "name": "Чудово",
+   "region": "RU-NGR",
+   "population": 16148,
+   "lat": 59.1248,
+   "lon": 31.6866,
+   "capital": true
+  },
+  {
+   "name": "Барабинск",
+   "region": "RU-NVS",
+   "population": 30250,
+   "lat": 55.3515,
+   "lon": 78.3465,
+   "capital": false
+  },
+  {
+   "name": "Бердск",
+   "region": "RU-NVS",
+   "population": 98809,
+   "lat": 54.7582,
+   "lon": 83.1071,
+   "capital": false
+  },
+  {
+   "name": "Болотное",
+   "region": "RU-NVS",
+   "population": 16969,
+   "lat": 55.6692,
+   "lon": 84.3907,
+   "capital": true
+  },
+  {
+   "name": "Искитим",
+   "region": "RU-NVS",
+   "population": 60072,
+   "lat": 54.6268,
+   "lon": 83.2951,
+   "capital": false
+  },
+  {
+   "name": "Карасук",
+   "region": "RU-NVS",
+   "population": 28929,
+   "lat": 53.7343,
+   "lon": 78.0423,
+   "capital": true
+  },
+  {
+   "name": "Каргат",
+   "region": "RU-NVS",
+   "population": 10620,
+   "lat": 55.1946,
+   "lon": 80.2829,
+   "capital": true
+  },
+  {
+   "name": "Куйбышев",
+   "region": "RU-NVS",
+   "population": 47278,
+   "lat": 55.4685,
+   "lon": 78.3242,
+   "capital": false
+  },
+  {
+   "name": "Купино",
+   "region": "RU-NVS",
+   "population": 15448,
+   "lat": 54.3661,
+   "lon": 77.2973,
+   "capital": true
+  },
+  {
+   "name": "Новосибирск",
+   "region": "RU-NVS",
+   "population": 1498921,
+   "lat": 55.0282,
+   "lon": 82.9211,
+   "capital": true
+  },
+  {
+   "name": "Обь",
+   "region": "RU-NVS",
+   "population": 26137,
+   "lat": 54.9946,
+   "lon": 82.6937,
+   "capital": false
+  },
+  {
+   "name": "Татарск",
+   "region": "RU-NVS",
+   "population": 26114,
+   "lat": 55.2146,
+   "lon": 75.974,
+   "capital": false
+  },
+  {
+   "name": "Тогучин",
+   "region": "RU-NVS",
+   "population": 21531,
+   "lat": 55.2252,
+   "lon": 84.4104,
+   "capital": true
+  },
+  {
+   "name": "Черепаново",
+   "region": "RU-NVS",
+   "population": 19346,
+   "lat": 54.2206,
+   "lon": 83.3725,
+   "capital": true
+  },
+  {
+   "name": "Чулым",
+   "region": "RU-NVS",
+   "population": 11964,
+   "lat": 55.0907,
+   "lon": 80.9593,
+   "capital": true
+  },
+  {
+   "name": "Исилькуль",
+   "region": "RU-OMS",
+   "population": 25905,
+   "lat": 54.9096,
+   "lon": 71.2816,
+   "capital": true
+  },
+  {
+   "name": "Калачинск",
+   "region": "RU-OMS",
+   "population": 24000,
+   "lat": 55.0598,
+   "lon": 74.5654,
+   "capital": true
+  },
+  {
+   "name": "Называевск",
+   "region": "RU-OMS",
+   "population": 12119,
+   "lat": 55.5689,
+   "lon": 71.3503,
+   "capital": true
+  },
+  {
+   "name": "Омск",
+   "region": "RU-OMS",
+   "population": 1154000,
+   "lat": 54.9849,
+   "lon": 73.3675,
+   "capital": true
+  },
+  {
+   "name": "Тара",
+   "region": "RU-OMS",
+   "population": 26664,
+   "lat": 56.9161,
+   "lon": 74.3649,
+   "capital": true
+  },
+  {
+   "name": "Тюкалинск",
+   "region": "RU-OMS",
+   "population": 12050,
+   "lat": 55.8703,
+   "lon": 72.1955,
+   "capital": true
+  },
+  {
+   "name": "Абдулино",
+   "region": "RU-ORE",
+   "population": 20663,
+   "lat": 53.6779,
+   "lon": 53.6472,
+   "capital": true
+  },
+  {
+   "name": "Бугуруслан",
+   "region": "RU-ORE",
+   "population": 52249,
+   "lat": 53.6524,
+   "lon": 52.4327,
+   "capital": false
+  },
+  {
+   "name": "Бузулук",
+   "region": "RU-ORE",
+   "population": 82816,
+   "lat": 52.7881,
+   "lon": 52.2625,
+   "capital": false
+  },
+  {
+   "name": "Гай",
+   "region": "RU-ORE",
+   "population": 38302,
+   "lat": 51.4649,
+   "lon": 58.4437,
+   "capital": false
+  },
+  {
+   "name": "Кувандык",
+   "region": "RU-ORE",
+   "population": 26176,
+   "lat": 51.4784,
+   "lon": 57.3613,
+   "capital": false
+  },
+  {
+   "name": "Медногорск",
+   "region": "RU-ORE",
+   "population": 27253,
+   "lat": 51.4038,
+   "lon": 57.5832,
+   "capital": false
+  },
+  {
+   "name": "Новотроицк",
+   "region": "RU-ORE",
+   "population": 97914,
+   "lat": 51.1964,
+   "lon": 58.3018,
+   "capital": false
+  },
+  {
+   "name": "Оренбург",
+   "region": "RU-ORE",
+   "population": 570329,
+   "lat": 51.7875,
+   "lon": 55.1019,
+   "capital": true
+  },
+  {
+   "name": "Орск",
+   "region": "RU-ORE",
+   "population": 238006,
+   "lat": 51.2294,
+   "lon": 58.4753,
+   "capital": false
+  },
+  {
+   "name": "Соль-Илецк",
+   "region": "RU-ORE",
+   "population": 26308,
+   "lat": 51.1634,
+   "lon": 54.9897,
+   "capital": true
+  },
+  {
+   "name": "Сорочинск",
+   "region": "RU-ORE",
+   "population": 30136,
+   "lat": 52.4267,
+   "lon": 53.1543,
+   "capital": false
+  },
+  {
+   "name": "Ясный",
+   "region": "RU-ORE",
+   "population": 16082,
+   "lat": 51.0368,
+   "lon": 59.8743,
+   "capital": true
+  },
+  {
+   "name": "Болхов",
+   "region": "RU-ORL",
+   "population": 11421,
+   "lat": 53.4438,
+   "lon": 36.0077,
+   "capital": true
+  },
+  {
+   "name": "Дмитровск",
+   "region": "RU-ORL",
+   "population": 5956,
+   "lat": 52.5055,
+   "lon": 35.1415,
+   "capital": true
+  },
+  {
+   "name": "Ливны",
+   "region": "RU-ORL",
+   "population": 50430,
+   "lat": 52.4285,
+   "lon": 37.604,
+   "capital": false
+  },
+  {
+   "name": "Малоархангельск",
+   "region": "RU-ORL",
+   "population": 3872,
+   "lat": 52.4002,
+   "lon": 36.5039,
+   "capital": true
+  },
+  {
+   "name": "Мценск",
+   "region": "RU-ORL",
+   "population": 43216,
+   "lat": 53.2788,
+   "lon": 36.5749,
+   "capital": false
+  },
+  {
+   "name": "Новосиль",
+   "region": "RU-ORL",
+   "population": 3799,
+   "lat": 52.9745,
+   "lon": 37.0437,
+   "capital": true
+  },
+  {
+   "name": "Орёл",
+   "region": "RU-ORL",
+   "population": 317854,
+   "lat": 52.9671,
+   "lon": 36.0696,
+   "capital": true
+  },
+  {
+   "name": "Белинский",
+   "region": "RU-PNZ",
+   "population": 8567,
+   "lat": 52.9641,
+   "lon": 43.4183,
+   "capital": true
+  },
+  {
+   "name": "Городище",
+   "region": "RU-PNZ",
+   "population": 8102,
+   "lat": 53.2727,
+   "lon": 45.7026,
+   "capital": true
+  },
+  {
+   "name": "Заречный",
+   "region": "RU-PNZ",
+   "population": 63579,
+   "lat": 53.1961,
+   "lon": 45.169,
+   "capital": false
+  },
+  {
+   "name": "Каменка",
+   "region": "RU-PNZ",
+   "population": 39579,
+   "lat": 53.1855,
+   "lon": 44.047,
+   "capital": true
+  },
+  {
+   "name": "Кузнецк",
+   "region": "RU-PNZ",
+   "population": 88886,
+   "lat": 53.1131,
+   "lon": 46.6051,
+   "capital": true
+  },
+  {
+   "name": "Нижний Ломов",
+   "region": "RU-PNZ",
+   "population": 22678,
+   "lat": 53.5301,
+   "lon": 43.673,
+   "capital": true
+  },
+  {
+   "name": "Никольск",
+   "region": "RU-PNZ",
+   "population": 22471,
+   "lat": 53.7137,
+   "lon": 46.08,
+   "capital": true
+  },
+  {
+   "name": "Пенза",
+   "region": "RU-PNZ",
+   "population": 519592,
+   "lat": 53.1753,
+   "lon": 45.0349,
+   "capital": true
+  },
+  {
+   "name": "Сердобск",
+   "region": "RU-PNZ",
+   "population": 35393,
+   "lat": 52.4698,
+   "lon": 44.2122,
+   "capital": true
+  },
+  {
+   "name": "Спасск",
+   "region": "RU-PNZ",
+   "population": 7442,
+   "lat": 53.9272,
+   "lon": 43.1859,
+   "capital": true
+  },
+  {
+   "name": "Сурск",
+   "region": "RU-PNZ",
+   "population": 7032,
+   "lat": 53.0761,
+   "lon": 45.6911,
+   "capital": false
+  },
+  {
+   "name": "Александровск",
+   "region": "RU-PER",
+   "population": 15022,
+   "lat": 59.1613,
+   "lon": 57.5763,
+   "capital": false
+  },
+  {
+   "name": "Березники",
+   "region": "RU-PER",
+   "population": 156350,
+   "lat": 59.408,
+   "lon": 56.8039,
+   "capital": false
+  },
+  {
+   "name": "Верещагино",
+   "region": "RU-PER",
+   "population": 22760,
+   "lat": 58.0798,
+   "lon": 54.6581,
+   "capital": true
+  },
+  {
+   "name": "Горнозаводск",
+   "region": "RU-PER",
+   "population": 12334,
+   "lat": 58.3743,
+   "lon": 58.3232,
+   "capital": true
+  },
+  {
+   "name": "Гремячинск",
+   "region": "RU-PER",
+   "population": 11005,
+   "lat": 58.5626,
+   "lon": 57.8521,
+   "capital": false
+  },
+  {
+   "name": "Губаха",
+   "region": "RU-PER",
+   "population": 27544,
+   "lat": 58.8372,
+   "lon": 57.5545,
+   "capital": false
+  },
+  {
+   "name": "Добрянка",
+   "region": "RU-PER",
+   "population": 35720,
+   "lat": 58.4697,
+   "lon": 56.4131,
+   "capital": false
+  },
+  {
+   "name": "Кизел",
+   "region": "RU-PER",
+   "population": 20277,
+   "lat": 59.0513,
+   "lon": 57.6471,
+   "capital": false
+  },
+  {
+   "name": "Красновишерск",
+   "region": "RU-PER",
+   "population": 17129,
+   "lat": 60.3901,
+   "lon": 57.0536,
+   "capital": true
+  },
+  {
+   "name": "Краснокамск",
+   "region": "RU-PER",
+   "population": 52632,
+   "lat": 58.0822,
+   "lon": 55.748,
+   "capital": false
+  },
+  {
+   "name": "Кудымкар",
+   "region": "RU-PER",
+   "population": 30711,
+   "lat": 59.0168,
+   "lon": 54.6573,
+   "capital": false
+  },
+  {
+   "name": "Кунгур",
+   "region": "RU-PER",
+   "population": 67857,
+   "lat": 57.4283,
+   "lon": 56.9439,
+   "capital": false
+  },
+  {
+   "name": "Лысьва",
+   "region": "RU-PER",
+   "population": 67712,
+   "lat": 58.0996,
+   "lon": 57.8087,
+   "capital": false
+  },
+  {
+   "name": "Нытва",
+   "region": "RU-PER",
+   "population": 19041,
+   "lat": 57.9337,
+   "lon": 55.3356,
+   "capital": true
+  },
+  {
+   "name": "Оса",
+   "region": "RU-PER",
+   "population": 22420,
+   "lat": 57.289,
+   "lon": 55.4689,
+   "capital": true
+  },
+  {
+   "name": "Оханск",
+   "region": "RU-PER",
+   "population": 7597,
+   "lat": 57.718,
+   "lon": 55.3872,
+   "capital": true
+  },
+  {
+   "name": "Очер",
+   "region": "RU-PER",
+   "population": 15003,
+   "lat": 57.8853,
+   "lon": 54.7161,
+   "capital": true
+  },
+  {
+   "name": "Пермь",
+   "region": "RU-PER",
+   "population": 1000679,
+   "lat": 58.0103,
+   "lon": 56.2342,
+   "capital": true
+  },
+  {
+   "name": "Соликамск",
+   "region": "RU-PER",
+   "population": 97239,
+   "lat": 59.6483,
+   "lon": 56.771,
+   "capital": false
+  },
+  {
+   "name": "Усолье",
+   "region": "RU-PER",
+   "population": 5694,
+   "lat": 59.4278,
+   "lon": 56.6838,
+   "capital": true
+  },
+  {
+   "name": "Чайковский",
+   "region": "RU-PER",
+   "population": 82933,
+   "lat": 56.7782,
+   "lon": 54.1478,
+   "capital": false
+  },
+  {
+   "name": "Чердынь",
+   "region": "RU-PER",
+   "population": 4920,
+   "lat": 60.4012,
+   "lon": 56.48,
+   "capital": true
+  },
+  {
+   "name": "Чермоз",
+   "region": "RU-PER",
+   "population": 4017,
+   "lat": 58.7843,
+   "lon": 56.1507,
+   "capital": false
+  },
+  {
+   "name": "Чернушка",
+   "region": "RU-PER",
+   "population": 33275,
+   "lat": 56.5161,
+   "lon": 56.0763,
+   "capital": true
+  },
+  {
+   "name": "Чусовой",
+   "region": "RU-PER",
+   "population": 46740,
+   "lat": 58.2975,
+   "lon": 57.8194,
+   "capital": false
+  },
+  {
+   "name": "Арсеньев",
+   "region": "RU-PRI",
+   "population": 56742,
+   "lat": 44.1622,
+   "lon": 133.2696,
+   "capital": false
+  },
+  {
+   "name": "Артем",
+   "region": "RU-PRI",
+   "population": 102636,
+   "lat": 43.3502,
+   "lon": 132.1596,
+   "capital": false
+  },
+  {
+   "name": "Большой Камень",
+   "region": "RU-PRI",
+   "population": 39257,
+   "lat": 43.1112,
+   "lon": 132.348,
+   "capital": false
+  },
+  {
+   "name": "Владивосток",
+   "region": "RU-PRI",
+   "population": 592069,
+   "lat": 43.1165,
+   "lon": 131.8824,
+   "capital": true
+  },
+  {
+   "name": "Дальнегорск",
+   "region": "RU-PRI",
+   "population": 37503,
+   "lat": 44.5539,
+   "lon": 135.5663,
+   "capital": false
+  },
+  {
+   "name": "Дальнереченск",
+   "region": "RU-PRI",
+   "population": 27601,
+   "lat": 45.9308,
+   "lon": 133.7317,
+   "capital": false
+  },
+  {
+   "name": "Лесозаводск",
+   "region": "RU-PRI",
+   "population": 36975,
+   "lat": 45.478,
+   "lon": 133.4186,
+   "capital": false
+  },
+  {
+   "name": "Находка",
+   "region": "RU-PRI",
+   "population": 159695,
+   "lat": 42.8239,
+   "lon": 132.8927,
+   "capital": false
+  },
+  {
+   "name": "Партизанск",
+   "region": "RU-PRI",
+   "population": 38648,
+   "lat": 43.1281,
+   "lon": 133.1265,
+   "capital": false
+  },
+  {
+   "name": "Спасск-Дальний",
+   "region": "RU-PRI",
+   "population": 44166,
+   "lat": 44.5901,
+   "lon": 132.8157,
+   "capital": false
+  },
+  {
+   "name": "Уссурийск",
+   "region": "RU-PRI",
+   "population": 157946,
+   "lat": 43.7972,
+   "lon": 131.9518,
+   "capital": false
+  },
+  {
+   "name": "Фокино",
+   "region": "RU-PRI",
+   "population": 23683,
+   "lat": 42.9706,
+   "lon": 132.411,
+   "capital": false
+  },
+  {
+   "name": "Великие Луки",
+   "region": "RU-PSK",
+   "population": 98778,
+   "lat": 56.3322,
+   "lon": 30.5509,
+   "capital": false
+  },
+  {
+   "name": "Гдов",
+   "region": "RU-PSK",
+   "population": 4379,
+   "lat": 58.7432,
+   "lon": 27.8265,
+   "capital": true
+  },
+  {
+   "name": "Дно",
+   "region": "RU-PSK",
+   "population": 9061,
+   "lat": 57.827,
+   "lon": 29.9629,
+   "capital": true
+  },
+  {
+   "name": "Невель",
+   "region": "RU-PSK",
+   "population": 16324,
+   "lat": 56.0202,
+   "lon": 29.924,
+   "capital": true
+  },
+  {
+   "name": "Новоржев",
+   "region": "RU-PSK",
+   "population": 3695,
+   "lat": 57.0298,
+   "lon": 29.3433,
+   "capital": true
+  },
+  {
+   "name": "Новосокольники",
+   "region": "RU-PSK",
+   "population": 8119,
+   "lat": 56.3408,
+   "lon": 30.1528,
+   "capital": true
+  },
+  {
+   "name": "Опочка",
+   "region": "RU-PSK",
+   "population": 11601,
+   "lat": 56.7107,
+   "lon": 28.6718,
+   "capital": true
+  },
+  {
+   "name": "Остров",
+   "region": "RU-PSK",
+   "population": 21670,
+   "lat": 57.3452,
+   "lon": 28.3438,
+   "capital": true
+  },
+  {
+   "name": "Печоры",
+   "region": "RU-PSK",
+   "population": 12308,
+   "lat": 57.8146,
+   "lon": 27.6223,
+   "capital": true
+  },
+  {
+   "name": "Порхов",
+   "region": "RU-PSK",
+   "population": 10608,
+   "lat": 57.7765,
+   "lon": 29.5437,
+   "capital": true
+  },
+  {
+   "name": "Псков",
+   "region": "RU-PSK",
+   "population": 203974,
+   "lat": 57.8194,
+   "lon": 28.3317,
+   "capital": true
+  },
+  {
+   "name": "Пустошка",
+   "region": "RU-PSK",
+   "population": 4619,
+   "lat": 56.3375,
+   "lon": 29.3668,
+   "capital": true
+  },
+  {
+   "name": "Пыталово",
+   "region": "RU-PSK",
+   "population": 5826,
+   "lat": 57.0638,
+   "lon": 27.9236,
+   "capital": true
+  },
+  {
+   "name": "Себеж",
+   "region": "RU-PSK",
+   "population": 6375,
+   "lat": 56.2909,
+   "lon": 28.4724,
+   "capital": true
+  },
+  {
+   "name": "Адыгейск",
+   "region": "RU-AD",
+   "population": 12689,
+   "lat": 44.8784,
+   "lon": 39.1903,
+   "capital": false
+  },
+  {
+   "name": "Майкоп",
+   "region": "RU-AD",
+   "population": 144055,
+   "lat": 44.6098,
+   "lon": 40.1007,
+   "capital": true
+  },
+  {
+   "name": "Горно-Алтайск",
+   "region": "RU-AL",
+   "population": 62861,
+   "lat": 51.9581,
+   "lon": 85.9603,
+   "capital": true
+  },
+  {
+   "name": "Агидель",
+   "region": "RU-BA",
+   "population": 16365,
+   "lat": 55.8999,
+   "lon": 53.922,
+   "capital": false
+  },
+  {
+   "name": "Баймак",
+   "region": "RU-BA",
+   "population": 17710,
+   "lat": 52.5913,
+   "lon": 58.3111,
+   "capital": true
+  },
+  {
+   "name": "Белебей",
+   "region": "RU-BA",
+   "population": 60183,
+   "lat": 54.1035,
+   "lon": 54.1113,
+   "capital": true
+  },
+  {
+   "name": "Белорецк",
+   "region": "RU-BA",
+   "population": 68804,
+   "lat": 53.9676,
+   "lon": 58.41,
+   "capital": true
+  },
+  {
+   "name": "Бирск",
+   "region": "RU-BA",
+   "population": 41637,
+   "lat": 55.4156,
+   "lon": 55.5582,
+   "capital": true
+  },
+  {
+   "name": "Благовещенск",
+   "region": "RU-BA",
+   "population": 34246,
+   "lat": 55.05,
+   "lon": 55.9553,
+   "capital": true
+  },
+  {
+   "name": "Давлеканово",
+   "region": "RU-BA",
+   "population": 24040,
+   "lat": 54.2227,
+   "lon": 55.0312,
+   "capital": true
+  },
+  {
+   "name": "Дюртюли",
+   "region": "RU-BA",
+   "population": 31272,
+   "lat": 55.4848,
+   "lon": 54.8525,
+   "capital": true
+  },
+  {
+   "name": "Ишимбай",
+   "region": "RU-BA",
+   "population": 66259,
+   "lat": 53.4546,
+   "lon": 56.0439,
+   "capital": true
+  },
+  {
+   "name": "Кумертау",
+   "region": "RU-BA",
+   "population": 62854,
+   "lat": 52.7565,
+   "lon": 55.797,
+   "capital": false
+  },
+  {
+   "name": "Межгорье",
+   "region": "RU-BA",
+   "population": 17353,
+   "lat": 54.2398,
+   "lon": 57.9615,
+   "capital": false
+  },
+  {
+   "name": "Мелеуз",
+   "region": "RU-BA",
+   "population": 61408,
+   "lat": 52.959,
+   "lon": 55.9283,
+   "capital": true
+  },
+  {
+   "name": "Нефтекамск",
+   "region": "RU-BA",
+   "population": 121757,
+   "lat": 56.0884,
+   "lon": 54.2483,
+   "capital": false
+  },
+  {
+   "name": "Октябрьский",
+   "region": "RU-BA",
+   "population": 109379,
+   "lat": 54.4815,
+   "lon": 53.4656,
+   "capital": false
+  },
+  {
+   "name": "Салават",
+   "region": "RU-BA",
+   "population": 156085,
+   "lat": 53.3617,
+   "lon": 55.9245,
+   "capital": false
+  },
+  {
+   "name": "Сибай",
+   "region": "RU-BA",
+   "population": 62732,
+   "lat": 52.7205,
+   "lon": 58.6664,
+   "capital": false
+  },
+  {
+   "name": "Стерлитамак",
+   "region": "RU-BA",
+   "population": 273432,
+   "lat": 53.6301,
+   "lon": 55.9317,
+   "capital": true
+  },
+  {
+   "name": "Туймазы",
+   "region": "RU-BA",
+   "population": 66849,
+   "lat": 54.5999,
+   "lon": 53.6951,
+   "capital": true
+  },
+  {
+   "name": "Уфа",
+   "region": "RU-BA",
+   "population": 1062300,
+   "lat": 54.7349,
+   "lon": 55.9578,
+   "capital": true
+  },
+  {
+   "name": "Учалы",
+   "region": "RU-BA",
+   "population": 37771,
+   "lat": 54.3067,
+   "lon": 59.4125,
+   "capital": true
+  },
+  {
+   "name": "Янаул",
+   "region": "RU-BA",
+   "population": 26988,
+   "lat": 56.265,
+   "lon": 54.9299,
+   "capital": true
+  },
+  {
+   "name": "Бабушкин",
+   "region": "RU-BU",
+   "population": 4542,
+   "lat": 51.7113,
+   "lon": 105.8673,
+   "capital": false
+  },
+  {
+   "name": "Гусиноозерск",
+   "region": "RU-BU",
+   "population": 23280,
+   "lat": 51.2865,
+   "lon": 106.523,
+   "capital": true
+  },
+  {
+   "name": "Закаменск",
+   "region": "RU-BU",
+   "population": 11249,
+   "lat": 50.3727,
+   "lon": 103.2867,
+   "capital": true
+  },
+  {
+   "name": "Кяхта",
+   "region": "RU-BU",
+   "population": 20013,
+   "lat": 50.3465,
+   "lon": 106.4534,
+   "capital": true
+  },
+  {
+   "name": "Северобайкальск",
+   "region": "RU-BU",
+   "population": 23673,
+   "lat": 55.6356,
+   "lon": 109.3362,
+   "capital": false
+  },
+  {
+   "name": "Улан-Удэ",
+   "region": "RU-BU",
+   "population": 431922,
+   "lat": 51.8336,
+   "lon": 107.5842,
+   "capital": true
+  },
+  {
+   "name": "Буйнакск",
+   "region": "RU-DA",
+   "population": 65735,
+   "lat": 42.8214,
+   "lon": 47.1165,
+   "capital": false
+  },
+  {
+   "name": "Дагестанские Огни",
+   "region": "RU-DA",
+   "population": 30671,
+   "lat": 42.1152,
+   "lon": 48.1939,
+   "capital": false
+  },
+  {
+   "name": "Дербент",
+   "region": "RU-DA",
+   "population": 119961,
+   "lat": 42.059,
+   "lon": 48.2907,
+   "capital": false
+  },
+  {
+   "name": "Избербаш",
+   "region": "RU-DA",
+   "population": 56301,
+   "lat": 42.5651,
+   "lon": 47.871,
+   "capital": false
+  },
+  {
+   "name": "Каспийск",
+   "region": "RU-DA",
+   "population": 103914,
+   "lat": 42.8916,
+   "lon": 47.6367,
+   "capital": false
+  },
+  {
+   "name": "Кизилюрт",
+   "region": "RU-DA",
+   "population": 36187,
+   "lat": 43.2038,
+   "lon": 46.873,
+   "capital": false
+  },
+  {
+   "name": "Кизляр",
+   "region": "RU-DA",
+   "population": 49169,
+   "lat": 43.8484,
+   "lon": 46.7234,
+   "capital": false
+  },
+  {
+   "name": "Махачкала",
+   "region": "RU-DA",
+   "population": 577990,
+   "lat": 42.9849,
+   "lon": 47.5047,
+   "capital": true
+  },
+  {
+   "name": "Хасавюрт",
+   "region": "RU-DA",
+   "population": 133929,
+   "lat": 43.2505,
+   "lon": 46.5851,
+   "capital": false
+  },
+  {
+   "name": "Южно-Сухокумск",
+   "region": "RU-DA",
+   "population": 10048,
+   "lat": 44.6602,
+   "lon": 45.65,
+   "capital": false
+  },
+  {
+   "name": "Карабулак",
+   "region": "RU-IN",
+   "population": 31081,
+   "lat": 43.3055,
+   "lon": 44.9095,
+   "capital": false
+  },
+  {
+   "name": "Магас",
+   "region": "RU-IN",
+   "population": 2505,
+   "lat": 43.1689,
+   "lon": 44.8131,
+   "capital": true
+  },
+  {
+   "name": "Малгобек",
+   "region": "RU-IN",
+   "population": 31076,
+   "lat": 43.5097,
+   "lon": 44.5902,
+   "capital": false
+  },
+  {
+   "name": "Назрань",
+   "region": "RU-IN",
+   "population": 93357,
+   "lat": 43.2258,
+   "lon": 44.7646,
+   "capital": true
+  },
+  {
+   "name": "Сунжа",
+   "region": "RU-IN",
+   "population": 64493,
+   "lat": 43.3204,
+   "lon": 45.0476,
+   "capital": true
+  },
+  {
+   "name": "Городовиковск",
+   "region": "RU-KL",
+   "population": 9565,
+   "lat": 46.0875,
+   "lon": 41.9355,
+   "capital": true
+  },
+  {
+   "name": "Лагань",
+   "region": "RU-KL",
+   "population": 14323,
+   "lat": 45.3931,
+   "lon": 47.3433,
+   "capital": true
+  },
+  {
+   "name": "Элиста",
+   "region": "RU-KL",
+   "population": 103728,
+   "lat": 46.3083,
+   "lon": 44.2702,
+   "capital": true
+  },
+  {
+   "name": "Беломорск",
+   "region": "RU-KR",
+   "population": 11217,
+   "lat": 64.5378,
+   "lon": 34.7799,
+   "capital": true
+  },
+  {
+   "name": "Кемь",
+   "region": "RU-KR",
+   "population": 13061,
+   "lat": 64.9544,
+   "lon": 34.5949,
+   "capital": false
+  },
+  {
+   "name": "Кондопога",
+   "region": "RU-KR",
+   "population": 32978,
+   "lat": 62.206,
+   "lon": 34.2682,
+   "capital": true
+  },
+  {
+   "name": "Костомукша",
+   "region": "RU-KR",
+   "population": 28433,
+   "lat": 64.5889,
+   "lon": 30.6017,
+   "capital": false
+  },
+  {
+   "name": "Лахденпохья",
+   "region": "RU-KR",
+   "population": 7818,
+   "lat": 61.5189,
+   "lon": 30.1996,
+   "capital": true
+  },
+  {
+   "name": "Медвежьегорск",
+   "region": "RU-KR",
+   "population": 15536,
+   "lat": 62.9128,
+   "lon": 34.4568,
+   "capital": true
+  },
+  {
+   "name": "Олонец",
+   "region": "RU-KR",
+   "population": 9060,
+   "lat": 60.9794,
+   "lon": 32.9726,
+   "capital": true
+  },
+  {
+   "name": "Петрозаводск",
+   "region": "RU-KR",
+   "population": 263540,
+   "lat": 61.7891,
+   "lon": 34.3596,
+   "capital": true
+  },
+  {
+   "name": "Питкяранта",
+   "region": "RU-KR",
+   "population": 11484,
+   "lat": 61.5757,
+   "lon": 31.4641,
+   "capital": true
+  },
+  {
+   "name": "Пудож",
+   "region": "RU-KR",
+   "population": 9698,
+   "lat": 61.8059,
+   "lon": 36.533,
+   "capital": true
+  },
+  {
+   "name": "Сегежа",
+   "region": "RU-KR",
+   "population": 29660,
+   "lat": 63.7438,
+   "lon": 34.3127,
+   "capital": true
+  },
+  {
+   "name": "Сортавала",
+   "region": "RU-KR",
+   "population": 19215,
+   "lat": 61.7034,
+   "lon": 30.6917,
+   "capital": false
+  },
+  {
+   "name": "Суоярви",
+   "region": "RU-KR",
+   "population": 9763,
+   "lat": 62.0787,
+   "lon": 32.3499,
+   "capital": true
+  },
+  {
+   "name": "Воркута",
+   "region": "RU-KO",
+   "population": 70551,
+   "lat": 67.4974,
+   "lon": 64.061,
+   "capital": false
+  },
+  {
+   "name": "Вуктыл",
+   "region": "RU-KO",
+   "population": 12357,
+   "lat": 63.8615,
+   "lon": 57.3165,
+   "capital": false
+  },
+  {
+   "name": "Емва",
+   "region": "RU-KO",
+   "population": 14574,
+   "lat": 62.5965,
+   "lon": 50.8732,
+   "capital": true
+  },
+  {
+   "name": "Инта",
+   "region": "RU-KO",
+   "population": 32021,
+   "lat": 66.0367,
+   "lon": 60.1153,
+   "capital": false
+  },
+  {
+   "name": "Микунь",
+   "region": "RU-KO",
+   "population": 10732,
+   "lat": 62.3579,
+   "lon": 50.072,
+   "capital": false
+  },
+  {
+   "name": "Печора",
+   "region": "RU-KO",
+   "population": 43458,
+   "lat": 65.1486,
+   "lon": 57.224,
+   "capital": false
+  },
+  {
+   "name": "Сосногорск",
+   "region": "RU-KO",
+   "population": 27809,
+   "lat": 63.599,
+   "lon": 53.8763,
+   "capital": false
+  },
+  {
+   "name": "Сыктывкар",
+   "region": "RU-KO",
+   "population": 235006,
+   "lat": 61.6687,
+   "lon": 50.8358,
+   "capital": true
+  },
+  {
+   "name": "Усинск",
+   "region": "RU-KO",
+   "population": 41100,
+   "lat": 65.9941,
+   "lon": 57.5569,
+   "capital": false
+  },
+  {
+   "name": "Ухта",
+   "region": "RU-KO",
+   "population": 99642,
+   "lat": 63.5566,
+   "lon": 53.7014,
+   "capital": false
+  },
+  {
+   "name": "Алушта",
+   "region": "RU-CR",
+   "population": 29078,
+   "lat": 44.6764,
+   "lon": 34.4101,
+   "capital": false
+  },
+  {
+   "name": "Армянск",
+   "region": "RU-CR",
+   "population": 21987,
+   "lat": 46.1059,
+   "lon": 33.691,
+   "capital": false
+  },
+  {
+   "name": "Бахчисарай",
+   "region": "RU-CR",
+   "population": 27448,
+   "lat": 44.7515,
+   "lon": 33.8752,
+   "capital": false
+  },
+  {
+   "name": "Белогорск",
+   "region": "RU-CR",
+   "population": 16354,
+   "lat": 45.0572,
+   "lon": 34.5999,
+   "capital": false
+  },
+  {
+   "name": "Джанкой",
+   "region": "RU-CR",
+   "population": 38622,
+   "lat": 45.7092,
+   "lon": 34.3883,
+   "capital": false
+  },
+  {
+   "name": "Евпатория",
+   "region": "RU-CR",
+   "population": 105719,
+   "lat": 45.1906,
+   "lon": 33.3676,
+   "capital": false
+  },
+  {
+   "name": "Керчь",
+   "region": "RU-CR",
+   "population": 147033,
+   "lat": 45.3563,
+   "lon": 36.4675,
+   "capital": false
+  },
+  {
+   "name": "Красноперекопск",
+   "region": "RU-CR",
+   "population": 26268,
+   "lat": 45.9538,
+   "lon": 33.7922,
+   "capital": false
+  },
+  {
+   "name": "Саки",
+   "region": "RU-CR",
+   "population": 25146,
+   "lat": 45.1342,
+   "lon": 33.6033,
+   "capital": false
+  },
+  {
+   "name": "Симферополь",
+   "region": "RU-CR",
+   "population": 332317,
+   "lat": 44.9483,
+   "lon": 34.1001,
+   "capital": false
+  },
+  {
+   "name": "Старый Крым",
+   "region": "RU-CR",
+   "population": 9277,
+   "lat": 45.0291,
+   "lon": 35.0901,
+   "capital": false
+  },
+  {
+   "name": "Судак",
+   "region": "RU-CR",
+   "population": 16492,
+   "lat": 44.8505,
+   "lon": 34.9762,
+   "capital": false
+  },
+  {
+   "name": "Феодосия",
+   "region": "RU-CR",
+   "population": 69038,
+   "lat": 45.0318,
+   "lon": 35.3824,
+   "capital": false
+  },
+  {
+   "name": "Щелкино",
+   "region": "RU-CR",
+   "population": 10620,
+   "lat": 45.4289,
+   "lon": 35.8252,
+   "capital": false
+  },
+  {
+   "name": "Ялта",
+   "region": "RU-CR",
+   "population": 76746,
+   "lat": 44.4954,
+   "lon": 34.1663,
+   "capital": false
+  },
+  {
+   "name": "Волжск",
+   "region": "RU-ME",
+   "population": 55671,
+   "lat": 55.8623,
+   "lon": 48.3715,
+   "capital": false
+  },
+  {
+   "name": "Звенигово",
+   "region": "RU-ME",
+   "population": 11945,
+   "lat": 55.9739,
+   "lon": 48.017,
+   "capital": true
+  },
+  {
+   "name": "Йошкар-Ола",
+   "region": "RU-ME",
+   "population": 248688,
+   "lat": 56.6344,
+   "lon": 47.9,
+   "capital": true
+  },
+  {
+   "name": "Козьмодемьянск",
+   "region": "RU-ME",
+   "population": 21262,
+   "lat": 56.3334,
+   "lon": 46.5467,
+   "capital": false
+  },
+  {
+   "name": "Ардатов",
+   "region": "RU-MO",
+   "population": 9400,
+   "lat": 54.8466,
+   "lon": 46.2411,
+   "capital": true
+  },
+  {
+   "name": "Инсар",
+   "region": "RU-MO",
+   "population": 8687,
+   "lat": 53.877,
+   "lon": 44.3697,
+   "capital": true
+  },
+  {
+   "name": "Ковылкино",
+   "region": "RU-MO",
+   "population": 21307,
+   "lat": 54.0391,
+   "lon": 43.9192,
+   "capital": true
+  },
+  {
+   "name": "Краснослободск",
+   "region": "RU-MO",
+   "population": 10151,
+   "lat": 54.4248,
+   "lon": 43.7845,
+   "capital": true
+  },
+  {
+   "name": "Рузаевка",
+   "region": "RU-MO",
+   "population": 47529,
+   "lat": 54.0582,
+   "lon": 44.949,
+   "capital": true
+  },
+  {
+   "name": "Саранск",
+   "region": "RU-MO",
+   "population": 318841,
+   "lat": 54.1809,
+   "lon": 45.1863,
+   "capital": true
+  },
+  {
+   "name": "Темников",
+   "region": "RU-MO",
+   "population": 7247,
+   "lat": 54.6311,
+   "lon": 43.2161,
+   "capital": true
+  },
+  {
+   "name": "Алдан",
+   "region": "RU-SA",
+   "population": 21277,
+   "lat": 58.6094,
+   "lon": 125.3817,
+   "capital": true
+  },
+  {
+   "name": "Верхоянск",
+   "region": "RU-SA",
+   "population": 1311,
+   "lat": 67.5502,
+   "lon": 133.3907,
+   "capital": false
+  },
+  {
+   "name": "Вилюйск",
+   "region": "RU-SA",
+   "population": 10233,
+   "lat": 63.7518,
+   "lon": 121.6273,
+   "capital": true
+  },
+  {
+   "name": "Ленск",
+   "region": "RU-SA",
+   "population": 24955,
+   "lat": 60.7276,
+   "lon": 114.9548,
+   "capital": true
+  },
+  {
+   "name": "Мирный",
+   "region": "RU-SA",
+   "population": 37179,
+   "lat": 62.5362,
+   "lon": 113.9668,
+   "capital": true
+  },
+  {
+   "name": "Нерюнгри",
+   "region": "RU-SA",
+   "population": 61746,
+   "lat": 56.66,
+   "lon": 124.7202,
+   "capital": false
+  },
+  {
+   "name": "Нюрба",
+   "region": "RU-SA",
+   "population": 10156,
+   "lat": 63.2829,
+   "lon": 118.3242,
+   "capital": true
+  },
+  {
+   "name": "Олекминск",
+   "region": "RU-SA",
+   "population": 9487,
+   "lat": 60.3758,
+   "lon": 120.4061,
+   "capital": true
+  },
+  {
+   "name": "Покровск",
+   "region": "RU-SA",
+   "population": 9495,
+   "lat": 61.4844,
+   "lon": 129.1482,
+   "capital": true
+  },
+  {
+   "name": "Среднеколымск",
+   "region": "RU-SA",
+   "population": 3525,
+   "lat": 67.4582,
+   "lon": 153.7069,
+   "capital": true
+  },
+  {
+   "name": "Томмот",
+   "region": "RU-SA",
+   "population": 8054,
+   "lat": 58.9587,
+   "lon": 126.2875,
+   "capital": false
+  },
+  {
+   "name": "Удачный",
+   "region": "RU-SA",
+   "population": 12611,
+   "lat": 66.4072,
+   "lon": 112.3062,
+   "capital": false
+  },
+  {
+   "name": "Якутск",
+   "region": "RU-SA",
+   "population": 269486,
+   "lat": 62.0281,
+   "lon": 129.7326,
+   "capital": true
+  },
+  {
+   "name": "Алагир",
+   "region": "RU-SE",
+   "population": 20949,
+   "lat": 43.0418,
+   "lon": 44.22,
+   "capital": true
+  },
+  {
+   "name": "Ардон",
+   "region": "RU-SE",
+   "population": 18774,
+   "lat": 43.1755,
+   "lon": 44.2956,
+   "capital": true
+  },
+  {
+   "name": "Беслан",
+   "region": "RU-SE",
+   "population": 36724,
+   "lat": 43.1938,
+   "lon": 44.5339,
+   "capital": true
+  },
+  {
+   "name": "Владикавказ",
+   "region": "RU-SE",
+   "population": 311635,
+   "lat": 43.0206,
+   "lon": 44.6819,
+   "capital": true
+  },
+  {
+   "name": "Дигора",
+   "region": "RU-SE",
+   "population": 10856,
+   "lat": 43.1568,
+   "lon": 44.1549,
+   "capital": true
+  },
+  {
+   "name": "Моздок",
+   "region": "RU-SE",
+   "population": 38748,
+   "lat": 43.7471,
+   "lon": 44.657,
+   "capital": true
+  },
+  {
+   "name": "Агрыз",
+   "region": "RU-TA",
+   "population": 19299,
+   "lat": 56.5233,
+   "lon": 52.9944,
+   "capital": true
+  },
+  {
+   "name": "Азнакаево",
+   "region": "RU-TA",
+   "population": 34859,
+   "lat": 54.8599,
+   "lon": 53.0746,
+   "capital": true
+  },
+  {
+   "name": "Альметьевск",
+   "region": "RU-TA",
+   "population": 146309,
+   "lat": 54.9015,
+   "lon": 52.297,
+   "capital": true
+  },
+  {
+   "name": "Арск",
+   "region": "RU-TA",
+   "population": 18114,
+   "lat": 56.0913,
+   "lon": 49.8771,
+   "capital": true
+  },
+  {
+   "name": "Бавлы",
+   "region": "RU-TA",
+   "population": 22109,
+   "lat": 54.4063,
+   "lon": 53.2458,
+   "capital": true
+  },
+  {
+   "name": "Болгар",
+   "region": "RU-TA",
+   "population": 8650,
+   "lat": 54.9749,
+   "lon": 49.0304,
+   "capital": true
+  },
+  {
+   "name": "Бугульма",
+   "region": "RU-TA",
+   "population": 89144,
+   "lat": 54.5363,
+   "lon": 52.7896,
+   "capital": true
+  },
+  {
+   "name": "Буинск",
+   "region": "RU-TA",
+   "population": 20342,
+   "lat": 54.9642,
+   "lon": 48.2901,
+   "capital": true
+  },
+  {
+   "name": "Елабуга",
+   "region": "RU-TA",
+   "population": 70750,
+   "lat": 55.7567,
+   "lon": 52.0544,
+   "capital": true
+  },
+  {
+   "name": "Заинск",
+   "region": "RU-TA",
+   "population": 41798,
+   "lat": 55.2991,
+   "lon": 52.0063,
+   "capital": true
+  },
+  {
+   "name": "Зеленодольск",
+   "region": "RU-TA",
+   "population": 97651,
+   "lat": 55.8467,
+   "lon": 48.5011,
+   "capital": true
+  },
+  {
+   "name": "Иннополис",
+   "region": "RU-TA",
+   "population": 96,
+   "lat": 55.7522,
+   "lon": 48.7447,
+   "capital": false
+  },
+  {
+   "name": "Казань",
+   "region": "RU-TA",
+   "population": 1216965,
+   "lat": 55.7944,
+   "lon": 49.1115,
+   "capital": true
+  },
+  {
+   "name": "Кукмор",
+   "region": "RU-TA",
+   "population": 17700,
+   "lat": 56.1861,
+   "lon": 50.897,
+   "capital": true
+  },
+  {
+   "name": "Лаишево",
+   "region": "RU-TA",
+   "population": 7735,
+   "lat": 55.4043,
+   "lon": 49.55,
+   "capital": true
+  },
+  {
+   "name": "Лениногорск",
+   "region": "RU-TA",
+   "population": 64145,
+   "lat": 54.5967,
+   "lon": 52.4432,
+   "capital": true
+  },
+  {
+   "name": "Мамадыш",
+   "region": "RU-TA",
+   "population": 14432,
+   "lat": 55.715,
+   "lon": 51.4129,
+   "capital": true
+  },
+  {
+   "name": "Менделеевск",
+   "region": "RU-TA",
+   "population": 22075,
+   "lat": 55.8952,
+   "lon": 52.3143,
+   "capital": true
+  },
+  {
+   "name": "Мензелинск",
+   "region": "RU-TA",
+   "population": 16474,
+   "lat": 55.7271,
+   "lon": 53.1004,
+   "capital": true
+  },
+  {
+   "name": "Набережные Челны",
+   "region": "RU-TA",
+   "population": 513242,
+   "lat": 55.7435,
+   "lon": 52.3959,
+   "capital": false
+  },
+  {
+   "name": "Нижнекамск",
+   "region": "RU-TA",
+   "population": 234108,
+   "lat": 55.6314,
+   "lon": 51.8145,
+   "capital": true
+  },
+  {
+   "name": "Нурлат",
+   "region": "RU-TA",
+   "population": 32600,
+   "lat": 54.4281,
+   "lon": 50.8049,
+   "capital": true
+  },
+  {
+   "name": "Тетюши",
+   "region": "RU-TA",
+   "population": 11596,
+   "lat": 54.9365,
+   "lon": 48.8315,
+   "capital": true
+  },
+  {
+   "name": "Чистополь",
+   "region": "RU-TA",
+   "population": 60703,
+   "lat": 55.3699,
+   "lon": 50.6286,
+   "capital": true
+  },
+  {
+   "name": "Ак-Довурак",
+   "region": "RU-TY",
+   "population": 13469,
+   "lat": 51.1785,
+   "lon": 90.5985,
+   "capital": false
+  },
+  {
+   "name": "Кызыл",
+   "region": "RU-TY",
+   "population": 109906,
+   "lat": 51.7191,
+   "lon": 94.4377,
+   "capital": true
+  },
+  {
+   "name": "Туран",
+   "region": "RU-TY",
+   "population": 4988,
+   "lat": 52.145,
+   "lon": 93.9173,
+   "capital": true
+  },
+  {
+   "name": "Чадан",
+   "region": "RU-TY",
+   "population": 9037,
+   "lat": 51.2845,
+   "lon": 91.5789,
+   "capital": true
+  },
+  {
+   "name": "Шагонар",
+   "region": "RU-TY",
+   "population": 10958,
+   "lat": 51.5346,
+   "lon": 92.92,
+   "capital": true
+  },
+  {
+   "name": "Абаза",
+   "region": "RU-KK",
+   "population": 17111,
+   "lat": 52.6517,
+   "lon": 90.0886,
+   "capital": false
+  },
+  {
+   "name": "Абакан",
+   "region": "RU-KK",
+   "population": 165183,
+   "lat": 53.7223,
+   "lon": 91.4437,
+   "capital": true
+  },
+  {
+   "name": "Саяногорск",
+   "region": "RU-KK",
+   "population": 49889,
+   "lat": 53.1008,
+   "lon": 91.4122,
+   "capital": false
+  },
+  {
+   "name": "Сорск",
+   "region": "RU-KK",
+   "population": 12140,
+   "lat": 54.0003,
+   "lon": 90.2594,
+   "capital": false
+  },
+  {
+   "name": "Черногорск",
+   "region": "RU-KK",
+   "population": 72117,
+   "lat": 53.8259,
+   "lon": 91.326,
+   "capital": false
+  },
+  {
+   "name": "Азов",
+   "region": "RU-ROS",
+   "population": 82882,
+   "lat": 47.1122,
+   "lon": 39.4233,
+   "capital": false
+  },
+  {
+   "name": "Аксай",
+   "region": "RU-ROS",
+   "population": 41984,
+   "lat": 47.2676,
+   "lon": 39.8757,
+   "capital": true
+  },
+  {
+   "name": "Батайск",
+   "region": "RU-ROS",
+   "population": 112400,
+   "lat": 47.1383,
+   "lon": 39.7507,
+   "capital": false
+  },
+  {
+   "name": "Белая Калитва",
+   "region": "RU-ROS",
+   "population": 43688,
+   "lat": 48.177,
+   "lon": 40.8034,
+   "capital": true
+  },
+  {
+   "name": "Волгодонск",
+   "region": "RU-ROS",
+   "population": 170621,
+   "lat": 47.5165,
+   "lon": 42.1985,
+   "capital": false
+  },
+  {
+   "name": "Гуково",
+   "region": "RU-ROS",
+   "population": 67268,
+   "lat": 48.0449,
+   "lon": 39.9485,
+   "capital": false
+  },
+  {
+   "name": "Донецк",
+   "region": "RU-ROS",
+   "population": 50085,
+   "lat": 48.3351,
+   "lon": 39.9459,
+   "capital": false
+  },
+  {
+   "name": "Зверево",
+   "region": "RU-ROS",
+   "population": 22416,
+   "lat": 48.0435,
+   "lon": 40.1266,
+   "capital": false
+  },
+  {
+   "name": "Зерноград",
+   "region": "RU-ROS",
+   "population": 26850,
+   "lat": 46.8496,
+   "lon": 40.3128,
+   "capital": true
+  },
+  {
+   "name": "Каменск-Шахтинский",
+   "region": "RU-ROS",
+   "population": 95306,
+   "lat": 48.3205,
+   "lon": 40.269,
+   "capital": false
+  },
+  {
+   "name": "Константиновск",
+   "region": "RU-ROS",
+   "population": 17926,
+   "lat": 47.5774,
+   "lon": 41.0967,
+   "capital": true
+  },
+  {
+   "name": "Красный Сулин",
+   "region": "RU-ROS",
+   "population": 40866,
+   "lat": 47.8831,
+   "lon": 40.0781,
+   "capital": true
+  },
+  {
+   "name": "Миллерово",
+   "region": "RU-ROS",
+   "population": 36493,
+   "lat": 48.926,
+   "lon": 40.3984,
+   "capital": true
+  },
+  {
+   "name": "Морозовск",
+   "region": "RU-ROS",
+   "population": 27644,
+   "lat": 48.3512,
+   "lon": 41.8309,
+   "capital": true
+  },
+  {
+   "name": "Новочеркасск",
+   "region": "RU-ROS",
+   "population": 169039,
+   "lat": 47.4119,
+   "lon": 40.1042,
+   "capital": false
+  },
+  {
+   "name": "Новошахтинск",
+   "region": "RU-ROS",
+   "population": 111087,
+   "lat": 47.7578,
+   "lon": 39.9364,
+   "capital": false
+  },
+  {
+   "name": "Пролетарск",
+   "region": "RU-ROS",
+   "population": 20267,
+   "lat": 46.7039,
+   "lon": 41.7276,
+   "capital": true
+  },
+  {
+   "name": "Ростов-на-Дону",
+   "region": "RU-ROS",
+   "population": 1091544,
+   "lat": 47.2225,
+   "lon": 39.7188,
+   "capital": true
+  },
+  {
+   "name": "Сальск",
+   "region": "RU-ROS",
+   "population": 61312,
+   "lat": 46.4752,
+   "lon": 41.541,
+   "capital": true
+  },
+  {
+   "name": "Семикаракорск",
+   "region": "RU-ROS",
+   "population": 23884,
+   "lat": 47.5177,
+   "lon": 40.8114,
+   "capital": true
+  },
+  {
+   "name": "Таганрог",
+   "region": "RU-ROS",
+   "population": 257692,
+   "lat": 47.2095,
+   "lon": 38.9351,
+   "capital": false
+  },
+  {
+   "name": "Цимлянск",
+   "region": "RU-ROS",
+   "population": 15029,
+   "lat": 47.6477,
+   "lon": 42.0932,
+   "capital": true
+  },
+  {
+   "name": "Шахты",
+   "region": "RU-ROS",
+   "population": 240152,
+   "lat": 47.7085,
+   "lon": 40.216,
+   "capital": false
+  },
+  {
+   "name": "Касимов",
+   "region": "RU-RYA",
+   "population": 33494,
+   "lat": 54.9373,
+   "lon": 41.3913,
+   "capital": true
+  },
+  {
+   "name": "Кораблино",
+   "region": "RU-RYA",
+   "population": 12657,
+   "lat": 53.9247,
+   "lon": 40.0228,
+   "capital": true
+  },
+  {
+   "name": "Михайлов",
+   "region": "RU-RYA",
+   "population": 11783,
+   "lat": 54.2297,
+   "lon": 39.0091,
+   "capital": true
+  },
+  {
+   "name": "Новомичуринск",
+   "region": "RU-RYA",
+   "population": 19309,
+   "lat": 54.0377,
+   "lon": 39.7465,
+   "capital": false
+  },
+  {
+   "name": "Рыбное",
+   "region": "RU-RYA",
+   "population": 18378,
+   "lat": 54.7256,
+   "lon": 39.5134,
+   "capital": true
+  },
+  {
+   "name": "Ряжск",
+   "region": "RU-RYA",
+   "population": 21676,
+   "lat": 53.7068,
+   "lon": 40.0522,
+   "capital": true
+  },
+  {
+   "name": "Рязань",
+   "region": "RU-RYA",
+   "population": 525062,
+   "lat": 54.6254,
+   "lon": 39.7359,
+   "capital": true
+  },
+  {
+   "name": "Сасово",
+   "region": "RU-RYA",
+   "population": 28117,
+   "lat": 54.3509,
+   "lon": 41.9117,
+   "capital": false
+  },
+  {
+   "name": "Скопин",
+   "region": "RU-RYA",
+   "population": 30374,
+   "lat": 53.8235,
+   "lon": 39.5492,
+   "capital": true
+  },
+  {
+   "name": "Спас-Клепики",
+   "region": "RU-RYA",
+   "population": 5917,
+   "lat": 55.1292,
+   "lon": 40.1745,
+   "capital": true
+  },
+  {
+   "name": "Спасск-Рязанский",
+   "region": "RU-RYA",
+   "population": 7745,
+   "lat": 54.4071,
+   "lon": 40.3763,
+   "capital": true
+  },
+  {
+   "name": "Шацк",
+   "region": "RU-RYA",
+   "population": 6562,
+   "lat": 54.0287,
+   "lon": 41.7182,
+   "capital": true
+  },
+  {
+   "name": "Жигулевск",
+   "region": "RU-SAM",
+   "population": 57565,
+   "lat": 53.4012,
+   "lon": 49.4945,
+   "capital": false
+  },
+  {
+   "name": "Кинель",
+   "region": "RU-SAM",
+   "population": 34472,
+   "lat": 53.221,
+   "lon": 50.6344,
+   "capital": false
+  },
+  {
+   "name": "Нефтегорск",
+   "region": "RU-SAM",
+   "population": 18732,
+   "lat": 52.7973,
+   "lon": 51.1637,
+   "capital": true
+  },
+  {
+   "name": "Новокуйбышевск",
+   "region": "RU-SAM",
+   "population": 108449,
+   "lat": 53.0995,
+   "lon": 49.9477,
+   "capital": false
+  },
+  {
+   "name": "Октябрьск",
+   "region": "RU-SAM",
+   "population": 27244,
+   "lat": 53.164,
+   "lon": 48.6708,
+   "capital": false
+  },
+  {
+   "name": "Отрадный",
+   "region": "RU-SAM",
+   "population": 47709,
+   "lat": 53.3801,
+   "lon": 51.3439,
+   "capital": false
+  },
+  {
+   "name": "Похвистнево",
+   "region": "RU-SAM",
+   "population": 28181,
+   "lat": 53.6498,
+   "lon": 52.1235,
+   "capital": false
+  },
+  {
+   "name": "Самара",
+   "region": "RU-SAM",
+   "population": 1164900,
+   "lat": 53.195,
+   "lon": 50.107,
+   "capital": true
+  },
+  {
+   "name": "Сызрань",
+   "region": "RU-SAM",
+   "population": 178773,
+   "lat": 53.1559,
+   "lon": 48.4745,
+   "capital": false
+  },
+  {
+   "name": "Тольятти",
+   "region": "RU-SAM",
+   "population": 719484,
+   "lat": 53.5205,
+   "lon": 49.3894,
+   "capital": false
+  },
+  {
+   "name": "Чапаевск",
+   "region": "RU-SAM",
+   "population": 72689,
+   "lat": 52.929,
+   "lon": 49.8673,
+   "capital": false
+  },
+  {
+   "name": "Аркадак",
+   "region": "RU-SAR",
+   "population": 12846,
+   "lat": 51.9388,
+   "lon": 43.4999,
+   "capital": true
+  },
+  {
+   "name": "Аткарск",
+   "region": "RU-SAR",
+   "population": 25620,
+   "lat": 51.8736,
+   "lon": 45.0003,
+   "capital": false
+  },
+  {
+   "name": "Балаково",
+   "region": "RU-SAR",
+   "population": 199576,
+   "lat": 52.0224,
+   "lon": 47.7828,
+   "capital": false
+  },
+  {
+   "name": "Балашов",
+   "region": "RU-SAR",
+   "population": 82222,
+   "lat": 51.5389,
+   "lon": 43.184,
+   "capital": false
+  },
+  {
+   "name": "Вольск",
+   "region": "RU-SAR",
+   "population": 66520,
+   "lat": 52.046,
+   "lon": 47.3874,
+   "capital": false
+  },
+  {
+   "name": "Ершов",
+   "region": "RU-SAR",
+   "population": 21447,
+   "lat": 51.3509,
+   "lon": 48.2762,
+   "capital": true
+  },
+  {
+   "name": "Калининск",
+   "region": "RU-SAR",
+   "population": 16442,
+   "lat": 51.4994,
+   "lon": 44.471,
+   "capital": true
+  },
+  {
+   "name": "Красноармейск",
+   "region": "RU-SAR",
+   "population": 24362,
+   "lat": 51.0235,
+   "lon": 45.695,
+   "capital": false
+  },
+  {
+   "name": "Красный Кут",
+   "region": "RU-SAR",
+   "population": 14420,
+   "lat": 50.9598,
+   "lon": 46.9712,
+   "capital": true
+  },
+  {
+   "name": "Маркс",
+   "region": "RU-SAR",
+   "population": 31535,
+   "lat": 51.7133,
+   "lon": 46.74,
+   "capital": false
+  },
+  {
+   "name": "Новоузенск",
+   "region": "RU-SAR",
+   "population": 17015,
+   "lat": 50.4552,
+   "lon": 48.1413,
+   "capital": true
+  },
+  {
+   "name": "Петровск",
+   "region": "RU-SAR",
+   "population": 31158,
+   "lat": 52.3094,
+   "lon": 45.3852,
+   "capital": true
+  },
+  {
+   "name": "Пугачев",
+   "region": "RU-SAR",
+   "population": 41705,
+   "lat": 52.016,
+   "lon": 48.7972,
+   "capital": true
+  },
+  {
+   "name": "Ртищево",
+   "region": "RU-SAR",
+   "population": 41295,
+   "lat": 52.2616,
+   "lon": 43.7842,
+   "capital": false
+  },
+  {
+   "name": "Саратов",
+   "region": "RU-SAR",
+   "population": 836900,
+   "lat": 51.5336,
+   "lon": 46.0343,
+   "capital": true
+  },
+  {
+   "name": "Хвалынск",
+   "region": "RU-SAR",
+   "population": 13199,
+   "lat": 52.4952,
+   "lon": 48.1046,
+   "capital": false
+  },
+  {
+   "name": "Шиханы",
+   "region": "RU-SAR",
+   "population": 6067,
+   "lat": 52.1147,
+   "lon": 47.2023,
+   "capital": false
+  },
+  {
+   "name": "Энгельс",
+   "region": "RU-SAR",
+   "population": 202838,
+   "lat": 51.4854,
+   "lon": 46.1267,
+   "capital": false
+  },
+  {
+   "name": "Александровск-Сахалинский",
+   "region": "RU-SAK",
+   "population": 10613,
+   "lat": 50.8974,
+   "lon": 142.1579,
+   "capital": true
+  },
+  {
+   "name": "Анива",
+   "region": "RU-SAK",
+   "population": 8449,
+   "lat": 46.7132,
+   "lon": 142.5266,
+   "capital": true
+  },
+  {
+   "name": "Долинск",
+   "region": "RU-SAK",
+   "population": 12200,
+   "lat": 47.3256,
+   "lon": 142.7945,
+   "capital": true
+  },
+  {
+   "name": "Корсаков",
+   "region": "RU-SAK",
+   "population": 33526,
+   "lat": 46.6325,
+   "lon": 142.7994,
+   "capital": true
+  },
+  {
+   "name": "Курильск",
+   "region": "RU-SAK",
+   "population": 2070,
+   "lat": 45.2271,
+   "lon": 147.8796,
+   "capital": true
+  },
+  {
+   "name": "Макаров",
+   "region": "RU-SAK",
+   "population": 6788,
+   "lat": 48.6236,
+   "lon": 142.7803,
+   "capital": true
+  },
+  {
+   "name": "Невельск",
+   "region": "RU-SAK",
+   "population": 11682,
+   "lat": 46.6527,
+   "lon": 141.8631,
+   "capital": true
+  },
+  {
+   "name": "Оха",
+   "region": "RU-SAK",
+   "population": 23007,
+   "lat": 53.5868,
+   "lon": 142.9412,
+   "capital": true
+  },
+  {
+   "name": "Поронайск",
+   "region": "RU-SAK",
+   "population": 16461,
+   "lat": 49.2389,
+   "lon": 143.1008,
+   "capital": true
+  },
+  {
+   "name": "Северо-Курильск",
+   "region": "RU-SAK",
+   "population": 2381,
+   "lat": 50.6731,
+   "lon": 156.1282,
+   "capital": true
+  },
+  {
+   "name": "Томари",
+   "region": "RU-SAK",
+   "population": 4537,
+   "lat": 47.762,
+   "lon": 142.0616,
+   "capital": true
+  },
+  {
+   "name": "Углегорск",
+   "region": "RU-SAK",
+   "population": 11880,
+   "lat": 49.0816,
+   "lon": 142.0693,
+   "capital": true
+  },
+  {
+   "name": "Холмск",
+   "region": "RU-SAK",
+   "population": 30936,
+   "lat": 47.0408,
+   "lon": 142.0417,
+   "capital": true
+  },
+  {
+   "name": "Южно-Сахалинск",
+   "region": "RU-SAK",
+   "population": 181727,
+   "lat": 46.9592,
+   "lon": 142.738,
+   "capital": true
+  },
+  {
+   "name": "Алапаевск",
+   "region": "RU-SVE",
+   "population": 38198,
+   "lat": 57.8476,
+   "lon": 61.6694,
+   "capital": false
+  },
+  {
+   "name": "Арамиль",
+   "region": "RU-SVE",
+   "population": 14227,
+   "lat": 56.6946,
+   "lon": 60.8343,
+   "capital": false
+  },
+  {
+   "name": "Артемовский",
+   "region": "RU-SVE",
+   "population": 32878,
+   "lat": 57.3384,
+   "lon": 61.8947,
+   "capital": true
+  },
+  {
+   "name": "Асбест",
+   "region": "RU-SVE",
+   "population": 70067,
+   "lat": 57.0052,
+   "lon": 61.4581,
+   "capital": false
+  },
+  {
+   "name": "Березовский",
+   "region": "RU-SVE",
+   "population": 51583,
+   "lat": 56.9096,
+   "lon": 60.8181,
+   "capital": false
+  },
+  {
+   "name": "Богданович",
+   "region": "RU-SVE",
+   "population": 31752,
+   "lat": 56.7765,
+   "lon": 62.0464,
+   "capital": false
+  },
+  {
+   "name": "Верхний Тагил",
+   "region": "RU-SVE",
+   "population": 11843,
+   "lat": 57.3764,
+   "lon": 59.9518,
+   "capital": false
+  },
+  {
+   "name": "Верхняя Пышма",
+   "region": "RU-SVE",
+   "population": 58707,
+   "lat": 56.9759,
+   "lon": 60.565,
+   "capital": false
+  },
+  {
+   "name": "Верхняя Салда",
+   "region": "RU-SVE",
+   "population": 46240,
+   "lat": 58.0466,
+   "lon": 60.556,
+   "capital": false
+  },
+  {
+   "name": "Верхняя Тура",
+   "region": "RU-SVE",
+   "population": 9468,
+   "lat": 58.3644,
+   "lon": 59.8265,
+   "capital": false
+  },
+  {
+   "name": "Верхотурье",
+   "region": "RU-SVE",
+   "population": 8815,
+   "lat": 58.8622,
+   "lon": 60.8104,
+   "capital": true
+  },
+  {
+   "name": "Волчанск",
+   "region": "RU-SVE",
+   "population": 10008,
+   "lat": 59.9352,
+   "lon": 60.0799,
+   "capital": false
+  },
+  {
+   "name": "Дегтярск",
+   "region": "RU-SVE",
+   "population": 15521,
+   "lat": 56.7048,
+   "lon": 60.0791,
+   "capital": false
+  },
+  {
+   "name": "Екатеринбург",
+   "region": "RU-SVE",
+   "population": 1377738,
+   "lat": 56.8385,
+   "lon": 60.6055,
+   "capital": true
+  },
+  {
+   "name": "Заречный",
+   "region": "RU-SVE",
+   "population": 26803,
+   "lat": 56.8103,
+   "lon": 61.338,
+   "capital": false
+  },
+  {
+   "name": "Ивдель",
+   "region": "RU-SVE",
+   "population": 17764,
+   "lat": 60.6944,
+   "lon": 60.4245,
+   "capital": false
+  },
+  {
+   "name": "Ирбит",
+   "region": "RU-SVE",
+   "population": 38352,
+   "lat": 57.6838,
+   "lon": 63.0577,
+   "capital": false
+  },
+  {
+   "name": "Каменск-Уральский",
+   "region": "RU-SVE",
+   "population": 174710,
+   "lat": 56.415,
+   "lon": 61.9189,
+   "capital": false
+  },
+  {
+   "name": "Камышлов",
+   "region": "RU-SVE",
+   "population": 26875,
+   "lat": 56.8465,
+   "lon": 62.712,
+   "capital": false
+  },
+  {
+   "name": "Карпинск",
+   "region": "RU-SVE",
+   "population": 29118,
+   "lat": 59.7666,
+   "lon": 60.0012,
+   "capital": false
+  },
+  {
+   "name": "Качканар",
+   "region": "RU-SVE",
+   "population": 42563,
+   "lat": 58.7052,
+   "lon": 59.4839,
+   "capital": false
+  },
+  {
+   "name": "Кировград",
+   "region": "RU-SVE",
+   "population": 21959,
+   "lat": 57.4299,
+   "lon": 60.0624,
+   "capital": false
+  },
+  {
+   "name": "Краснотурьинск",
+   "region": "RU-SVE",
+   "population": 59701,
+   "lat": 59.7637,
+   "lon": 60.1935,
+   "capital": false
+  },
+  {
+   "name": "Красноуральск",
+   "region": "RU-SVE",
+   "population": 24973,
+   "lat": 58.3487,
+   "lon": 60.0409,
+   "capital": false
+  },
+  {
+   "name": "Красноуфимск",
+   "region": "RU-SVE",
+   "population": 39765,
+   "lat": 56.6124,
+   "lon": 57.7637,
+   "capital": false
+  },
+  {
+   "name": "Кушва",
+   "region": "RU-SVE",
+   "population": 33027,
+   "lat": 58.2826,
+   "lon": 59.7646,
+   "capital": false
+  },
+  {
+   "name": "Лесной",
+   "region": "RU-SVE",
+   "population": 52464,
+   "lat": 58.6349,
+   "lon": 59.7982,
+   "capital": false
+  },
+  {
+   "name": "Михайловск",
+   "region": "RU-SVE",
+   "population": 9215,
+   "lat": 56.437,
+   "lon": 59.1137,
+   "capital": false
+  },
+  {
+   "name": "Невьянск",
+   "region": "RU-SVE",
+   "population": 25147,
+   "lat": 57.4913,
+   "lon": 60.2183,
+   "capital": true
+  },
+  {
+   "name": "Нижние Серги",
+   "region": "RU-SVE",
+   "population": 11217,
+   "lat": 56.6545,
+   "lon": 59.2953,
+   "capital": true
+  },
+  {
+   "name": "Нижний Тагил",
+   "region": "RU-SVE",
+   "population": 361883,
+   "lat": 57.9101,
+   "lon": 59.9813,
+   "capital": false
+  },
+  {
+   "name": "Нижняя Салда",
+   "region": "RU-SVE",
+   "population": 17969,
+   "lat": 58.0748,
+   "lon": 60.7025,
+   "capital": false
+  },
+  {
+   "name": "Нижняя Тура",
+   "region": "RU-SVE",
+   "population": 21596,
+   "lat": 58.6309,
+   "lon": 59.852,
+   "capital": false
+  },
+  {
+   "name": "Новая Ляля",
+   "region": "RU-SVE",
+   "population": 12400,
+   "lat": 59.0539,
+   "lon": 60.5945,
+   "capital": true
+  },
+  {
+   "name": "Новоуральск",
+   "region": "RU-SVE",
+   "population": 91813,
+   "lat": 57.2473,
+   "lon": 60.0957,
+   "capital": false
+  },
+  {
+   "name": "Первоуральск",
+   "region": "RU-SVE",
+   "population": 149800,
+   "lat": 56.908,
+   "lon": 59.9429,
+   "capital": false
+  },
+  {
+   "name": "Полевской",
+   "region": "RU-SVE",
+   "population": 64316,
+   "lat": 56.4957,
+   "lon": 60.2365,
+   "capital": false
+  },
+  {
+   "name": "Ревда",
+   "region": "RU-SVE",
+   "population": 61713,
+   "lat": 56.7986,
+   "lon": 59.9072,
+   "capital": false
+  },
+  {
+   "name": "Реж",
+   "region": "RU-SVE",
+   "population": 38709,
+   "lat": 57.3717,
+   "lon": 61.3834,
+   "capital": true
+  },
+  {
+   "name": "Североуральск",
+   "region": "RU-SVE",
+   "population": 29279,
+   "lat": 60.1533,
+   "lon": 59.9525,
+   "capital": false
+  },
+  {
+   "name": "Серов",
+   "region": "RU-SVE",
+   "population": 99381,
+   "lat": 59.6048,
+   "lon": 60.5754,
+   "capital": false
+  },
+  {
+   "name": "Среднеуральск",
+   "region": "RU-SVE",
+   "population": 20357,
+   "lat": 56.9919,
+   "lon": 60.4771,
+   "capital": false
+  },
+  {
+   "name": "Сухой Лог",
+   "region": "RU-SVE",
+   "population": 34836,
+   "lat": 56.9076,
+   "lon": 62.0358,
+   "capital": false
+  },
+  {
+   "name": "Сысерть",
+   "region": "RU-SVE",
+   "population": 20594,
+   "lat": 56.5006,
+   "lon": 60.819,
+   "capital": true
+  },
+  {
+   "name": "Тавда",
+   "region": "RU-SVE",
+   "population": 35421,
+   "lat": 58.0435,
+   "lon": 65.2742,
+   "capital": false
+  },
+  {
+   "name": "Талица",
+   "region": "RU-SVE",
+   "population": 18339,
+   "lat": 57.0123,
+   "lon": 63.7321,
+   "capital": true
+  },
+  {
+   "name": "Туринск",
+   "region": "RU-SVE",
+   "population": 17990,
+   "lat": 58.0394,
+   "lon": 63.6982,
+   "capital": true
+  },
+  {
+   "name": "Велиж",
+   "region": "RU-SMO",
+   "population": 7620,
+   "lat": 55.6058,
+   "lon": 31.1856,
+   "capital": true
+  },
+  {
+   "name": "Вязьма",
+   "region": "RU-SMO",
+   "population": 57103,
+   "lat": 55.2117,
+   "lon": 34.2952,
+   "capital": true
+  },
+  {
+   "name": "Гагарин",
+   "region": "RU-SMO",
+   "population": 31721,
+   "lat": 55.5525,
+   "lon": 34.9951,
+   "capital": true
+  },
+  {
+   "name": "Демидов",
+   "region": "RU-SMO",
+   "population": 7333,
+   "lat": 55.2682,
+   "lon": 31.5063,
+   "capital": true
+  },
+  {
+   "name": "Десногорск",
+   "region": "RU-SMO",
+   "population": 29677,
+   "lat": 54.1465,
+   "lon": 33.2833,
+   "capital": false
+  },
+  {
+   "name": "Дорогобуж",
+   "region": "RU-SMO",
+   "population": 10720,
+   "lat": 54.9137,
+   "lon": 33.3023,
+   "capital": true
+  },
+  {
+   "name": "Духовщина",
+   "region": "RU-SMO",
+   "population": 4370,
+   "lat": 55.195,
+   "lon": 32.4013,
+   "capital": true
+  },
+  {
+   "name": "Ельня",
+   "region": "RU-SMO",
+   "population": 10095,
+   "lat": 54.5838,
+   "lon": 33.175,
+   "capital": true
+  },
+  {
+   "name": "Починок",
+   "region": "RU-SMO",
+   "population": 8776,
+   "lat": 54.4062,
+   "lon": 32.4398,
+   "capital": true
+  },
+  {
+   "name": "Рославль",
+   "region": "RU-SMO",
+   "population": 54898,
+   "lat": 53.945,
+   "lon": 32.848,
+   "capital": true
+  },
+  {
+   "name": "Рудня",
+   "region": "RU-SMO",
+   "population": 10029,
+   "lat": 54.9441,
+   "lon": 31.0795,
+   "capital": true
+  },
+  {
+   "name": "Сафоново",
+   "region": "RU-SMO",
+   "population": 46116,
+   "lat": 55.12,
+   "lon": 33.2337,
+   "capital": true
+  },
+  {
+   "name": "Смоленск",
+   "region": "RU-SMO",
+   "population": 326863,
+   "lat": 54.7826,
+   "lon": 32.0453,
+   "capital": true
+  },
+  {
+   "name": "Сычевка",
+   "region": "RU-SMO",
+   "population": 8111,
+   "lat": 55.8309,
+   "lon": 34.2779,
+   "capital": true
+  },
+  {
+   "name": "Ярцево",
+   "region": "RU-SMO",
+   "population": 47853,
+   "lat": 55.0565,
+   "lon": 32.6902,
+   "capital": true
+  },
+  {
+   "name": "Благодарный",
+   "region": "RU-STA",
+   "population": 32736,
+   "lat": 45.099,
+   "lon": 43.4306,
+   "capital": true
+  },
+  {
+   "name": "Буденновск",
+   "region": "RU-STA",
+   "population": 64628,
+   "lat": 44.7816,
+   "lon": 44.165,
+   "capital": true
+  },
+  {
+   "name": "Георгиевск",
+   "region": "RU-STA",
+   "population": 72126,
+   "lat": 44.1486,
+   "lon": 43.474,
+   "capital": false
+  },
+  {
+   "name": "Ессентуки",
+   "region": "RU-STA",
+   "population": 100969,
+   "lat": 44.0446,
+   "lon": 42.8589,
+   "capital": false
+  },
+  {
+   "name": "Железноводск",
+   "region": "RU-STA",
+   "population": 24496,
+   "lat": 44.1321,
+   "lon": 43.0306,
+   "capital": false
+  },
+  {
+   "name": "Зеленокумск",
+   "region": "RU-STA",
+   "population": 35790,
+   "lat": 44.4033,
+   "lon": 43.8842,
+   "capital": true
+  },
+  {
+   "name": "Изобильный",
+   "region": "RU-STA",
+   "population": 40546,
+   "lat": 45.3684,
+   "lon": 41.7087,
+   "capital": true
+  },
+  {
+   "name": "Ипатово",
+   "region": "RU-STA",
+   "population": 26055,
+   "lat": 45.7182,
+   "lon": 42.897,
+   "capital": true
+  },
+  {
+   "name": "Кисловодск",
+   "region": "RU-STA",
+   "population": 128502,
+   "lat": 43.9052,
+   "lon": 42.7169,
+   "capital": false
+  },
+  {
+   "name": "Лермонтов",
+   "region": "RU-STA",
+   "population": 22540,
+   "lat": 44.1054,
+   "lon": 42.9731,
+   "capital": false
+  },
+  {
+   "name": "Минеральные Воды",
+   "region": "RU-STA",
+   "population": 76715,
+   "lat": 44.2087,
+   "lon": 43.1384,
+   "capital": true
+  },
+  {
+   "name": "Михайловск",
+   "region": "RU-STA",
+   "population": 71018,
+   "lat": 45.1297,
+   "lon": 42.0288,
+   "capital": true
+  },
+  {
+   "name": "Невинномысск",
+   "region": "RU-STA",
+   "population": 118351,
+   "lat": 44.6226,
+   "lon": 41.9477,
+   "capital": false
+  },
+  {
+   "name": "Нефтекумск",
+   "region": "RU-STA",
+   "population": 27700,
+   "lat": 44.7545,
+   "lon": 44.9865,
+   "capital": true
+  },
+  {
+   "name": "Новоалександровск",
+   "region": "RU-STA",
+   "population": 26759,
+   "lat": 45.4933,
+   "lon": 41.2154,
+   "capital": true
+  },
+  {
+   "name": "Новопавловск",
+   "region": "RU-STA",
+   "population": 26556,
+   "lat": 43.9617,
+   "lon": 43.6343,
+   "capital": true
+  },
+  {
+   "name": "Пятигорск",
+   "region": "RU-STA",
+   "population": 142397,
+   "lat": 44.0411,
+   "lon": 43.0662,
+   "capital": false
+  },
+  {
+   "name": "Светлоград",
+   "region": "RU-STA",
+   "population": 38520,
+   "lat": 45.3287,
+   "lon": 42.8566,
+   "capital": true
+  },
+  {
+   "name": "Ставрополь",
+   "region": "RU-STA",
+   "population": 398266,
+   "lat": 45.0445,
+   "lon": 41.969,
+   "capital": true
+  },
+  {
+   "name": "Жердевка",
+   "region": "RU-TAM",
+   "population": 15211,
+   "lat": 51.8422,
+   "lon": 41.4618,
+   "capital": true
+  },
+  {
+   "name": "Кирсанов",
+   "region": "RU-TAM",
+   "population": 17240,
+   "lat": 52.6506,
+   "lon": 42.7286,
+   "capital": false
+  },
+  {
+   "name": "Котовск",
+   "region": "RU-TAM",
+   "population": 31851,
+   "lat": 52.5924,
+   "lon": 41.5101,
+   "capital": false
+  },
+  {
+   "name": "Мичуринск",
+   "region": "RU-TAM",
+   "population": 98758,
+   "lat": 52.8912,
+   "lon": 40.5104,
+   "capital": true
+  },
+  {
+   "name": "Моршанск",
+   "region": "RU-TAM",
+   "population": 41550,
+   "lat": 53.4436,
+   "lon": 41.8115,
+   "capital": false
+  },
+  {
+   "name": "Рассказово",
+   "region": "RU-TAM",
+   "population": 45484,
+   "lat": 52.6539,
+   "lon": 41.8743,
+   "capital": false
+  },
+  {
+   "name": "Тамбов",
+   "region": "RU-TAM",
+   "population": 280457,
+   "lat": 52.7213,
+   "lon": 41.4523,
+   "capital": true
+  },
+  {
+   "name": "Уварово",
+   "region": "RU-TAM",
+   "population": 26829,
+   "lat": 51.9768,
+   "lon": 42.253,
+   "capital": false
+  },
+  {
+   "name": "Андреаполь",
+   "region": "RU-TVE",
+   "population": 8265,
+   "lat": 56.6507,
+   "lon": 32.262,
+   "capital": true
+  },
+  {
+   "name": "Бежецк",
+   "region": "RU-TVE",
+   "population": 24517,
+   "lat": 57.786,
+   "lon": 36.6905,
+   "capital": true
+  },
+  {
+   "name": "Белый",
+   "region": "RU-TVE",
+   "population": 3771,
+   "lat": 55.8339,
+   "lon": 32.939,
+   "capital": true
+  },
+  {
+   "name": "Бологое",
+   "region": "RU-TVE",
+   "population": 23499,
+   "lat": 57.8856,
+   "lon": 34.0538,
+   "capital": true
+  },
+  {
+   "name": "Весьегонск",
+   "region": "RU-TVE",
+   "population": 7330,
+   "lat": 58.6583,
+   "lon": 37.2568,
+   "capital": true
+  },
+  {
+   "name": "Вышний Волочек",
+   "region": "RU-TVE",
+   "population": 52326,
+   "lat": 57.5683,
+   "lon": 34.5404,
+   "capital": false
+  },
+  {
+   "name": "Западная Двина",
+   "region": "RU-TVE",
+   "population": 9376,
+   "lat": 56.2566,
+   "lon": 32.0805,
+   "capital": true
+  },
+  {
+   "name": "Зубцов",
+   "region": "RU-TVE",
+   "population": 6937,
+   "lat": 56.1761,
+   "lon": 34.5826,
+   "capital": true
+  },
+  {
+   "name": "Калязин",
+   "region": "RU-TVE",
+   "population": 13870,
+   "lat": 57.2579,
+   "lon": 37.782,
+   "capital": true
+  },
+  {
+   "name": "Кашин",
+   "region": "RU-TVE",
+   "population": 16174,
+   "lat": 57.3602,
+   "lon": 37.6119,
+   "capital": true
+  },
+  {
+   "name": "Кимры",
+   "region": "RU-TVE",
+   "population": 49623,
+   "lat": 56.8733,
+   "lon": 37.3557,
+   "capital": false
+  },
+  {
+   "name": "Конаково",
+   "region": "RU-TVE",
+   "population": 41303,
+   "lat": 56.7275,
+   "lon": 36.8013,
+   "capital": true
+  },
+  {
+   "name": "Красный Холм",
+   "region": "RU-TVE",
+   "population": 5608,
+   "lat": 58.0571,
+   "lon": 37.1126,
+   "capital": true
+  },
+  {
+   "name": "Кувшиново",
+   "region": "RU-TVE",
+   "population": 10008,
+   "lat": 57.0265,
+   "lon": 34.1676,
+   "capital": true
+  },
+  {
+   "name": "Лихославль",
+   "region": "RU-TVE",
+   "population": 12259,
+   "lat": 57.1221,
+   "lon": 35.4668,
+   "capital": true
+  },
+  {
+   "name": "Нелидово",
+   "region": "RU-TVE",
+   "population": 22886,
+   "lat": 56.2233,
+   "lon": 32.7767,
+   "capital": true
+  },
+  {
+   "name": "Осташков",
+   "region": "RU-TVE",
+   "population": 18073,
+   "lat": 57.1457,
+   "lon": 33.1115,
+   "capital": true
+  },
+  {
+   "name": "Ржев",
+   "region": "RU-TVE",
+   "population": 62026,
+   "lat": 56.2629,
+   "lon": 34.3291,
+   "capital": false
+  },
+  {
+   "name": "Старица",
+   "region": "RU-TVE",
+   "population": 8610,
+   "lat": 56.5149,
+   "lon": 34.9336,
+   "capital": true
+  },
+  {
+   "name": "Тверь",
+   "region": "RU-TVE",
+   "population": 403726,
+   "lat": 56.8586,
+   "lon": 35.9117,
+   "capital": true
+  },
+  {
+   "name": "Торжок",
+   "region": "RU-TVE",
+   "population": 47702,
+   "lat": 57.0413,
+   "lon": 34.9602,
+   "capital": false
+  },
+  {
+   "name": "Торопец",
+   "region": "RU-TVE",
+   "population": 13018,
+   "lat": 56.5012,
+   "lon": 31.6355,
+   "capital": true
+  },
+  {
+   "name": "Удомля",
+   "region": "RU-TVE",
+   "population": 31048,
+   "lat": 57.8787,
+   "lon": 35.0167,
+   "capital": true
+  },
+  {
+   "name": "Асино",
+   "region": "RU-TOM",
+   "population": 25614,
+   "lat": 56.9907,
+   "lon": 86.1765,
+   "capital": true
+  },
+  {
+   "name": "Кедровый",
+   "region": "RU-TOM",
+   "population": 2451,
+   "lat": 57.5619,
+   "lon": 79.5678,
+   "capital": false
+  },
+  {
+   "name": "Колпашево",
+   "region": "RU-TOM",
+   "population": 24126,
+   "lat": 58.3114,
+   "lon": 82.9026,
+   "capital": true
+  },
+  {
+   "name": "Северск",
+   "region": "RU-TOM",
+   "population": 108466,
+   "lat": 56.6031,
+   "lon": 84.881,
+   "capital": false
+  },
+  {
+   "name": "Стрежевой",
+   "region": "RU-TOM",
+   "population": 42216,
+   "lat": 60.7329,
+   "lon": 77.6041,
+   "capital": false
+  },
+  {
+   "name": "Томск",
+   "region": "RU-TOM",
+   "population": 522940,
+   "lat": 56.4846,
+   "lon": 84.9482,
+   "capital": true
+  },
+  {
+   "name": "Алексин",
+   "region": "RU-TUL",
+   "population": 61738,
+   "lat": 54.5083,
+   "lon": 37.0478,
+   "capital": true
+  },
+  {
+   "name": "Белев",
+   "region": "RU-TUL",
+   "population": 13918,
+   "lat": 53.8114,
+   "lon": 36.1382,
+   "capital": true
+  },
+  {
+   "name": "Богородицк",
+   "region": "RU-TUL",
+   "population": 31897,
+   "lat": 53.7701,
+   "lon": 38.1225,
+   "capital": true
+  },
+  {
+   "name": "Болохово",
+   "region": "RU-TUL",
+   "population": 9619,
+   "lat": 54.082,
+   "lon": 37.8267,
+   "capital": false
+  },
+  {
+   "name": "Венев",
+   "region": "RU-TUL",
+   "population": 15220,
+   "lat": 54.3542,
+   "lon": 38.2642,
+   "capital": true
+  },
+  {
+   "name": "Донской",
+   "region": "RU-TUL",
+   "population": 64561,
+   "lat": 53.9679,
+   "lon": 38.3372,
+   "capital": false
+  },
+  {
+   "name": "Ефремов",
+   "region": "RU-TUL",
+   "population": 42350,
+   "lat": 53.1465,
+   "lon": 38.0922,
+   "capital": true
+  },
+  {
+   "name": "Кимовск",
+   "region": "RU-TUL",
+   "population": 28493,
+   "lat": 53.9698,
+   "lon": 38.5381,
+   "capital": true
+  },
+  {
+   "name": "Киреевск",
+   "region": "RU-TUL",
+   "population": 25585,
+   "lat": 53.932,
+   "lon": 37.922,
+   "capital": true
+  },
+  {
+   "name": "Липки",
+   "region": "RU-TUL",
+   "population": 8741,
+   "lat": 53.9418,
+   "lon": 37.702,
+   "capital": false
+  },
+  {
+   "name": "Новомосковск",
+   "region": "RU-TUL",
+   "population": 131227,
+   "lat": 54.0109,
+   "lon": 38.2914,
+   "capital": true
+  },
+  {
+   "name": "Плавск",
+   "region": "RU-TUL",
+   "population": 16248,
+   "lat": 53.7096,
+   "lon": 37.2862,
+   "capital": true
+  },
+  {
+   "name": "Советск",
+   "region": "RU-TUL",
+   "population": 7537,
+   "lat": 53.9339,
+   "lon": 37.6316,
+   "capital": false
+  },
+  {
+   "name": "Суворов",
+   "region": "RU-TUL",
+   "population": 18975,
+   "lat": 54.1344,
+   "lon": 36.4807,
+   "capital": true
+  },
+  {
+   "name": "Тула",
+   "region": "RU-TUL",
+   "population": 501129,
+   "lat": 54.1921,
+   "lon": 37.6154,
+   "capital": true
+  },
+  {
+   "name": "Узловая",
+   "region": "RU-TUL",
+   "population": 55282,
+   "lat": 53.973,
+   "lon": 38.1763,
+   "capital": true
+  },
+  {
+   "name": "Чекалин",
+   "region": "RU-TUL",
+   "population": 994,
+   "lat": 54.0984,
+   "lon": 36.2474,
+   "capital": false
+  },
+  {
+   "name": "Щекино",
+   "region": "RU-TUL",
+   "population": 58154,
+   "lat": 54.0021,
+   "lon": 37.5176,
+   "capital": true
+  },
+  {
+   "name": "Ясногорск",
+   "region": "RU-TUL",
+   "population": 16804,
+   "lat": 54.4795,
+   "lon": 37.6896,
+   "capital": true
+  },
+  {
+   "name": "Заводоуковск",
+   "region": "RU-TYU",
+   "population": 25657,
+   "lat": 56.5027,
+   "lon": 66.5514,
+   "capital": true
+  },
+  {
+   "name": "Ишим",
+   "region": "RU-TYU",
+   "population": 69567,
+   "lat": 56.1105,
+   "lon": 69.4796,
+   "capital": true
+  },
+  {
+   "name": "Тобольск",
+   "region": "RU-TYU",
+   "population": 99698,
+   "lat": 58.2017,
+   "lon": 68.2539,
+   "capital": false
+  },
+  {
+   "name": "Тюмень",
+   "region": "RU-TYU",
+   "population": 581758,
+   "lat": 57.153,
+   "lon": 65.5344,
+   "capital": true
+  },
+  {
+   "name": "Ялуторовск",
+   "region": "RU-TYU",
+   "population": 36494,
+   "lat": 56.6547,
+   "lon": 66.3123,
+   "capital": true
+  },
+  {
+   "name": "Воткинск",
+   "region": "RU-UD",
+   "population": 100034,
+   "lat": 57.0518,
+   "lon": 53.9873,
+   "capital": false
+  },
+  {
+   "name": "Глазов",
+   "region": "RU-UD",
+   "population": 95835,
+   "lat": 58.1359,
+   "lon": 52.6635,
+   "capital": false
+  },
+  {
+   "name": "Ижевск",
+   "region": "RU-UD",
+   "population": 628117,
+   "lat": 56.8527,
+   "lon": 53.2115,
+   "capital": true
+  },
+  {
+   "name": "Камбарка",
+   "region": "RU-UD",
+   "population": 11028,
+   "lat": 56.266,
+   "lon": 54.1934,
+   "capital": true
+  },
+  {
+   "name": "Можга",
+   "region": "RU-UD",
+   "population": 47959,
+   "lat": 56.4428,
+   "lon": 52.2138,
+   "capital": false
+  },
+  {
+   "name": "Сарапул",
+   "region": "RU-UD",
+   "population": 101390,
+   "lat": 56.4616,
+   "lon": 53.8038,
+   "capital": false
+  },
+  {
+   "name": "Барыш",
+   "region": "RU-ULY",
+   "population": 17149,
+   "lat": 53.6534,
+   "lon": 47.1181,
+   "capital": false
+  },
+  {
+   "name": "Димитровград",
+   "region": "RU-ULY",
+   "population": 122549,
+   "lat": 54.2168,
+   "lon": 49.6263,
+   "capital": false
+  },
+  {
+   "name": "Инза",
+   "region": "RU-ULY",
+   "population": 18547,
+   "lat": 53.855,
+   "lon": 46.3533,
+   "capital": true
+  },
+  {
+   "name": "Новоульяновск",
+   "region": "RU-ULY",
+   "population": 16032,
+   "lat": 54.1448,
+   "lon": 48.3911,
+   "capital": false
+  },
+  {
+   "name": "Сенгилей",
+   "region": "RU-ULY",
+   "population": 6959,
+   "lat": 53.959,
+   "lon": 48.7768,
+   "capital": true
+  },
+  {
+   "name": "Ульяновск",
+   "region": "RU-ULY",
+   "population": 613793,
+   "lat": 54.3079,
+   "lon": 48.3748,
+   "capital": true
+  },
+  {
+   "name": "Амурск",
+   "region": "RU-KHA",
+   "population": 42977,
+   "lat": 50.2344,
+   "lon": 136.8792,
+   "capital": false
+  },
+  {
+   "name": "Бикин",
+   "region": "RU-KHA",
+   "population": 17156,
+   "lat": 46.8186,
+   "lon": 134.2551,
+   "capital": false
+  },
+  {
+   "name": "Вяземский",
+   "region": "RU-KHA",
+   "population": 14556,
+   "lat": 47.5353,
+   "lon": 134.7554,
+   "capital": true
+  },
+  {
+   "name": "Комсомольск-на-Амуре",
+   "region": "RU-KHA",
+   "population": 263906,
+   "lat": 50.5499,
+   "lon": 137.0079,
+   "capital": false
+  },
+  {
+   "name": "Николаевск-на-Амуре",
+   "region": "RU-KHA",
+   "population": 22773,
+   "lat": 53.1461,
+   "lon": 140.7111,
+   "capital": false
+  },
+  {
+   "name": "Советская Гавань",
+   "region": "RU-KHA",
+   "population": 27712,
+   "lat": 48.9665,
+   "lon": 140.2852,
+   "capital": false
+  },
+  {
+   "name": "Хабаровск",
+   "region": "RU-KHA",
+   "population": 577668,
+   "lat": 48.4647,
+   "lon": 135.0599,
+   "capital": true
+  },
+  {
+   "name": "Белоярский",
+   "region": "RU-KHM",
+   "population": 20283,
+   "lat": 63.7121,
+   "lon": 66.6772,
+   "capital": false
+  },
+  {
+   "name": "Когалым",
+   "region": "RU-KHM",
+   "population": 58192,
+   "lat": 62.264,
+   "lon": 74.483,
+   "capital": false
+  },
+  {
+   "name": "Лангепас",
+   "region": "RU-KHM",
+   "population": 41675,
+   "lat": 61.2537,
+   "lon": 75.1808,
+   "capital": false
+  },
+  {
+   "name": "Лянтор",
+   "region": "RU-KHM",
+   "population": 38922,
+   "lat": 61.6393,
+   "lon": 72.1794,
+   "capital": false
+  },
+  {
+   "name": "Мегион",
+   "region": "RU-KHM",
+   "population": 49471,
+   "lat": 61.0319,
+   "lon": 76.1026,
+   "capital": false
+  },
+  {
+   "name": "Нефтеюганск",
+   "region": "RU-KHM",
+   "population": 123276,
+   "lat": 61.0883,
+   "lon": 72.6164,
+   "capital": false
+  },
+  {
+   "name": "Нижневартовск",
+   "region": "RU-KHM",
+   "population": 251860,
+   "lat": 60.9397,
+   "lon": 76.5696,
+   "capital": false
+  },
+  {
+   "name": "Нягань",
+   "region": "RU-KHM",
+   "population": 54903,
+   "lat": 62.1455,
+   "lon": 65.3946,
+   "capital": false
+  },
+  {
+   "name": "Покачи",
+   "region": "RU-KHM",
+   "population": 17053,
+   "lat": 61.7422,
+   "lon": 75.5942,
+   "capital": false
+  },
+  {
+   "name": "Пыть-Ях",
+   "region": "RU-KHM",
+   "population": 41453,
+   "lat": 60.7586,
+   "lon": 72.8366,
+   "capital": false
+  },
+  {
+   "name": "Радужный",
+   "region": "RU-KHM",
+   "population": 43394,
+   "lat": 62.1343,
+   "lon": 77.4584,
+   "capital": false
+  },
+  {
+   "name": "Советский",
+   "region": "RU-KHM",
+   "population": 26434,
+   "lat": 61.3707,
+   "lon": 63.5667,
+   "capital": true
+  },
+  {
+   "name": "Сургут",
+   "region": "RU-KHM",
+   "population": 306703,
+   "lat": 61.2541,
+   "lon": 73.3962,
+   "capital": false
+  },
+  {
+   "name": "Урай",
+   "region": "RU-KHM",
+   "population": 39435,
+   "lat": 60.1297,
+   "lon": 64.8039,
+   "capital": false
+  },
+  {
+   "name": "Ханты-Мансийск",
+   "region": "RU-KHM",
+   "population": 79410,
+   "lat": 61.0024,
+   "lon": 69.0185,
+   "capital": true
+  },
+  {
+   "name": "Югорск",
+   "region": "RU-KHM",
+   "population": 34066,
+   "lat": 61.3124,
+   "lon": 63.3365,
+   "capital": false
+  },
+  {
+   "name": "Аша",
+   "region": "RU-CHE",
+   "population": 31916,
+   "lat": 54.9907,
+   "lon": 57.2784,
+   "capital": true
+  },
+  {
+   "name": "Бакал",
+   "region": "RU-CHE",
+   "population": 20953,
+   "lat": 54.9406,
+   "lon": 58.8052,
+   "capital": false
+  },
+  {
+   "name": "Верхнеуральск",
+   "region": "RU-CHE",
+   "population": 9459,
+   "lat": 53.8761,
+   "lon": 59.217,
+   "capital": true
+  },
+  {
+   "name": "Верхний Уфалей",
+   "region": "RU-CHE",
+   "population": 30504,
+   "lat": 56.0487,
+   "lon": 60.2319,
+   "capital": false
+  },
+  {
+   "name": "Еманжелинск",
+   "region": "RU-CHE",
+   "population": 30218,
+   "lat": 54.7555,
+   "lon": 61.3243,
+   "capital": true
+  },
+  {
+   "name": "Златоуст",
+   "region": "RU-CHE",
+   "population": 174985,
+   "lat": 55.1715,
+   "lon": 59.6726,
+   "capital": false
+  },
+  {
+   "name": "Карабаш",
+   "region": "RU-CHE",
+   "population": 13151,
+   "lat": 55.4852,
+   "lon": 60.2359,
+   "capital": false
+  },
+  {
+   "name": "Карталы",
+   "region": "RU-CHE",
+   "population": 29136,
+   "lat": 53.0536,
+   "lon": 60.6478,
+   "capital": true
+  },
+  {
+   "name": "Касли",
+   "region": "RU-CHE",
+   "population": 16998,
+   "lat": 55.8869,
+   "lon": 60.7422,
+   "capital": true
+  },
+  {
+   "name": "Катав-Ивановск",
+   "region": "RU-CHE",
+   "population": 17640,
+   "lat": 54.7521,
+   "lon": 58.1984,
+   "capital": true
+  },
+  {
+   "name": "Копейск",
+   "region": "RU-CHE",
+   "population": 137604,
+   "lat": 55.1167,
+   "lon": 61.6179,
+   "capital": false
+  },
+  {
+   "name": "Коркино",
+   "region": "RU-CHE",
+   "population": 38950,
+   "lat": 54.8903,
+   "lon": 61.4035,
+   "capital": true
+  },
+  {
+   "name": "Куса",
+   "region": "RU-CHE",
+   "population": 18792,
+   "lat": 55.3386,
+   "lon": 59.4386,
+   "capital": true
+  },
+  {
+   "name": "Кыштым",
+   "region": "RU-CHE",
+   "population": 38950,
+   "lat": 55.7061,
+   "lon": 60.5564,
+   "capital": false
+  },
+  {
+   "name": "Магнитогорск",
+   "region": "RU-CHE",
+   "population": 408401,
+   "lat": 53.4072,
+   "lon": 58.9791,
+   "capital": false
+  },
+  {
+   "name": "Миасс",
+   "region": "RU-CHE",
+   "population": 151812,
+   "lat": 55.0456,
+   "lon": 60.1078,
+   "capital": false
+  },
+  {
+   "name": "Миньяр",
+   "region": "RU-CHE",
+   "population": 10195,
+   "lat": 55.071,
+   "lon": 57.5485,
+   "capital": false
+  },
+  {
+   "name": "Нязепетровск",
+   "region": "RU-CHE",
+   "population": 12452,
+   "lat": 56.0537,
+   "lon": 59.6097,
+   "capital": true
+  },
+  {
+   "name": "Озерск",
+   "region": "RU-CHE",
+   "population": 82268,
+   "lat": 55.7632,
+   "lon": 60.7076,
+   "capital": false
+  },
+  {
+   "name": "Пласт",
+   "region": "RU-CHE",
+   "population": 17344,
+   "lat": 54.3693,
+   "lon": 60.8152,
+   "capital": true
+  },
+  {
+   "name": "Сатка",
+   "region": "RU-CHE",
+   "population": 45465,
+   "lat": 55.0405,
+   "lon": 59.0289,
+   "capital": true
+  },
+  {
+   "name": "Сим",
+   "region": "RU-CHE",
+   "population": 14465,
+   "lat": 54.9908,
+   "lon": 57.69,
+   "capital": false
+  },
+  {
+   "name": "Снежинск",
+   "region": "RU-CHE",
+   "population": 48896,
+   "lat": 56.0851,
+   "lon": 60.7325,
+   "capital": false
+  },
+  {
+   "name": "Трехгорный",
+   "region": "RU-CHE",
+   "population": 33678,
+   "lat": 54.8178,
+   "lon": 58.4464,
+   "capital": false
+  },
+  {
+   "name": "Троицк",
+   "region": "RU-CHE",
+   "population": 78637,
+   "lat": 54.0844,
+   "lon": 61.5587,
+   "capital": false
+  },
+  {
+   "name": "Усть-Катав",
+   "region": "RU-CHE",
+   "population": 23586,
+   "lat": 54.9261,
+   "lon": 58.1528,
+   "capital": false
+  },
+  {
+   "name": "Чебаркуль",
+   "region": "RU-CHE",
+   "population": 43405,
+   "lat": 54.9819,
+   "lon": 60.3773,
+   "capital": false
+  },
+  {
+   "name": "Челябинск",
+   "region": "RU-CHE",
+   "population": 1130273,
+   "lat": 55.1603,
+   "lon": 61.4008,
+   "capital": true
+  },
+  {
+   "name": "Южноуральск",
+   "region": "RU-CHE",
+   "population": 37890,
+   "lat": 54.4489,
+   "lon": 61.2581,
+   "capital": false
+  },
+  {
+   "name": "Юрюзань",
+   "region": "RU-CHE",
+   "population": 12568,
+   "lat": 54.8547,
+   "lon": 58.4227,
+   "capital": false
+  },
+  {
+   "name": "Аргун",
+   "region": "RU-CE",
+   "population": 29528,
+   "lat": 43.2917,
+   "lon": 45.8723,
+   "capital": false
+  },
+  {
+   "name": "Грозный",
+   "region": "RU-CE",
+   "population": 271596,
+   "lat": 43.318,
+   "lon": 45.6983,
+   "capital": true
+  },
+  {
+   "name": "Гудермес",
+   "region": "RU-CE",
+   "population": 45643,
+   "lat": 43.3519,
+   "lon": 46.1036,
+   "capital": true
+  },
+  {
+   "name": "Курчалой",
+   "region": "RU-CE",
+   "population": 25672,
+   "lat": 43.2047,
+   "lon": 46.0889,
+   "capital": true
+  },
+  {
+   "name": "Шали",
+   "region": "RU-CE",
+   "population": 47715,
+   "lat": 43.1489,
+   "lon": 45.901,
+   "capital": true
+  },
+  {
+   "name": "Алатырь",
+   "region": "RU-CU",
+   "population": 38202,
+   "lat": 54.8398,
+   "lon": 46.5722,
+   "capital": false
+  },
+  {
+   "name": "Канаш",
+   "region": "RU-CU",
+   "population": 45608,
+   "lat": 55.507,
+   "lon": 47.4918,
+   "capital": false
+  },
+  {
+   "name": "Козловка",
+   "region": "RU-CU",
+   "population": 10355,
+   "lat": 55.8406,
+   "lon": 48.2578,
+   "capital": true
+  },
+  {
+   "name": "Мариинский Посад",
+   "region": "RU-CU",
+   "population": 10186,
+   "lat": 56.1119,
+   "lon": 47.7143,
+   "capital": true
+  },
+  {
+   "name": "Новочебоксарск",
+   "region": "RU-CU",
+   "population": 124094,
+   "lat": 56.1095,
+   "lon": 47.4791,
+   "capital": false
+  },
+  {
+   "name": "Цивильск",
+   "region": "RU-CU",
+   "population": 13478,
+   "lat": 55.865,
+   "lon": 47.4729,
+   "capital": true
+  },
+  {
+   "name": "Чебоксары",
+   "region": "RU-CU",
+   "population": 447929,
+   "lat": 56.1438,
+   "lon": 47.249,
+   "capital": true
+  },
+  {
+   "name": "Шумерля",
+   "region": "RU-CU",
+   "population": 33412,
+   "lat": 55.4962,
+   "lon": 46.4183,
+   "capital": false
+  },
+  {
+   "name": "Ядрин",
+   "region": "RU-CU",
+   "population": 9614,
+   "lat": 55.9407,
+   "lon": 46.2021,
+   "capital": true
+  },
+  {
+   "name": "Анадырь",
+   "region": "RU-CHU",
+   "population": 13053,
+   "lat": 64.7314,
+   "lon": 177.5015,
+   "capital": true
+  },
+  {
+   "name": "Билибино",
+   "region": "RU-CHU",
+   "population": 5504,
+   "lat": 68.0584,
+   "lon": 166.4388,
+   "capital": true
+  },
+  {
+   "name": "Певек",
+   "region": "RU-CHU",
+   "population": 4161,
+   "lat": 69.7017,
+   "lon": 170.2999,
+   "capital": true
+  },
+  {
+   "name": "Губкинский",
+   "region": "RU-YAN",
+   "population": 23340,
+   "lat": 64.4458,
+   "lon": 76.4713,
+   "capital": false
+  },
+  {
+   "name": "Лабытнанги",
+   "region": "RU-YAN",
+   "population": 26948,
+   "lat": 66.6593,
+   "lon": 66.3883,
+   "capital": false
+  },
+  {
+   "name": "Муравленко",
+   "region": "RU-YAN",
+   "population": 33401,
+   "lat": 63.7941,
+   "lon": 74.4949,
+   "capital": false
+  },
+  {
+   "name": "Надым",
+   "region": "RU-YAN",
+   "population": 46550,
+   "lat": 65.5378,
+   "lon": 72.5183,
+   "capital": false
+  },
+  {
+   "name": "Новый Уренгой",
+   "region": "RU-YAN",
+   "population": 104144,
+   "lat": 66.0839,
+   "lon": 76.681,
+   "capital": false
+  },
+  {
+   "name": "Ноябрьск",
+   "region": "RU-YAN",
+   "population": 110572,
+   "lat": 63.2018,
+   "lon": 75.4511,
+   "capital": false
+  },
+  {
+   "name": "Салехард",
+   "region": "RU-YAN",
+   "population": 42494,
+   "lat": 66.5492,
+   "lon": 66.6085,
+   "capital": true
+  },
+  {
+   "name": "Тарко-Сале",
+   "region": "RU-YAN",
+   "population": 20372,
+   "lat": 64.9119,
+   "lon": 77.761,
+   "capital": true
+  },
+  {
+   "name": "Гаврилов-Ям",
+   "region": "RU-YAR",
+   "population": 17792,
+   "lat": 57.3091,
+   "lon": 39.8546,
+   "capital": true
+  },
+  {
+   "name": "Данилов",
+   "region": "RU-YAR",
+   "population": 15861,
+   "lat": 58.186,
+   "lon": 40.1795,
+   "capital": true
+  },
+  {
+   "name": "Любим",
+   "region": "RU-YAR",
+   "population": 5553,
+   "lat": 58.362,
+   "lon": 40.6868,
+   "capital": true
+  },
+  {
+   "name": "Мышкин",
+   "region": "RU-YAR",
+   "population": 5932,
+   "lat": 57.7882,
+   "lon": 38.4544,
+   "capital": true
+  },
+  {
+   "name": "Переславль-Залесский",
+   "region": "RU-YAR",
+   "population": 41923,
+   "lat": 56.7361,
+   "lon": 38.8544,
+   "capital": false
+  },
+  {
+   "name": "Пошехонье",
+   "region": "RU-YAR",
+   "population": 6085,
+   "lat": 58.5063,
+   "lon": 39.1208,
+   "capital": true
+  },
+  {
+   "name": "Ростов",
+   "region": "RU-YAR",
+   "population": 31791,
+   "lat": 57.2051,
+   "lon": 39.4379,
+   "capital": true
+  },
+  {
+   "name": "Рыбинск",
+   "region": "RU-YAR",
+   "population": 200771,
+   "lat": 58.0485,
+   "lon": 38.8584,
+   "capital": true
+  },
+  {
+   "name": "Тутаев",
+   "region": "RU-YAR",
+   "population": 41001,
+   "lat": 57.8675,
+   "lon": 39.537,
+   "capital": true
+  },
+  {
+   "name": "Углич",
+   "region": "RU-YAR",
+   "population": 34505,
+   "lat": 57.5224,
+   "lon": 38.302,
+   "capital": true
+  },
+  {
+   "name": "Ярославль",
+   "region": "RU-YAR",
+   "population": 591486,
+   "lat": 57.6215,
+   "lon": 39.8977,
+   "capital": true
+  }
+ ]
+}

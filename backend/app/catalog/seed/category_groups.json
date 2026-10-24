@@ -1,0 +1,17 @@
+[
+  {"name": "Рыба и морепродукты", "kind": "ingredient"},
+  {"name": "Мясо и птица", "kind": "ingredient"},
+  {"name": "Овощи, фрукты и зелень", "kind": "ingredient"},
+  {"name": "Грибы", "kind": "ingredient"},
+  {"name": "Молочные продукты и сыры", "kind": "ingredient"},
+  {"name": "Яйца", "kind": "ingredient"},
+  {"name": "Крупы, мука и тесто", "kind": "ingredient"},
+  {"name": "Соусы, приправы и специи", "kind": "ingredient"},
+  {"name": "Водоросли и азиатские продукты", "kind": "ingredient"},
+  {"name": "Масла и жиры", "kind": "ingredient"},
+  {"name": "Орехи, семена и сухофрукты", "kind": "ingredient"},
+  {"name": "Сладости и десерты", "kind": "ingredient"},
+  {"name": "Напитки", "kind": "ingredient"},
+  {"name": "Прочее", "kind": "ingredient"},
+  {"name": "Упаковка и расходники", "kind": "packaging"}
+]

@@ -1,0 +1,9 @@
+# Секреты не должны попадать в образы
+.env
+.env.*
+!.env.example
+
+.git
+**/__pycache__
+**/.venv
+**/node_modules

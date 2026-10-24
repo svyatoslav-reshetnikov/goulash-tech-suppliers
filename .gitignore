@@ -1,0 +1,29 @@
+# Секреты
+.env
+.env.*
+!.env.example
+deploy/server.env
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Результаты проверки моделей
+backend/scripts/model_check/out/
+
+# Frontend
+node_modules/
+frontend/dist/
+
+# Прочее
+.DS_Store
+.idea/
+.vscode/
+
+# Загруженные данные для сборки справочника локаций
+backend/scripts/locations_cache/
+.jbeval/

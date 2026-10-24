@@ -1,0 +1,64 @@
+# Продовый запуск на сервере, где порты 80 и 443 уже заняты обратным прокси (Caddy, nginx).
+# Образы собирает GitHub Actions и кладёт в ghcr.io; сервер только скачивает их и запускает.
+# Наружу портов нет: до контейнера web запросы доходят через Docker-сеть прокси (PROXY_NETWORK в .env):
+# прокси направляет домен на goulash-web:80 и выдаёт сертификат.
+# Настройки и секреты берутся из .env рядом с этим файлом.
+
+name: goulash
+
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-suppliers}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?задайте POSTGRES_PASSWORD в .env}
+      POSTGRES_DB: ${POSTGRES_DB:-suppliers}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    image: ghcr.io/svyatoslav-reshetnikov/goulash-api:${IMAGE_TAG:?задайте IMAGE_TAG в .env}
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_PORT: "5432"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 15s
+
+  web:
+    image: ghcr.io/svyatoslav-reshetnikov/goulash-web:${IMAGE_TAG:?задайте IMAGE_TAG в .env}
+    restart: unless-stopped
+    environment:
+      SITE_ADDRESS: ":80"  # HTTPS и сертификат на стороне внешнего Caddy
+      BASIC_AUTH_USER: ${BASIC_AUTH_USER:-admin}
+      BASIC_AUTH_HASH: ${BASIC_AUTH_HASH:-}
+    networks:
+      default:
+      proxy:
+        aliases:
+          - goulash-web  # под этим именем внешний Caddy находит контейнер
+    depends_on:
+      api:
+        condition: service_healthy
+
+networks:
+  proxy:
+    name: ${PROXY_NETWORK:?задайте PROXY_NETWORK в .env (имя Docker-сети вашего прокси)}
+    external: true
+
+volumes:
+  pgdata:

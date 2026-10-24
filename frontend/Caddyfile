@@ -1,0 +1,20 @@
+# По умолчанию слушает :80. Для HTTPS задайте SITE_ADDRESS=ваш.домен: Caddy сам получит сертификат.
+{$SITE_ADDRESS::80} {
+	encode gzip
+
+	# Парольная защита: файл auth/basic.caddy создаёт docker-entrypoint.sh, если в .env задан BASIC_AUTH_HASH
+	import /etc/caddy/auth/*.caddy
+
+	handle /api/* {
+		# flush_interval -1: события SSE доставляются сразу, без буферизации
+		reverse_proxy api:8000 {
+			flush_interval -1
+		}
+	}
+
+	handle {
+		root * /srv
+		try_files {path} /index.html
+		file_server
+	}
+}

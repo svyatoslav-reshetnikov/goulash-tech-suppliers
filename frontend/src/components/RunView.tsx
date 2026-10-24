@@ -1,0 +1,181 @@
+import { useEffect, useRef, useState } from "react";
+import { fetchRun, fetchRunSuppliers, subscribeRun, type Run, type RunEvent, type SupplierData } from "../api";
+import ComparisonTable from "./ComparisonTable";
+import RecommendationPanel from "./RecommendationPanel";
+import SupplierCard from "./SupplierCard";
+
+const KINDS: Record<string, { label: string; style: string }> = {
+  run_started: { label: "Старт", style: "bg-slate-100 text-slate-700" },
+  search: { label: "Поиск", style: "bg-blue-100 text-blue-800" },
+  search_result: { label: "Выдача", style: "bg-blue-50 text-blue-700" },
+  fetch: { label: "Страница", style: "bg-violet-100 text-violet-800" },
+  research: { label: "Изучение", style: "bg-indigo-100 text-indigo-800" },
+  research_extract: { label: "Анализ", style: "bg-indigo-50 text-indigo-700" },
+  research_more: { label: "Доп. поиск", style: "bg-amber-50 text-amber-700" },
+  research_failed: { label: "Не открылся", style: "bg-red-50 text-red-700" },
+  research_done: { label: "Сайт готов", style: "bg-emerald-50 text-emerald-700" },
+  supplier_saved: { label: "Сохранён", style: "bg-emerald-100 text-emerald-800" },
+  supplier_rejected: { label: "Отклонено", style: "bg-amber-100 text-amber-800" },
+  note: { label: "Заметка", style: "bg-slate-100 text-slate-600" },
+  run_finished: { label: "Итог", style: "bg-cyan-100 text-cyan-800" },
+  run_failed: { label: "Ошибка", style: "bg-red-100 text-red-800" },
+};
+const STOP: Record<string, string> = {
+  finished: "Агент завершил поиск",
+  target_reached: "Найдено нужное число поставщиков",
+  turn_limit: "Исчерпан лимит шагов",
+  time_limit: "Исчерпан лимит времени",
+  token_limit: "Исчерпан лимит токенов (бюджет запуска)",
+  no_action: "Агент остановился без итогового действия",
+  llm_error: "Ошибка модели",
+};
+const clock = (iso?: string) => (iso ? new Date(iso).toLocaleTimeString("ru-RU") : "");
+
+/** Ход одного запуска: живая лента шагов агента и карточки найденных поставщиков, которые появляются по мере сохранения. */
+export default function RunView({ runId, onFinished }: { runId: number; onFinished: () => void }) {
+  const [run, setRun] = useState<Run | null>(null);
+  const [events, setEvents] = useState<RunEvent[]>([]);
+  const [suppliers, setSuppliers] = useState<SupplierData[]>([]);
+  const [live, setLive] = useState(true);
+  const [selected, setSelected] = useState<number[]>([]);
+  const [comparing, setComparing] = useState(false);
+  const feed = useRef<HTMLUListElement>(null);
+  const shown = events.filter((e) => e.type !== "usage");
+
+  useEffect(() => {
+    setRun(null);
+    setEvents([]);
+    setSuppliers([]);
+    setSelected([]);
+    setComparing(false);
+    setLive(true);
+    const refresh = () => {
+      void fetchRun(runId).then(setRun);
+      void fetchRunSuppliers(runId).then(setSuppliers);
+    };
+    refresh();
+    const stop = subscribeRun(
+      runId,
+      (event) => {
+        setEvents((prev) => [...prev, event]);
+        if (event.type === "supplier_saved") void fetchRunSuppliers(runId).then(setSuppliers);
+      },
+      () => {
+        setLive(false);
+        refresh();
+        onFinished();
+      },
+    );
+    return stop;
+  }, [runId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    feed.current?.scrollTo({ top: feed.current.scrollHeight });
+  }, [shown.length]);
+
+  const searches = events.filter((e) => e.type === "search").length;
+  const pages = events.filter((e) => e.type === "fetch").length;
+  const tokens = (run?.stats?.prompt_tokens ?? 0) + (run?.stats?.completion_tokens ?? 0);
+  const usage = [...events].reverse().find((e) => e.type === "usage");
+  const liveCost = usage ? Number(usage.cost_rub) : (run?.stats?.cost_rub ?? 0);
+  const liveTokens = usage ? Number(usage.prompt_tokens) + Number(usage.completion_tokens) : tokens;
+
+  return (
+    <section className="space-y-4">
+      <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-lg font-semibold">
+            {run ? run.category : "Запуск"} <span className="text-sm font-normal text-slate-400">№{runId}</span>
+          </h2>
+          <span
+            className={`rounded-full px-3 py-1 text-xs font-medium ${
+              live ? "bg-blue-100 text-blue-800" : run?.status === "failed" ? "bg-red-100 text-red-800" : "bg-emerald-100 text-emerald-800"
+            }`}
+          >
+            {live ? "Идёт поиск…" : run?.status === "failed" ? "Не удалось" : "Завершён"}
+          </span>
+        </div>
+        {run && (
+          <p className="mt-1 text-sm text-slate-500">
+            {run.location ? run.location : "Вся Россия"}
+            {run.include_neighbors && run.regions.length > 1 ? ` и соседние регионы (${run.regions.length - 1})` : ""}
+            {run.supplier_type ? ` · ${run.supplier_type}` : ""}
+          </p>
+        )}
+        <p className="mt-2 text-sm text-slate-600">
+          Поисков: <b>{searches}</b> · открыто страниц: <b>{pages}</b> · найдено поставщиков: <b>{suppliers.length}</b>
+        </p>
+
+        {liveTokens > 0 && (
+          <p className="mt-1 text-sm text-slate-600">
+            Расход{live ? " сейчас" : ""}: <b>{liveCost.toLocaleString("ru-RU", { maximumFractionDigits: 1 })} ₽</b>
+            <span className="text-slate-400"> · {liveTokens.toLocaleString("ru-RU")} токенов, оценка по тарифу</span>
+          </p>
+        )}
+
+        <ul ref={feed} className="mt-3 max-h-72 space-y-1.5 overflow-y-auto overflow-x-hidden rounded-lg bg-slate-50 p-3">
+          {shown.length === 0 && <li className="text-sm text-slate-400">Ждём первых шагов агента…</li>}
+          {shown.map((e) => {
+            const kind = KINDS[e.type] ?? { label: e.type, style: "bg-slate-100 text-slate-600" };
+            return (
+              <li key={e.seq ?? e.message} className="grid grid-cols-[3.6rem_5.2rem_minmax(0,1fr)] items-baseline gap-2 text-sm">
+                <span className="text-xs text-slate-400">{clock(e.created_at)}</span>
+                <span className={`rounded px-1.5 py-0.5 text-center text-xs ${kind.style}`}>{kind.label}</span>
+                <span className="break-words text-slate-700">{e.message}</span>
+              </li>
+            );
+          })}
+        </ul>
+
+        {!live && run && (
+          <div className="mt-3 text-sm text-slate-600">
+            <p>
+              {run.error ? <span className="text-red-600">Ошибка: {run.error}. </span> : null}
+              {run.stop_reason ? `${STOP[run.stop_reason] ?? run.stop_reason}. ` : ""}
+              {tokens > 0 && `Использовано ${tokens.toLocaleString("ru-RU")} токенов за ${run.stats?.seconds ?? "?"} с${run.stats?.cost_rub != null ? `, примерно ${run.stats.cost_rub} ₽ (модель и поиск по тарифу)` : ""}.`}
+            </p>
+            {run.summary && !run.summary.startsWith("[TOOL_CALL") && !run.summary.startsWith("Сохранено поставщиков:") && (
+              <p className="mt-1 text-slate-500">{run.summary}</p>
+            )}
+          </div>
+        )}
+      </div>
+
+      <RecommendationPanel suppliers={suppliers} />
+
+      {comparing && selected.length >= 2 && (
+        <ComparisonTable suppliers={suppliers.filter((s) => selected.includes(s.id))} onClose={() => setComparing(false)} />
+      )}
+
+      {suppliers.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-sm font-medium text-slate-500">Все найденные поставщики ({suppliers.length}), по рейтингу</h2>
+            {suppliers.length >= 2 && (
+              <button
+                onClick={() => setComparing(true)}
+                disabled={selected.length < 2}
+                className="rounded-lg bg-slate-900 px-3 py-1.5 text-sm text-white hover:bg-slate-700 disabled:opacity-40"
+              >
+                Сравнить выбранных ({selected.length}/4)
+              </button>
+            )}
+          </div>
+          {suppliers.map((s) => (
+            <SupplierCard
+              key={s.id}
+              supplier={s}
+              selected={selected.includes(s.id)}
+              canSelect={selected.length < 4}
+              onToggle={() => setSelected((prev) => (prev.includes(s.id) ? prev.filter((x) => x !== s.id) : [...prev, s.id]))}
+              onNote={(id, note) => setSuppliers((prev) => prev.map((x) => (x.id === id ? { ...x, note } : x)))}
+            />
+          ))}
+        </div>
+      )}
+      {!live && suppliers.length === 0 && run?.status !== "failed" && (
+        <p className="rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800">Подходящих поставщиков не найдено. Попробуйте другую категорию или локацию.</p>
+      )}
+    </section>
+  );
+}

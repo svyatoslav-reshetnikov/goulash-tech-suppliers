@@ -1,0 +1,7 @@
+.env
+.env.*
+**/__pycache__
+.pytest_cache
+.venv
+tests
+scripts/model_check/out

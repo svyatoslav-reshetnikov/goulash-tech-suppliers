@@ -1,0 +1,194 @@
+import { useState } from "react";
+import { saveSupplierNote, type FieldValue, type SupplierData } from "../api";
+import RankBadge from "./RankBadge";
+
+const LABELS: Record<string, string> = {
+  phone: "Телефон",
+  email: "Email",
+  address: "Адрес",
+  description: "Чем занимается",
+  assortment: "Ассортимент",
+  regions: "Регионы поставки",
+  delivery_terms: "Доставка",
+  moq: "Минимальный заказ",
+  price_hint: "Цены",
+  certificates: "Сертификаты",
+};
+const MISSING_LABELS: Record<string, string> = {
+  phone: "контакты",
+  description: "чем занимается",
+  address: "адрес",
+  regions: "регионы работы",
+  delivery_terms: "условия доставки",
+  moq: "минимальный заказ",
+  price_hint: "цены",
+  certificates: "сертификаты",
+};
+const ORDER = ["phone", "email", "address", "description", "assortment", "regions", "delivery_terms", "moq", "price_hint", "certificates"];
+
+function Value({ item }: { item: FieldValue }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="text-sm">
+      <button onClick={() => setOpen(!open)} className="text-left" title="Показать источник">
+        {item.value}
+        <span className="ml-1.5 text-xs text-cyan-700 underline decoration-dotted">{open ? "скрыть источник" : "источник"}</span>
+      </button>
+      {open && (
+        <blockquote className="mt-1 rounded border-l-2 border-cyan-300 bg-slate-50 px-3 py-1.5 text-xs text-slate-600">
+          «{item.quote}»
+          <a href={item.source_url} target="_blank" rel="noreferrer" className="mt-1 block truncate text-cyan-700 hover:underline">
+            {item.source_url}
+          </a>
+          <span className="text-slate-400">проверено {new Date(item.verified_at).toLocaleDateString("ru-RU")}</span>
+        </blockquote>
+      )}
+    </div>
+  );
+}
+
+/** Карточка поставщика: у каждого поля можно открыть дословную цитату и страницу, откуда оно взято. */
+type CardProps = {
+  supplier: SupplierData;
+  selected?: boolean;
+  canSelect?: boolean;
+  onToggle?: () => void;
+  onNote?: (supplierId: number, note: string | null) => void;
+};
+
+const PARTS: [keyof SupplierData["ranking"]["breakdown"], string, number][] = [
+  ["relevance", "Совпадение с продуктом", 20],
+  ["location", "Расположение", 30],
+  ["completeness", "Полнота данных", 35],
+  ["reliability", "Надёжность", 15],
+];
+
+/** Заметка закупщика: хранится у поставщика и видна в любом запуске, где он найден. */
+function NoteEditor({ supplier, onNote }: { supplier: SupplierData; onNote?: CardProps["onNote"] }) {
+  const [text, setText] = useState(supplier.note ?? "");
+  const [state, setState] = useState<"saved" | "saving" | "error">("saved");
+  const dirty = text.trim() !== (supplier.note ?? "");
+
+  const save = async () => {
+    setState("saving");
+    try {
+      const stored = await saveSupplierNote(supplier.id, text);
+      setText(stored ?? "");
+      onNote?.(supplier.id, stored);
+      setState("saved");
+    } catch {
+      setState("error");
+    }
+  };
+
+  return (
+    <div className="mt-3 border-t border-slate-100 pt-3">
+      <label className="mb-1 block text-xs text-slate-400">Заметка</label>
+      <textarea
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        maxLength={2000}
+        rows={2}
+        placeholder="Например: звонили 25.10, обещали прайс до пятницы"
+        className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-cyan-500"
+      />
+      <div className="mt-1 flex items-center gap-3">
+        <button
+          onClick={save}
+          disabled={!dirty || state === "saving"}
+          className="rounded-lg bg-slate-900 px-3 py-1 text-xs text-white hover:bg-slate-700 disabled:opacity-40"
+        >
+          {state === "saving" ? "Сохраняем…" : "Сохранить заметку"}
+        </button>
+        {state === "error" && <span className="text-xs text-red-600">Не удалось сохранить</span>}
+        {state === "saved" && !dirty && supplier.note && <span className="text-xs text-slate-400">Сохранено</span>}
+      </div>
+    </div>
+  );
+}
+
+export default function SupplierCard({ supplier, selected = false, canSelect = true, onToggle, onNote }: CardProps) {
+  const [why, setWhy] = useState(false);
+  const ranking = supplier.ranking;
+  const type = supplier.fields.supplier_type?.[0];
+  const names = supplier.fields.name ?? [];
+  const rows = ORDER.filter((f) => supplier.fields[f]?.length);
+  return (
+    <article className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <header className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
+        <h3 className="text-base font-semibold">{supplier.name}</h3>
+        {type && <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800">{type.value}</span>}
+      </header>
+      <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
+        <RankBadge ranking={ranking} />
+        {onToggle && (
+          <label className={`flex items-center gap-1.5 text-xs ${selected || canSelect ? "text-slate-600" : "text-slate-300"}`}>
+            <input type="checkbox" checked={selected} disabled={!selected && !canSelect} onChange={onToggle} />
+            Сравнить
+          </label>
+        )}
+      </div>
+      <a href={supplier.website} target="_blank" rel="noreferrer" className="text-sm text-cyan-700 hover:underline">
+        {supplier.domain}
+      </a>
+      <button onClick={() => setWhy(!why)} className="ml-3 text-xs text-slate-500 underline decoration-dotted">
+        {why ? "скрыть оценку" : "почему такая оценка"}
+      </button>
+      {supplier.research && (
+        <p className={`mt-2 text-xs ${supplier.research.missing.length ? "text-amber-700" : "text-emerald-700"}`}>
+          Изучено страниц сайта: {supplier.research.pages.length}.{" "}
+          {supplier.research.missing.length
+            ? `Не найдено на сайте: ${supplier.research.missing.map((f) => MISSING_LABELS[f] ?? f).join(", ")}.`
+            : "Все обязательные данные найдены."}
+        </p>
+      )}
+      {why && (
+        <div className="mt-2 rounded-lg bg-slate-50 p-3 text-sm">
+          <div className="space-y-1">
+            {PARTS.map(([key, label, max]) => (
+              <div key={key} className="grid grid-cols-[10rem_1fr_3rem] items-center gap-2 text-xs">
+                <span className="text-slate-500">{label}</span>
+                <span className="h-1.5 overflow-hidden rounded bg-slate-200">
+                  <span className="block h-full bg-cyan-500" style={{ width: `${(ranking.breakdown[key] / max) * 100}%` }} />
+                </span>
+                <span className="text-right text-slate-500">{ranking.breakdown[key]}/{max}</span>
+              </div>
+            ))}
+          </div>
+          <ul className="mt-2 list-disc space-y-0.5 pl-5 text-xs text-slate-600">
+            {ranking.reasons.map((r) => (
+              <li key={r}>{r}</li>
+            ))}
+          </ul>
+          {ranking.missing.length > 0 && <p className="mt-1 text-xs text-slate-400">Нет данных: {ranking.missing.join(", ")}</p>}
+        </div>
+      )}
+      {names.length > 1 && <p className="mt-1 text-xs text-slate-400">Также: {names.slice(1).map((n) => n.value).join("; ")}</p>}
+      <dl className="mt-3 space-y-1.5">
+        {rows.map((field) => (
+          <div key={field} className="grid grid-cols-[8.5rem_1fr] gap-2">
+            <dt className="text-xs text-slate-400">{LABELS[field]}</dt>
+            <dd className="space-y-1">
+              {supplier.fields[field].map((item) => (
+                <Value key={`${field}-${item.value}`} item={item} />
+              ))}
+            </dd>
+          </div>
+        ))}
+        {supplier.inn && (
+          <div className="grid grid-cols-[8.5rem_1fr] gap-2">
+            <dt className="text-xs text-slate-400">ИНН</dt>
+            <dd className="text-sm">
+              {supplier.inn}{" "}
+              <a href={`https://www.rusprofile.ru/search?query=${supplier.inn}`} target="_blank" rel="noreferrer" className="text-xs text-cyan-700 hover:underline">
+                проверить в реестре
+              </a>
+            </dd>
+          </div>
+        )}
+        {rows.length === 0 && !supplier.inn && <p className="text-sm text-slate-400">Других данных агент не нашёл.</p>}
+      </dl>
+      <NoteEditor supplier={supplier} onNote={onNote} />
+    </article>
+  );
+}
