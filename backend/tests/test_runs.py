@@ -435,3 +435,21 @@ async def test_previous_run_finds_the_same_search_and_ignores_failed_or_differen
         assert (await previous_run(session=session, **{**same, "location_kind": None, "location_key": None}))["run"] is None  # вся Россия — другой поиск
         newer = await new_run(factory, location_kind="city", location_key="RU-TA|Казань", include_neighbors=False)
         assert (await previous_run(session=session, **same))["run"]["id"] == newer  # берётся самый свежий
+
+
+@needs_db
+@with_db
+async def test_db_sink_does_not_store_the_same_address_twice_and_keeps_the_fullest(factory):
+    run_id = await new_run(factory)
+    sink = DbSink(factory, run_id)
+    site = "https://suomifish.test"
+    short = AcceptedField("address", "Московская область, Мытищи, Осташковское шоссе, вл.5, с.1", "Адрес: Московская область, Мытищи, Осташковское шоссе, вл.5, с.1", f"{site}/contacts/")
+    full = AcceptedField("address", "127224, Россия, Московская обл., Мытищи, Осташковское шоссе, вл.5, с.1", "127224, Россия, Московская обл., Мытищи, Осташковское шоссе, вл.5, с.1", f"{site}/cart/checkout/")
+    saved = await sink.save(draft(domain="suomifish.test", fields=[AcceptedField("name", "SuomiFish", "SuomiFish", f"{site}/"), short, full]))
+    await sink.save(draft(domain="suomifish.test", fields=[short]))  # тот же адрес в следующем запуске
+    async with factory() as session:
+        addresses = (await session.execute(
+            select(SupplierField).where(SupplierField.supplier_id == saved.supplier_id, SupplierField.field == "address")
+        )).scalars().all()
+        assert len(addresses) == 1
+        assert addresses[0].value == full.value and addresses[0].quote == full.quote and addresses[0].source_url.endswith("/cart/checkout/")

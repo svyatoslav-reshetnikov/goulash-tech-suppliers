@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.agent.models import SaveOutcome, SupplierDraft
 from app.agent.pages import Page
+from app.agent.validation import DEDUP_FIELDS, near_duplicate
 from app.db.models import FetchedPage, RunEvent, RunSupplier, Supplier, SupplierField
 
 PAGE_TTL = timedelta(days=7)
@@ -48,9 +49,22 @@ class DbSink:
             now = datetime.now(UTC)
             for item in draft.fields:
                 known = existing.get((item.field, item.value))
+                if known is None and item.field in DEDUP_FIELDS:
+                    similar = next(
+                        (f for (name, value), f in existing.items() if name == item.field and near_duplicate(name, value, item.value)), None
+                    )
+                    if similar is not None:  # тот же адрес или описание в другой записи: дубль не копим
+                        if len(item.value) > len(similar.value):  # новая запись полнее: заменяем значение вместе с цитатой
+                            existing.pop((similar.field, similar.value), None)
+                            similar.value, similar.quote, similar.source_url = item.value, item.quote, item.source_url
+                            existing[(similar.field, similar.value)] = similar
+                        similar.run_id, similar.verified_at = self._run_id, now
+                        continue
                 if known is None:
-                    session.add(SupplierField(supplier_id=supplier.id, field=item.field, value=item.value,
-                                              source_url=item.source_url, quote=item.quote, run_id=self._run_id))
+                    created_field = SupplierField(supplier_id=supplier.id, field=item.field, value=item.value,
+                                                  source_url=item.source_url, quote=item.quote, run_id=self._run_id)
+                    session.add(created_field)
+                    existing[(item.field, item.value)] = created_field
                 else:  # то же значение найдено снова: обновляем источник и дату проверки
                     known.source_url, known.quote, known.run_id, known.verified_at = item.source_url, item.quote, self._run_id, now
             await session.execute(

@@ -92,6 +92,43 @@ def same_site(a: str, b: str) -> bool:
     return a == b or a.endswith("." + b) or b.endswith("." + a)
 
 
+_ADDRESS_NOISE = {"россия", "рф", "г", "город", "ул", "улица", "д", "дом", "вл", "владение", "с", "стр", "строение", "к", "корп", "корпус"}
+_ADDRESS_ALIASES = {"обл": "область", "пр": "проспект", "пр-т": "проспект", "ш": "шоссе", "наб": "набережная", "пер": "переулок"}
+# поля, у которых одно и то же сведение с разных страниц приходит в разной записи; остаётся самая полная
+DEDUP_FIELDS = {"address", "assortment", "description"}
+
+
+def _tokens(field: str, value: str) -> frozenset[str]:
+    words = re.findall(r"[a-zа-я0-9]+", value.lower().replace("ё", "е"))
+    if field == "address":
+        words = [_ADDRESS_ALIASES.get(w, w) for w in words if w not in _ADDRESS_NOISE and not re.fullmatch(r"\d{6}", w)]
+    return frozenset(words)
+
+
+def near_duplicate(field: str, a: str, b: str) -> bool:
+    """Одно и то же значение в разной записи: слова одного целиком входят в другое («Москва, ул. Ленина, 5» и «127000, Россия, г. Москва, ул. Ленина, 5»)."""
+    ta, tb = _tokens(field, a), _tokens(field, b)
+    return bool(ta) and bool(tb) and (ta <= tb or tb <= ta)
+
+
+def collapse_duplicates(field: str, values: list[str]) -> list[str]:
+    """Убирает значения, которые целиком входят в другое, более полное; порядок остальных сохраняется."""
+    if field not in DEDUP_FIELDS:
+        return values
+    kept: list[str] = []
+    for value in sorted(values, key=len, reverse=True):
+        if not any(near_duplicate(field, value, other) for other in kept):
+            kept.append(value)
+    return [v for v in values if v in kept]
+
+
+def address_problem(value: str) -> str | None:
+    """Адрес без номера дома («Москва» из статьи о технологии) адресом не считается."""
+    if not re.search(r"\d", value) or len(_tokens("address", value)) < 2:
+        return "это не адрес: нужен адрес с улицей и номером дома, например «г. Казань, ул. Бухарская, 4В». Название города или региона адресом не является"
+    return None
+
+
 def normalize_value(field: str, value: str) -> tuple[str | None, str | None]:
     """Возвращает (нормализованное значение, причина отказа)."""
     value = value.strip()
@@ -111,6 +148,8 @@ def normalize_value(field: str, value: str) -> tuple[str | None, str | None]:
         return (kind, None) if kind in SUPPLIER_TYPES else (None, "допустимо: производитель, дистрибьютор, оптовик")
     if len(value) > 600:
         return None, "значение слишком длинное (до 600 символов)"
+    if field == "address" and (problem := address_problem(value)):
+        return None, problem
     return value, None
 
 

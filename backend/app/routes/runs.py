@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.agent.validation import SUPPLIER_TYPES
+from app.agent.validation import SUPPLIER_TYPES, address_problem, collapse_duplicates
 from app.config import get_settings
 from app.db.models import Category, Run, RunEvent, RunSupplier, Supplier, SupplierField
 from app.db.session import SessionLocal, get_session
@@ -161,6 +161,12 @@ async def run_suppliers(run_id: int, session: AsyncSession = Depends(get_session
     by_supplier: dict[int, dict[str, list[SupplierField]]] = {}
     for f in fields:
         by_supplier.setdefault(f.supplier_id, {}).setdefault(f.field, []).append(f)
+    for per_field in by_supplier.values():  # данные прошлых запусков: прячем не-адреса и дубли одного и того же
+        if "address" in per_field:
+            per_field["address"] = [f for f in per_field["address"] if address_problem(f.value) is None]
+        for name, items in per_field.items():
+            keep = set(collapse_duplicates(name, [f.value for f in items]))
+            per_field[name] = [f for f in items if f.value in keep]
 
     category = await session.get(Category, run.category_id) if run.category_id else None
     primary = next((r["id"] for r in run.regions if r["role"] == "primary"), None)

@@ -347,3 +347,32 @@ def test_usage_events_report_growing_spend_during_research():
     assert usage and usage[-1]["prompt_tokens"] + usage[-1]["completion_tokens"] > 0
     totals = [d["prompt_tokens"] + d["completion_tokens"] for d in usage]
     assert totals == sorted(totals)
+
+
+# --- адреса: настоящие данные запуска «Рис для суши», Москва ---
+
+REAL_ADDRESSES = [
+    "Московская область, Мытищи, Осташковское шоссе, вл.5, с.1",
+    "Москва",
+    "127224, Россия, Московская обл., Мытищи, Осташковское шоссе, вл.5, с.1",
+]
+
+
+def test_address_must_have_a_house_number_not_just_a_city():
+    from app.agent.validation import normalize_value
+
+    assert normalize_value("address", "Москва")[0] is None
+    assert normalize_value("address", "г. Москва")[0] is None
+    assert "не адрес" in normalize_value("address", "Москва")[1]
+    for good in ("г. Мытищи, ул. Угольная, 6", "Россия, Москва, Коровинское шоссе, 35с4", "123022, г. Москва, Звенигородское шоссе, д. 9/27с1", "ул. Ленина, 5"):
+        assert normalize_value("address", good)[0] == good
+
+
+def test_same_address_in_different_writing_is_collapsed_to_the_fullest():
+    from app.agent.validation import address_problem, collapse_duplicates
+
+    real = [a for a in REAL_ADDRESSES if address_problem(a) is None]
+    assert collapse_duplicates("address", real) == [REAL_ADDRESSES[2]]
+    other = ["г. Казань, ул. Бухарская, 4В", "г. Казань, ул. Бухарская, 6"]
+    assert collapse_duplicates("address", other) == other  # разные дома не склеиваются
+    assert collapse_duplicates("phone", ["+7 (843) 555-01-23", "+7 (843) 555-01-23 доб. 5"]) == ["+7 (843) 555-01-23", "+7 (843) 555-01-23 доб. 5"]  # только описательные поля
