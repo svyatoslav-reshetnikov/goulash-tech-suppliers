@@ -1,4 +1,5 @@
 import type { SupplierData } from "../api";
+import { FieldText } from "./Linkified";
 
 const ROWS: [string, string][] = [
   ["supplier_type", "Тип"],
@@ -15,11 +16,19 @@ const ROWS: [string, string][] = [
 ];
 
 /** Сравнение 2–4 поставщиков бок о бок; недостающие данные видны сразу. */
-export default function ComparisonTable({ suppliers, onClose }: { suppliers: SupplierData[]; onClose: () => void }) {
+export default function ComparisonTable({
+  suppliers,
+  onClose,
+  onRemove,
+}: {
+  suppliers: SupplierData[];
+  onClose: () => void;
+  onRemove: (id: number) => void;
+}) {
   const best = Math.max(...suppliers.map((s) => s.ranking.score));
   const cell = (s: SupplierData, field: string) => {
     const values = s.fields[field]?.map((v) => v.value) ?? [];
-    return values.length ? values.join("; ") : null;
+    return values.length ? values : null;
   };
   return (
     <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -29,6 +38,10 @@ export default function ComparisonTable({ suppliers, onClose }: { suppliers: Sup
           Закрыть
         </button>
       </div>
+      <p className="mb-3 text-sm text-slate-500">
+        Выбранные поставщики рядом, строка за строкой. Лучшая оценка выделена зелёным, «нет данных» значит, что агент не нашёл это на сайте. Телефоны, почты и
+        сайты кликабельны.
+      </p>
       <div className="overflow-x-auto">
         <table className="w-full min-w-[34rem] border-collapse text-left text-sm">
           <thead>
@@ -40,6 +53,9 @@ export default function ComparisonTable({ suppliers, onClose }: { suppliers: Sup
                   <a href={s.website} target="_blank" rel="noreferrer" className="text-xs font-normal text-cyan-700 hover:underline">
                     {s.domain}
                   </a>
+                  <button onClick={() => onRemove(s.id)} className="mt-0.5 block text-xs font-normal text-slate-400 hover:text-slate-700">
+                    убрать из сравнения
+                  </button>
                 </th>
               ))}
             </tr>
@@ -67,7 +83,17 @@ export default function ComparisonTable({ suppliers, onClose }: { suppliers: Sup
                   const value = cell(s, field);
                   return (
                     <td key={s.id} className="p-2">
-                      {value ?? <span className="italic text-slate-300">нет данных</span>}
+                      {value ? (
+                        <div className="space-y-0.5">
+                          {value.map((v) => (
+                            <div key={v}>
+                              <FieldText field={field} value={v} />
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="italic text-slate-300">нет данных</span>
+                      )}
                     </td>
                   );
                 })}

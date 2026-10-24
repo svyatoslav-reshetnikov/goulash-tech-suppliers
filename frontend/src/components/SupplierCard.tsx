@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { saveSupplierNote, type FieldValue, type SupplierData } from "../api";
+import { FieldText } from "./Linkified";
 import RankBadge from "./RankBadge";
 
 const LABELS: Record<string, string> = {
@@ -26,13 +27,13 @@ const MISSING_LABELS: Record<string, string> = {
 };
 const ORDER = ["phone", "email", "address", "description", "assortment", "regions", "delivery_terms", "moq", "price_hint", "certificates"];
 
-function Value({ item }: { item: FieldValue }) {
+function Value({ field, item }: { field: string; item: FieldValue }) {
   const [open, setOpen] = useState(false);
   return (
     <div className="text-sm">
-      <button onClick={() => setOpen(!open)} className="text-left" title="Показать источник">
-        {item.value}
-        <span className="ml-1.5 text-xs text-cyan-700 underline decoration-dotted">{open ? "скрыть источник" : "источник"}</span>
+      <FieldText field={field} value={item.value} />
+      <button onClick={() => setOpen(!open)} className="ml-1.5 text-xs text-slate-500 underline decoration-dotted" title="Показать, откуда взято">
+        {open ? "скрыть источник" : "источник"}
       </button>
       {open && (
         <blockquote className="mt-1 rounded border-l-2 border-cyan-300 bg-slate-50 px-3 py-1.5 text-xs text-slate-600">
@@ -114,13 +115,18 @@ export default function SupplierCard({ supplier, selected = false, canSelect = t
   const names = supplier.fields.name ?? [];
   const rows = ORDER.filter((f) => supplier.fields[f]?.length);
   return (
-    <article className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+    <article className={`rounded-xl border p-4 shadow-sm ${ranking.recommended ? "border-emerald-300 bg-emerald-50/40" : "border-slate-200 bg-white"}`}>
       <header className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
         <h3 className="text-base font-semibold">{supplier.name}</h3>
         {type && <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800">{type.value}</span>}
       </header>
       <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
-        <RankBadge ranking={ranking} />
+        <span className="flex flex-wrap items-center gap-2">
+          <RankBadge ranking={ranking} />
+          {ranking.recommended && (
+            <span className="rounded-full bg-emerald-600 px-2.5 py-0.5 text-xs font-medium text-white">Рекомендуем связаться</span>
+          )}
+        </span>
         {onToggle && (
           <label className={`flex items-center gap-1.5 text-xs ${selected || canSelect ? "text-slate-600" : "text-slate-300"}`}>
             <input type="checkbox" checked={selected} disabled={!selected && !canSelect} onChange={onToggle} />
@@ -142,6 +148,25 @@ export default function SupplierCard({ supplier, selected = false, canSelect = t
             : "Все обязательные данные найдены."}
         </p>
       )}
+      {ranking.recommended && (
+        <div className="mt-3 space-y-2 text-sm">
+          <ul className="list-disc space-y-0.5 pl-5 text-slate-600">
+            {ranking.reasons.map((r) => (
+              <li key={r}>{r}</li>
+            ))}
+          </ul>
+          {ranking.questions.length > 0 && (
+            <div className="rounded bg-white p-2.5 text-slate-700 ring-1 ring-emerald-100">
+              <b>Что уточнить при звонке:</b>
+              <ul className="mt-1 list-disc space-y-0.5 pl-5">
+                {ranking.questions.map((q) => (
+                  <li key={q}>{q}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
       {why && (
         <div className="mt-2 rounded-lg bg-slate-50 p-3 text-sm">
           <div className="space-y-1">
@@ -155,11 +180,25 @@ export default function SupplierCard({ supplier, selected = false, canSelect = t
               </div>
             ))}
           </div>
-          <ul className="mt-2 list-disc space-y-0.5 pl-5 text-xs text-slate-600">
-            {ranking.reasons.map((r) => (
-              <li key={r}>{r}</li>
-            ))}
-          </ul>
+          {!ranking.recommended && (
+            <>
+              <ul className="mt-2 list-disc space-y-0.5 pl-5 text-xs text-slate-600">
+                {ranking.reasons.map((r) => (
+                  <li key={r}>{r}</li>
+                ))}
+              </ul>
+              {ranking.questions.length > 0 && (
+                <div className="mt-2 text-xs text-slate-600">
+                  <b>Что уточнить:</b>
+                  <ul className="mt-1 list-disc space-y-0.5 pl-5">
+                    {ranking.questions.map((q) => (
+                      <li key={q}>{q}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </>
+          )}
           {ranking.missing.length > 0 && <p className="mt-1 text-xs text-slate-400">Нет данных: {ranking.missing.join(", ")}</p>}
         </div>
       )}
@@ -170,7 +209,7 @@ export default function SupplierCard({ supplier, selected = false, canSelect = t
             <dt className="text-xs text-slate-400">{LABELS[field]}</dt>
             <dd className="space-y-1">
               {supplier.fields[field].map((item) => (
-                <Value key={`${field}-${item.value}`} item={item} />
+                <Value key={`${field}-${item.value}`} field={field} item={item} />
               ))}
             </dd>
           </div>

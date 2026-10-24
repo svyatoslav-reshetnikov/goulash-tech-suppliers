@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { fetchRun, fetchRunSuppliers, subscribeRun, type Run, type RunEvent, type SupplierData } from "../api";
 import ComparisonTable from "./ComparisonTable";
-import RecommendationPanel from "./RecommendationPanel";
 import SupplierCard from "./SupplierCard";
 
 const KINDS: Record<string, { label: string; style: string }> = {
@@ -40,6 +39,7 @@ export default function RunView({ runId, onFinished }: { runId: number; onFinish
   const [selected, setSelected] = useState<number[]>([]);
   const [comparing, setComparing] = useState(false);
   const feed = useRef<HTMLUListElement>(null);
+  const comparison = useRef<HTMLDivElement>(null);
   const shown = events.filter((e) => e.type !== "usage");
 
   useEffect(() => {
@@ -77,7 +77,7 @@ export default function RunView({ runId, onFinished }: { runId: number; onFinish
   const pages = events.filter((e) => e.type === "fetch").length;
   const tokens = (run?.stats?.prompt_tokens ?? 0) + (run?.stats?.completion_tokens ?? 0);
   const usage = [...events].reverse().find((e) => e.type === "usage");
-  const liveCost = usage ? Number(usage.cost_rub) : (run?.stats?.cost_rub ?? 0);
+  const liveCost = usage ? Number(usage.cost_rub) : (run?.stats?.cost_rub ?? null);
   const liveTokens = usage ? Number(usage.prompt_tokens) + Number(usage.completion_tokens) : tokens;
 
   return (
@@ -108,8 +108,9 @@ export default function RunView({ runId, onFinished }: { runId: number; onFinish
 
         {liveTokens > 0 && (
           <p className="mt-1 text-sm text-slate-600">
-            Расход{live ? " сейчас" : ""}: <b>{liveCost.toLocaleString("ru-RU", { maximumFractionDigits: 1 })} ₽</b>
-            <span className="text-slate-400"> · {liveTokens.toLocaleString("ru-RU")} токенов, оценка по тарифу</span>
+            Расход{live ? " сейчас" : ""}:{" "}
+            {liveCost !== null && <b>{liveCost.toLocaleString("ru-RU", { maximumFractionDigits: 1 })} ₽ · </b>}
+            <span className="text-slate-500">{liveTokens.toLocaleString("ru-RU")} токенов{liveCost !== null ? ", оценка по тарифу" : ""}</span>
           </p>
         )}
 
@@ -141,24 +142,27 @@ export default function RunView({ runId, onFinished }: { runId: number; onFinish
         )}
       </div>
 
-      <RecommendationPanel suppliers={suppliers} />
-
       {comparing && selected.length >= 2 && (
-        <ComparisonTable suppliers={suppliers.filter((s) => selected.includes(s.id))} onClose={() => setComparing(false)} />
+        <div ref={comparison}>
+          <ComparisonTable
+            suppliers={suppliers.filter((s) => selected.includes(s.id))}
+            onClose={() => setComparing(false)}
+            onRemove={(id) => setSelected((prev) => prev.filter((x) => x !== id))}
+          />
+        </div>
       )}
 
       {suppliers.length > 0 && (
         <div className="space-y-3">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <h2 className="text-sm font-medium text-slate-500">Все найденные поставщики ({suppliers.length}), по рейтингу</h2>
-            {suppliers.length >= 2 && (
-              <button
-                onClick={() => setComparing(true)}
-                disabled={selected.length < 2}
-                className="rounded-lg bg-slate-900 px-3 py-1.5 text-sm text-white hover:bg-slate-700 disabled:opacity-40"
-              >
-                Сравнить выбранных ({selected.length}/4)
-              </button>
+          <div>
+            <h2 className="text-lg font-semibold">Найденные поставщики ({suppliers.length})</h2>
+            <p className="text-sm text-slate-500">
+              По рейтингу, лучшие отмечены «Рекомендуем связаться». Чтобы сравнить, отметьте галочкой «Сравнить» у 2–4 поставщиков: внизу появится кнопка.
+            </p>
+            {!live && !suppliers.some((s) => s.ranking.recommended) && (
+              <p className="mt-2 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">
+                Рекомендовать пока некого: по найденным поставщикам слишком мало подтверждённых данных (оценка ниже 40 из 100).
+              </p>
             )}
           </div>
           {suppliers.map((s) => (
@@ -171,6 +175,32 @@ export default function RunView({ runId, onFinished }: { runId: number; onFinish
               onNote={(id, note) => setSuppliers((prev) => prev.map((x) => (x.id === id ? { ...x, note } : x)))}
             />
           ))}
+        </div>
+      )}
+      {selected.length > 0 && (
+        <div className="fixed inset-x-0 bottom-4 z-10 mx-auto flex w-fit max-w-[calc(100%-2rem)] flex-wrap items-center gap-3 rounded-xl bg-slate-900 px-4 py-2.5 text-sm text-white shadow-lg">
+          <span>
+            Для сравнения выбрано: {selected.length} из 4{selected.length < 2 ? ". Выберите ещё хотя бы одного" : ""}
+          </span>
+          <button
+            onClick={() => {
+              setComparing(true);
+              setTimeout(() => comparison.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+            }}
+            disabled={selected.length < 2}
+            className="rounded-lg bg-white px-3 py-1 font-medium text-slate-900 hover:bg-slate-200 disabled:opacity-40"
+          >
+            Сравнить
+          </button>
+          <button
+            onClick={() => {
+              setSelected([]);
+              setComparing(false);
+            }}
+            className="text-slate-300 hover:text-white"
+          >
+            Сбросить
+          </button>
         </div>
       )}
       {!live && suppliers.length === 0 && run?.status !== "failed" && (
