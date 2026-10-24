@@ -89,7 +89,7 @@ export default function SearchForm({ onStarted, onOpenPrevious, busy }: { onStar
           {starting ? "Запускаем…" : "Найти поставщиков"}
         </button>
         <span className="text-xs text-slate-400">
-          Поиск делает агент на платной модели (YandexGPT): обычно 40–70 ₽ за запуск, не больше ~250 ₽. Агент изучает сайты подробно, поэтому идёт 2–4 минуты.
+          Поиск делает агент на платной модели (YandexGPT): обычно 70–100 ₽ за запуск, не больше ~250 ₽. Агент изучает сайты подробно, поэтому идёт 2–4 минуты.
         </span>
       </div>
       {previous && (

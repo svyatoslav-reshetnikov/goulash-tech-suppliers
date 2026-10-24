@@ -140,33 +140,6 @@ export default function SupplierCard({ supplier, selected = false, canSelect = t
       <button onClick={() => setWhy(!why)} className="ml-3 text-xs text-slate-500 underline decoration-dotted">
         {why ? "скрыть оценку" : "почему такая оценка"}
       </button>
-      {supplier.research && (
-        <p className={`mt-2 text-xs ${supplier.research.missing.length ? "text-amber-700" : "text-emerald-700"}`}>
-          Изучено страниц сайта: {supplier.research.pages.length}.{" "}
-          {supplier.research.missing.length
-            ? `Не найдено на сайте: ${supplier.research.missing.map((f) => MISSING_LABELS[f] ?? f).join(", ")}.`
-            : "Все обязательные данные найдены."}
-        </p>
-      )}
-      {ranking.recommended && (
-        <div className="mt-3 space-y-2 text-sm">
-          <ul className="list-disc space-y-0.5 pl-5 text-slate-600">
-            {ranking.reasons.map((r) => (
-              <li key={r}>{r}</li>
-            ))}
-          </ul>
-          {ranking.questions.length > 0 && (
-            <div className="rounded bg-white p-2.5 text-slate-700 ring-1 ring-emerald-100">
-              <b>Что уточнить при звонке:</b>
-              <ul className="mt-1 list-disc space-y-0.5 pl-5">
-                {ranking.questions.map((q) => (
-                  <li key={q}>{q}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-      )}
       {why && (
         <div className="mt-2 rounded-lg bg-slate-50 p-3 text-sm">
           <div className="space-y-1">
@@ -202,6 +175,33 @@ export default function SupplierCard({ supplier, selected = false, canSelect = t
           {ranking.missing.length > 0 && <p className="mt-1 text-xs text-slate-400">Нет данных: {ranking.missing.join(", ")}</p>}
         </div>
       )}
+      {supplier.research && (
+        <p className={`mt-2 text-xs ${supplier.research.missing.length ? "text-amber-700" : "text-emerald-700"}`}>
+          Изучено страниц сайта: {supplier.research.pages.length}.{" "}
+          {supplier.research.missing.length
+            ? `Не найдено на сайте: ${supplier.research.missing.map((f) => MISSING_LABELS[f] ?? f).join(", ")}.`
+            : "Все обязательные данные найдены."}
+        </p>
+      )}
+      {ranking.recommended && (
+        <div className="mt-3 space-y-2 text-sm">
+          <ul className="list-disc space-y-0.5 pl-5 text-slate-600">
+            {ranking.reasons.map((r) => (
+              <li key={r}>{r}</li>
+            ))}
+          </ul>
+          {ranking.questions.length > 0 && (
+            <div className="rounded bg-white p-2.5 text-slate-700 ring-1 ring-emerald-100">
+              <b>Что уточнить при звонке:</b>
+              <ul className="mt-1 list-disc space-y-0.5 pl-5">
+                {ranking.questions.map((q) => (
+                  <li key={q}>{q}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
       {names.length > 1 && <p className="mt-1 text-xs text-slate-400">Также: {names.slice(1).map((n) => n.value).join("; ")}</p>}
       <dl className="mt-3 space-y-1.5">
         {rows.map((field) => (
@@ -219,7 +219,7 @@ export default function SupplierCard({ supplier, selected = false, canSelect = t
             <dt className="text-xs text-slate-400">ИНН</dt>
             <dd className="text-sm">
               {supplier.inn}{" "}
-              <a href={`https://www.rusprofile.ru/search?query=${supplier.inn}`} target="_blank" rel="noreferrer" className="text-xs text-cyan-700 hover:underline">
+              <a href={`https://checko.ru/search?query=${supplier.inn}`} target="_blank" rel="noreferrer" className="text-xs text-cyan-700 hover:underline">
                 проверить в реестре
               </a>
             </dd>
