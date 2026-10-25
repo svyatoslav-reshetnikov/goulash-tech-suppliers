@@ -45,8 +45,6 @@ services:
       - "${HTTPS_PORT:-8443}:443"  # нужен, только если SITE_ADDRESS — домен (тогда Caddy сам получает сертификат)
     environment:
       SITE_ADDRESS: ${SITE_ADDRESS:-:80}
-      BASIC_AUTH_USER: ${BASIC_AUTH_USER:-admin}
-      BASIC_AUTH_HASH: ${BASIC_AUTH_HASH:-}  # хеш пароля; пусто — вход без пароля
     volumes:
       - caddy_data:/data  # выданные сертификаты
       - caddy_config:/config

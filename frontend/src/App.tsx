@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
-import { fetchHealth, type Health } from "./api";
+import { UNAUTHORIZED_EVENT, fetchAuth, fetchHealth, logout, type AuthState, type Health } from "./api";
 import CatalogPage from "./components/CatalogPage";
 import HistoryPage from "./components/HistoryPage";
+import LoginPage from "./components/LoginPage";
 import SearchPage from "./components/SearchPage";
 
 type Route = { tab: "search" | "history" | "catalog"; runId: number | null };
@@ -15,12 +16,20 @@ const parse = (hash: string): Route => {
 export default function App() {
   const [route, setRoute] = useState<Route>(() => parse(window.location.hash));
   const [health, setHealth] = useState<Health | "unreachable" | null>(null);
+  const [auth, setAuth] = useState<AuthState | null>(null);
 
   useEffect(() => {
     const onHash = () => setRoute(parse(window.location.hash));
+    // сессия закончилась посреди работы: любой ответ 401 возвращает на страницу входа
+    const onUnauthorized = () => setAuth((prev) => (prev ? { ...prev, authenticated: false } : prev));
     window.addEventListener("hashchange", onHash);
+    window.addEventListener(UNAUTHORIZED_EVENT, onUnauthorized);
     fetchHealth().then(setHealth).catch(() => setHealth("unreachable"));
-    return () => window.removeEventListener("hashchange", onHash);
+    fetchAuth().then(setAuth).catch(() => setAuth({ auth_required: false, authenticated: true, user: null }));
+    return () => {
+      window.removeEventListener("hashchange", onHash);
+      window.removeEventListener(UNAUTHORIZED_EVENT, onUnauthorized);
+    };
   }, []);
 
   const go = useCallback((hash: string) => {
@@ -30,11 +39,27 @@ export default function App() {
   const tabClass = (active: boolean) =>
     `rounded-lg px-4 py-1.5 text-sm font-medium ${active ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"}`;
 
+  if (auth === null) return <div className="p-8 text-sm text-slate-400">Загрузка…</div>;
+  if (!auth.authenticated) return <LoginPage onLoggedIn={setAuth} />;
+
   return (
     <div className="mx-auto max-w-3xl space-y-5 px-4 py-8">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold">Поиск поставщиков продуктов питания</h1>
-        <span className="rounded-full bg-cyan-100 px-3 py-1 text-xs font-medium text-cyan-800">тестовое задание</span>
+        <span className="flex items-center gap-3">
+          <span className="rounded-full bg-cyan-100 px-3 py-1 text-xs font-medium text-cyan-800">тестовое задание</span>
+          {auth.auth_required && (
+            <button
+              onClick={() => {
+                void logout().then(() => setAuth({ auth_required: true, authenticated: false, user: null }));
+              }}
+              className="text-sm text-slate-500 hover:text-slate-800"
+              title={auth.user ? `Вы вошли как ${auth.user}` : undefined}
+            >
+              Выйти
+            </button>
+          )}
+        </span>
       </header>
 
       <nav className="flex gap-2">

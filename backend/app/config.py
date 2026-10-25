@@ -31,6 +31,11 @@ class Settings(BaseSettings):
 
     yandex_cloud_folder_id: str | None = None
 
+    # Вход по логину и паролю. Хеш пароля: `python3 backend/scripts/hash_password.py`. Хеш пустой: вход отключён
+    auth_user: str | None = None
+    auth_password_hash: SecretStr | None = None
+    auth_session_days: int = 7
+
     llm_base_url: str | None = None
     llm_api_key: SecretStr | None = None
     llm_model: str | None = None

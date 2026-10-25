@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+from app import auth
 from app.catalog import snapshot
 from app.db.session import engine
 from app.routes import catalog as catalog_routes
@@ -34,9 +35,7 @@ app = FastAPI(
     docs_url="/api/docs",
     openapi_url="/api/openapi.json",
 )
-app.include_router(health.router, prefix="/api")
-app.include_router(catalog_routes.router, prefix="/api")
-app.include_router(categories_routes.router, prefix="/api")
-app.include_router(locations_routes.router, prefix="/api")
-app.include_router(runs_routes.router, prefix="/api")
-app.include_router(suppliers_routes.router, prefix="/api")
+app.include_router(health.router, prefix="/api")  # проверка состояния и вход открыты, остальное только после входа
+app.include_router(auth.router, prefix="/api")
+for router in (catalog_routes.router, categories_routes.router, locations_routes.router, runs_routes.router, suppliers_routes.router):
+    app.include_router(router, prefix="/api", dependencies=auth.protected)

@@ -144,13 +144,14 @@ jobs:
           docker compose -f docker-compose.prod.yml ps
           REMOTE
       - name: Проверка, что сайт отвечает
-        # без пароля сайт обязан вернуть 401: значит, внешний Caddy, HTTPS и парольная защита работают
+        # страница входа открыта (200), а API без входа обязан вернуть 401: значит, маршрутизация, HTTPS и защита работают
         run: |
           for i in $(seq 1 18); do
-            code=$(curl -s -o /dev/null -w '%{http_code}' "https://$SITE_DOMAIN/" || true)
-            echo "попытка $i: $code"
-            [ "$code" = "401" ] && exit 0
+            page=$(curl -s -o /dev/null -w '%{http_code}' "https://$SITE_DOMAIN/" || true)
+            api=$(curl -s -o /dev/null -w '%{http_code}' "https://$SITE_DOMAIN/api/runs?limit=1" || true)
+            echo "попытка $i: страница $page, API без входа $api"
+            [ "$page" = "200" ] && [ "$api" = "401" ] && exit 0
             sleep 10
           done
-          echo "Сайт не ответил ожидаемым кодом 401" >&2
+          echo "Ожидалось: страница 200, API без входа 401" >&2
           exit 1

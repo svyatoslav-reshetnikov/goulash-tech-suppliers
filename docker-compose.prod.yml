@@ -44,8 +44,6 @@ services:
     restart: unless-stopped
     environment:
       SITE_ADDRESS: ":80"  # HTTPS и сертификат на стороне внешнего Caddy
-      BASIC_AUTH_USER: ${BASIC_AUTH_USER:-admin}
-      BASIC_AUTH_HASH: ${BASIC_AUTH_HASH:-}
     networks:
       default:
       proxy:
