@@ -121,6 +121,7 @@ async def execute_run(
                 supplier_type=run.supplier_type,
                 target=settings.agent_target_suppliers,
                 search_region=yandex_region(run.location_kind, run.location_key),
+                city=run.location_key.split("|", 1)[1] if run.location_kind == "city" and run.location_key else None,
             )
             run.status, run.started_at = "running", datetime.now(UTC)
             await session.commit()

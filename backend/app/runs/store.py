@@ -41,6 +41,9 @@ class DbSink:
                 await session.flush()
             if inns and not supplier.inn:
                 supplier.inn = inns[0]
+            names = draft.values("name")
+            if names and supplier.name == supplier.domain:  # сохранён под доменом, а теперь название подтвердилось
+                supplier.name = names[0][:300]
 
             existing = {
                 (f.field, f.value): f

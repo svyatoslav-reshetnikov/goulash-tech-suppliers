@@ -147,6 +147,17 @@ class SupplierField(Base):
     verified_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
+class SupplierStatus(Base):
+    """Work status of a supplier within one search (new when there is no row)."""
+
+    __tablename__ = "supplier_statuses"
+
+    run_id: Mapped[int] = mapped_column(ForeignKey("runs.id", ondelete="CASCADE"), primary_key=True)
+    supplier_id: Mapped[int] = mapped_column(ForeignKey("suppliers.id", ondelete="CASCADE"), primary_key=True)
+    status: Mapped[str] = mapped_column(String(20))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
 class RunSupplier(Base):
     """Какие поставщики найдены в запуске. Балл, ранг и объяснение заполняются на этапе ранжирования."""
 

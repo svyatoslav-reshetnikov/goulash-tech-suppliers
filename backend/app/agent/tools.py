@@ -23,6 +23,7 @@ from app.agent.pages import Page, UnsafeUrl, normalize_url, useful_links
 from app.agent.research import (
     FIELD_LABELS,
     SITE_QUERIES,
+    Qualification,
     build_evidence,
     build_extraction_messages,
     build_qualify_messages,
@@ -77,7 +78,7 @@ def tool_schemas(places_enabled: bool, research_enabled: bool = False) -> list[d
         tool(
             "save_supplier",
             "Сохраняет поставщика. Каждое поле подтверждается дословной цитатой со страницы, открытой через fetch_page. "
-            "Обязательны поле name и хотя бы один phone или email.",
+            "Обязателен хотя бы один phone или email; без подтверждённого name поставщик сохраняется под доменом.",
             {
                 "website": {"type": "string", "description": "Адрес главной страницы сайта поставщика"},
                 "fields": {
@@ -175,6 +176,7 @@ class ToolBox:
         self.supplier_fields: dict[str, set[str]] = {}  # домен → поля, принятые у поставщика в этом запуске
         self.research_summaries: dict[str, dict] = {}
         self.snippets: dict[str, str] = {}  # домен → отрывок из выдачи: подсказка для проверки сайта
+        self.qualifications: dict[str, dict] = {}  # домен → итог проверки сайта (для отчёта и разбора качества)
 
     def schemas(self) -> list[dict]:
         return tool_schemas(self.places is not None, research_enabled=self.llm is not None)
@@ -335,15 +337,13 @@ class ToolBox:
                 accepted.append(reason)
 
         fields_present = {f.field for f in accepted}
-        missing = []
-        if domain not in self.saved_domains:  # нового поставщика сохраняем только с названием и контактом
-            missing = [] if "name" in fields_present else ["name"]
-            if not fields_present & CONTACT_FIELDS:
-                missing.append("phone или email")
-        if missing:
-            await self.emit("supplier_rejected", f"Не сохранён {domain}: нет подтверждённых {', '.join(missing)}",
+        # нового поставщика сохраняем только с подтверждённым контактом. Без подтверждённого названия он сохраняется
+        # под доменом: название часто написано иначе, чем на сайте («Пак-Крафт» при «pack-craft.ru»), а терять из-за
+        # этого поставщика с телефоном нельзя
+        if domain not in self.saved_domains and not fields_present & CONTACT_FIELDS:
+            await self.emit("supplier_rejected", f"Не сохранён {domain}: нет подтверждённых phone или email",
                             domain=domain, rejected=rejected)
-            return {"ошибка": f"не сохранено: нет подтверждённых полей — {', '.join(missing)}", "отклонено": rejected}
+            return {"ошибка": "не сохранено: нет подтверждённых полей — phone или email", "отклонено": rejected}
 
         parts = urlsplit(normalize_url(website))
         origin = f"{parts.scheme}://{parts.netloc}/"  # модель может дать адрес внутренней страницы: сохраняем главную
@@ -487,8 +487,8 @@ class ToolBox:
         messages = build_qualify_messages(self.request, home, self.snippets.get(domain))
         try:
             reply = await self._llm(messages, 300)
-        except Exception:
-            return parse_qualification(None)
+        except Exception as exc:
+            return Qualification(error=f"проверка не удалась: {str(exc)[:120] or type(exc).__name__}")
         return parse_qualification(getattr(reply, "text", None))
 
     async def _research_supplier(self, website: str) -> dict:
@@ -516,10 +516,12 @@ class ToolBox:
         qualification = None
         if self.limits.qualify:
             verdict = await self._qualify(domain, home)
-            qualification = {"supplier": verdict.supplier, "product": verdict.product, "reason": verdict.reason}
+            qualification = {"supplier": verdict.supplier, "product": verdict.product, "reason": verdict.reason,
+                             **({"error": verdict.error} if verdict.error else {})}
+            self.qualifications[domain] = qualification
             if verdict.rejected:
                 self.counters.rejected += 1
-                reason = verdict.reason or "по главной странице не похоже на поставщика нужного продукта"
+                reason = verdict.reason or "по главной странице не понять, продаёт ли компания нужный продукт бизнесу"
                 await self.emit("research_skipped", f"{domain}: не подходит — {reason}", domain=domain, reason=reason)
                 summary = {"сайт": domain, "результат": f"не подходит, не сохранён: {reason}. Ищи другие сайты"}
                 self.research_summaries[domain] = summary
@@ -550,7 +552,7 @@ class ToolBox:
         first = await self._extract_and_save(origin, domain, checked, None)
 
         # второй проход: обязательные по ТЗ поля, которых не нашлось, ищем по самому сайту (site:домен …);
-        # сайт, где не нашлось даже названия и контакта, дальше не изучаем: это не поставщик или сайт не читается
+        # сайт, где не нашлось даже контакта, дальше не изучаем: это не поставщик или сайт не читается
         missing = missing_fields(self.supplier_fields.get(domain, set()))
         used = 0
         for group, query in SITE_QUERIES if domain in self.saved_domains else []:
@@ -585,7 +587,7 @@ class ToolBox:
         have = sorted(self.supplier_fields.get(domain, set()))
         summary = {
             "сайт": domain,
-            "результат": "сохранён" if saved else "не сохранён: на страницах не нашлось подтверждённых названия и контакта",
+            "результат": "сохранён" if saved else "не сохранён: на страницах не нашлось подтверждённого телефона или email",
             "сохранено_полей": have,
             "не_найдено_на_сайте": [FIELD_LABELS[f] for f in missing] if saved else [],
             "изучено_страниц": len(checked),

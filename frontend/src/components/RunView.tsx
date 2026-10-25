@@ -167,6 +167,7 @@ export default function RunView({ runId, onFinished }: { runId: number; onFinish
           suppliers={suppliers}
           live={live}
           onNote={(id, note) => setSuppliers((prev) => prev.map((x) => (x.id === id ? { ...x, note } : x)))}
+          onStatus={(id, value, updatedAt) => setSuppliers((prev) => prev.map((x) => (x.id === id ? { ...x, status: { value, updated_at: updatedAt } } : x)))}
         />
       )}
       {!live && suppliers.length === 0 && run?.status !== "failed" && (

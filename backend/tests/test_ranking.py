@@ -235,3 +235,16 @@ def test_village_address_does_not_match_a_similar_city_name():
     # «Рыбно-Слободский район» — не город Слободской Кировской области
     assert detector.detect("Рыбно-Слободский район, пгт. Рыбная Слобода, ул. Октябрьская, д.36/2") == set()
     assert {L.regions[i].name for i in detector.detect("г. Слободской, ул. Ленина 1")} == {"Кировская область"}
+
+
+def test_address_served_through_a_branch_elsewhere_is_delivery_not_local():
+    from app.ranking.places import split_served_via
+
+    # настоящая запись запуска eval: склад в Туле, а Казань он только снабжает
+    real = "г. Казань обслуживается через филиал г. Тула Одоевское шоссе 130, склад №7"
+    assert split_served_via(real) == ("г. Казань", "г. Тула Одоевское шоссе 130, склад №7")
+    assert split_served_via("г. Казань, ул. Бухарская, 4В") == ("", "г. Казань, ул. Бухарская, 4В")
+    fields = {"address": [FieldInfo(real)], "phone": [FieldInfo("+7 (800) 707-94-42")]}
+    ranked = rank_suppliers([SupplierInfo(1, "kazan.gostpp.ru", "ИП Ховренок", None, fields)],
+                            RankContext(category="Моцарелла", primary_region_id="RU-TA"))[0]
+    assert ranked.tier == "delivers"

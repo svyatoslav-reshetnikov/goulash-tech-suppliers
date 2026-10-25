@@ -1,7 +1,8 @@
-import { useState } from "react";
-import type { SupplierData } from "../api";
+import type { SupplierData, SupplierStatus } from "../api";
 import { compactPrice, sortSuppliers, supplierType, warnCount, type SortKey, type SortState } from "../lib/results";
+import { statusOf } from "../lib/status";
 import { FieldText } from "./Linkified";
+import StatusSelect from "./StatusSelect";
 
 const COLUMNS: { key: SortKey; label: string }[] = [
   { key: "rank", label: "#" },
@@ -15,6 +16,7 @@ const COLUMNS: { key: SortKey; label: string }[] = [
   { key: "phone", label: "Телефон" },
   { key: "email", label: "Email" },
   { key: "warnings", label: "⚠" },
+  { key: "status", label: "Статус" },
 ];
 
 type Props = {
@@ -22,14 +24,15 @@ type Props = {
   selected: number[];
   onToggleSelect: (id: number) => void;
   canSelectMore: boolean;
+  sort: SortState;
+  onSort: (sort: SortState) => void;
+  onStatus: (supplierId: number, status: SupplierStatus) => void;
 };
 
 /** Sortable table of the same suppliers as the cards; scrolls horizontally on narrow screens. */
-export default function SupplierTable({ suppliers, selected, onToggleSelect, canSelectMore }: Props) {
-  const [sort, setSort] = useState<SortState>({ key: "rank", dir: "asc" });
+export default function SupplierTable({ suppliers, selected, onToggleSelect, canSelectMore, sort, onSort, onStatus }: Props) {
   const rows = sortSuppliers(suppliers, sort);
-  const click = (key: SortKey) =>
-    setSort((prev) => (prev.key === key ? { key, dir: prev.dir === "asc" ? "desc" : "asc" } : { key, dir: key === "score" ? "desc" : "asc" }));
+  const click = (key: SortKey) => onSort(sort.key === key ? { key, dir: sort.dir === "asc" ? "desc" : "asc" } : { key, dir: key === "score" ? "desc" : "asc" });
 
   return (
     <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
@@ -84,6 +87,9 @@ export default function SupplierTable({ suppliers, selected, onToggleSelect, can
                 <td className="p-2">{email ? <FieldText field="email" value={email} /> : "—"}</td>
                 <td className="p-2 text-amber-800" title={s.ranking.warnings.filter((w) => w.severity === "warn").map((w) => w.text).join("\n")}>
                   {warnCount(s) || ""}
+                </td>
+                <td className="p-2">
+                  <StatusSelect value={statusOf(s)} onChange={(status) => onStatus(s.id, status)} label={`Статус: ${s.name}`} />
                 </td>
               </tr>
             );

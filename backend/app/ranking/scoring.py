@@ -16,7 +16,7 @@ from app.ranking.config import (
     RECOMMEND_TOP,
     WEIGHTS,
 )
-from app.ranking.places import PlaceDetector, detector_for
+from app.ranking.places import PlaceDetector, detector_for, split_served_via
 from app.ranking.product import first_matching_phrase, is_generic, partially_matches
 from app.ranking.warnings import build_warnings
 
@@ -105,12 +105,15 @@ def classify_location(info: SupplierInfo, ctx: RankContext, detector: PlaceDetec
     if ctx.primary_region_id is None:
         return "any", "Локация поиска не выбрана: регион на оценку не влияет."
     primary = ctx.primary_region_id
-    home = detector.detect(info.text("address"))
+    # «Казань обслуживается через филиал г. Тула…»: регион адреса — Тульская область, а Казань — место доставки
+    parts = [split_served_via(address) for address in info.values("address")]
+    served, actual = " ".join(p[0] for p in parts), " ".join(p[1] for p in parts)
+    home = detector.detect(actual)
     home_from = "Адрес"
     if not home and info.fields.get("address"):
         # адрес без региона («пгт. Рыбная Слобода, ул. Октябрьская»): регион берём из описания компании
         home, home_from = detector.detect(info.text("description")), "По описанию компании"
-    delivery_text = info.text("regions", "delivery_terms")
+    delivery_text = f"{info.text('regions', 'delivery_terms')} {served}"
     delivers = detector.detect(delivery_text)
     nationwide = detector.nationwide(info.text("regions", "delivery_terms", "description"))
     regions = get_locations().regions

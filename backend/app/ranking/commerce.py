@@ -170,3 +170,15 @@ def commerce_payload(price_fields: list[tuple[str, str]], moq_fields: list[tuple
         "prices_other": [asdict(p) for p in others],
         "min_order": asdict(order) if order else None,
     }
+
+
+def compact_price(price: dict) -> str:
+    """Price per base unit when known ("≈84 ₽/кг"), otherwise the amount; same rule as the table view in the UI."""
+    amount = price.get("price_rub")
+    if amount is None:
+        return ""
+    per, base = price.get("price_per_base_unit"), price.get("base_unit")
+    if per is not None and base:
+        return f"≈{_per_unit_text(per)} ₽/{BASE_LABELS[base]}"
+    return money(amount)
+

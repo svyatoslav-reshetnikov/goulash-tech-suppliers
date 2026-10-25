@@ -1,5 +1,18 @@
 # Changelog
 
+## Phase 3: export and work tracking
+
+- `GET /api/runs/{id}/export?format=xlsx|csv&ids=...`: the whole search or the chosen suppliers in the given (table) order. `.xlsx` is
+  written by a small built-in writer (no new dependency); CSV is the fallback (UTF-8 with BOM, `;` delimiter, cells that Excel could
+  read as formulas are prefixed with an apostrophe). Columns = table columns + all phones/emails, address, site, INN, note,
+  source URLs, warnings, collection date, search parameters and search date. File name `suppliers_<product>_<region>_<date>.xlsx`.
+  The endpoint sits behind the existing session auth.
+- Work statuses per supplier within a search: `new`, `called`, `awaiting_price`, `shortlisted`, `declined`
+  (`PUT /api/runs/{id}/suppliers/{supplier}/status`, table `supplier_statuses`, migration 0008, idempotent). Select on the card and in
+  the table, filter above the list, included in the export. Notes stay as they were.
+- "Данные собраны: dd.mm.yyyy" per supplier: the crawl time of the supplier's site, falling back to the search finish date.
+- The UI export button follows the screen: chosen suppliers, otherwise the shown list, in table order.
+
 ## Phase 2: results layout
 
 - Supplier cards are collapsed by default: name, type, score, one region badge, headline price, minimum order, main phone and

@@ -1,6 +1,7 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { useState } from "react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { SupplierData } from "../api";
 import ResultsPanel from "../components/ResultsPanel";
 import fixture from "./fixtures/search-rice-moscow.json";
@@ -8,9 +9,23 @@ import fixture from "./fixtures/search-rice-moscow.json";
 // Stored result of the "Рис для суши", Москва search (6 suppliers), in the shape the API returns.
 const suppliers = fixture.suppliers as unknown as SupplierData[];
 
+/** The panel with the same state wiring as RunView: statuses are kept in the supplier list. */
+function Harness({ runId }: { runId: number }) {
+  const [list, setList] = useState(suppliers);
+  return (
+    <ResultsPanel
+      runId={runId}
+      suppliers={list}
+      live={false}
+      onNote={() => undefined}
+      onStatus={(id, value, updatedAt) => setList((prev) => prev.map((x) => (x.id === id ? { ...x, status: { value, updated_at: updatedAt } } : x)))}
+    />
+  );
+}
+
 function setup(runId = 1) {
   const user = userEvent.setup();
-  const view = render(<ResultsPanel runId={runId} suppliers={suppliers} live={false} onNote={() => undefined} />);
+  const view = render(<Harness runId={runId} />);
   return { user, ...view };
 }
 
@@ -137,5 +152,64 @@ describe("comparison (regression: selecting suppliers and pressing «Сравн�
     expect(screen.getByRole("heading", { name: "Сравнение (2)" })).toBeInTheDocument();
     await user.click(screen.getAllByRole("button", { name: "убрать из сравнения" })[0]);
     expect(screen.queryByRole("heading", { name: /Сравнение \(/ })).not.toBeInTheDocument();
+  });
+});
+
+
+/** Query of an export link: format and the supplier ids in the requested order. */
+function exported(link: HTMLElement): { format: string | null; ids: string } {
+  const url = new URL(link.getAttribute("href") ?? "", "http://localhost");
+  return { format: url.searchParams.get("format"), ids: url.searchParams.get("ids") ?? "" };
+}
+
+describe("statuses, filter, freshness and export", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("saves a status, shows it, filters by it and exports in the shown order", async () => {
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify({ value: "called", updated_at: "2026-10-26T10:00:00+00:00" }), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    const { user } = setup();
+    const suomiId = suppliers.find((s) => s.name === "SuomiFish")!.id;
+    await user.selectOptions(screen.getByRole("combobox", { name: "Статус: SuomiFish" }), "called");
+    expect(fetchMock).toHaveBeenCalledWith(`/api/runs/1/suppliers/${suomiId}/status`, expect.objectContaining({ method: "PUT", body: JSON.stringify({ status: "called" }) }));
+    expect(screen.getByRole("combobox", { name: "Статус: SuomiFish" })).toHaveValue("called");
+
+    await user.selectOptions(screen.getByRole("combobox", { name: "Фильтр по статусу" }), "called");
+    expect(screen.getAllByRole("article")).toHaveLength(1);
+    const link = screen.getByRole("link", { name: /Скачать в Excel/ });
+    expect(link).toHaveAccessibleName("Скачать в Excel (показанные: 1)");
+    expect(exported(link)).toEqual({ format: "xlsx", ids: String(suomiId) });
+  });
+
+  it("puts a failed status save back and tells the user", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => new Response("{}", { status: 500 })));
+    const { user } = setup();
+    await user.selectOptions(screen.getByRole("combobox", { name: "Статус: SuomiFish" }), "declined");
+    expect(await screen.findByText(/Не удалось сохранить статус/)).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: "Статус: SuomiFish" })).toHaveValue("new");
+  });
+
+  it("exports all suppliers in rank order by default, the chosen ones when some are selected, and follows the table sort", async () => {
+    const { user } = setup();
+    const ids = (list: SupplierData[]) => list.map((s) => s.id).join(",");
+    expect(exported(screen.getByRole("link", { name: /Скачать в Excel/ }))).toEqual({ format: "xlsx", ids: ids(suppliers) });
+    await user.click(screen.getByRole("checkbox", { name: "Сравнить: Сушимаг" }));
+    await user.click(screen.getByRole("checkbox", { name: "Сравнить: SuomiFish" }));
+    const chosen = suppliers.filter((s) => ["SuomiFish", "Сушимаг"].includes(s.name));
+    expect(screen.getByRole("link", { name: /Скачать в Excel/ })).toHaveAccessibleName("Скачать в Excel (выбранные: 2)");
+    expect(exported(screen.getByRole("link", { name: /Скачать в Excel/ }))).toEqual({ format: "xlsx", ids: ids(chosen) });
+    expect(screen.getByRole("link", { name: "CSV" })).toHaveAttribute("href", expect.stringContaining("format=csv"));
+    await user.click(screen.getByRole("button", { name: "Сбросить" }));
+    await user.click(screen.getByRole("button", { name: "Таблица" }));
+    await user.click(screen.getByRole("button", { name: /^Мин\. заказ/ }));
+    const sorted = [...suppliers].sort((a, b) => (a.name === "Сушимаг" ? -1 : b.name === "Сушимаг" ? 1 : 0));
+    expect(exported(screen.getByRole("link", { name: /Скачать в Excel/ })).ids.split(",")[0]).toBe(String(sorted[0].id));
+  });
+
+  it("shows the date the data was collected on the card", () => {
+    setup();
+    const dated = suppliers.filter((s) => s.collected_at);
+    expect(dated.length).toBeGreaterThan(0);
+    expect(within(card(dated[0].name)).getByText(/Данные собраны: \d{2}\.\d{2}\.\d{4}/)).toBeInTheDocument();
   });
 });

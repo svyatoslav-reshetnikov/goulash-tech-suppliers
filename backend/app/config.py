@@ -60,7 +60,7 @@ class Settings(BaseSettings):
     agent_max_seconds: int = 600
     agent_max_total_tokens: int = 200_000
     agent_target_suppliers: int = 5
-    agent_max_fetches: int = 45
+    agent_max_fetches: int = 70  # загрузка страниц бесплатна; расход ограничен бюджетом токенов
     agent_max_runs_per_day: int = 10
 
     # тарифы Yandex AI Studio (₽ с НДС) для оценки стоимости запуска; сверяйте с биллингом

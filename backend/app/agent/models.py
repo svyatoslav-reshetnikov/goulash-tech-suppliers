@@ -20,6 +20,7 @@ class RunRequest:
     supplier_type: str | None = None
     target: int = 5
     search_region: int | None = None  # код региона Яндекс Поиска (lr): выдача ранжируется для этого места
+    city: str | None = None  # выбранный город: по нему ищут в первую очередь (иначе в запросах только регион)
 
 
 @dataclass(frozen=True)

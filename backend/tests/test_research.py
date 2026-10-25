@@ -495,11 +495,17 @@ def test_site_that_does_not_sell_the_product_to_business_is_skipped_before_resea
     assert "уже изучен" in research(box, BASE)["сайты"][0]["примечание"]  # второй раз не проверяем
 
 
-def test_unclear_or_broken_verdict_does_not_drop_the_site():
-    for verdict in ('{"supplier": "unclear", "product": "unclear", "reason": "мало текста"}', "не JSON"):
+def test_half_clear_or_broken_verdict_keeps_the_site_but_fully_unclear_drops_it():
+    for verdict in ('{"supplier": "yes", "product": "unclear", "reason": "посуда, коробок не видно"}',
+                    '{"supplier": "unclear", "product": "yes", "reason": "не сказано, продают ли бизнесу"}', "не JSON"):
         box, _, sink, _ = make_box(JudgingLLM(verdict, [FIRST_PASS_FULL]))
-        assert research(box, BASE)["сайты"][0]["результат"] == "сохранён"
-        assert sink.research["syrmaster-kazan.test"]["qualification"]["supplier"] == "unclear"
+        assert research(box, BASE)["сайты"][0]["результат"] == "сохранён", verdict
+    assert "не разобрался" in sink.research["syrmaster-kazan.test"]["qualification"]["error"]  # сбой проверки записан
+    # колбасная база в поиске моцареллы: ни про бизнес, ни про продукт по главной не понять — не изучаем
+    box, fetcher, sink, _ = make_box(JudgingLLM('{"supplier": "unclear", "product": "unclear", "reason": ""}'))
+    out = research(box, BASE)["сайты"][0]
+    assert "не подходит" in out["результат"] and "не понять" in out["результат"] and not sink.suppliers
+    assert box.qualifications["syrmaster-kazan.test"]["product"] == "unclear"
 
 
 def test_recently_researched_supplier_is_reused_without_paying_for_extraction_again():

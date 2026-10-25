@@ -39,6 +39,8 @@ def main() -> None:
         items.append({
             **{k: s[k] for k in ("id", "domain", "website", "name", "inn", "note", "research", "fields")},
             "ranking": ranking[s["id"]],
+            "status": {"value": "new", "updated_at": None},
+            "collected_at": (s["research"] or {}).get("researched_at") or data["run"]["finished_at"],
             "commerce": commerce_payload(
                 [(v["value"], v["source_url"]) for v in fields.get("price_hint", [])],
                 [(v["value"], v["source_url"]) for v in fields.get("moq", [])], phrases,

@@ -1,11 +1,13 @@
 import json
 from collections.abc import AsyncIterator
 from dataclasses import asdict
+from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query
-from fastapi.responses import StreamingResponse
+from fastapi.responses import Response, StreamingResponse
 from pydantic import BaseModel, Field
 from sqlalchemy import func, or_, select
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.agent.research import missing_fields
@@ -18,8 +20,9 @@ from app.agent.validation import (
     value_supported_by_quote,
 )
 from app.config import get_settings
-from app.db.models import Category, Run, RunEvent, RunSupplier, Supplier, SupplierField
+from app.db.models import Category, Run, RunEvent, RunSupplier, Supplier, SupplierField, SupplierStatus
 from app.db.session import SessionLocal, get_session
+from app.export import HEADERS, build_csv, build_xlsx, export_rows, file_name
 from app.locations import get_locations
 from app.ranking import FieldInfo, RankContext, SupplierInfo, rank_suppliers
 from app.ranking.commerce import commerce_payload
@@ -155,6 +158,12 @@ async def run_stream(
 @router.get("/{run_id}/suppliers")
 async def run_suppliers(run_id: int, session: AsyncSession = Depends(get_session)) -> dict:
     """Поставщики запуска, отсортированные по оценке, с объяснением и рекомендацией «с кем связаться»."""
+    payload, _ = await build_run_payload(session, run_id)
+    return payload
+
+
+async def build_run_payload(session: AsyncSession, run_id: int) -> tuple[dict, Run]:
+    """Everything the result page and the export show for one search; everything derived is computed here, on read."""
     run = await session.get(Run, run_id)
     if run is None:
         raise HTTPException(status_code=404, detail="Запуск не найден")
@@ -226,5 +235,66 @@ async def run_suppliers(run_id: int, session: AsyncSession = Depends(get_session
         }
         for s in suppliers
     ]
+    statuses = {
+        row.supplier_id: row
+        for row in (await session.execute(select(SupplierStatus).where(SupplierStatus.run_id == run_id))).scalars()
+    }
+    finished = run.finished_at.isoformat() if run.finished_at else None
+    for item in items:
+        row = statuses.get(item["id"])
+        item["status"] = {"value": row.status if row else "new", "updated_at": row.updated_at.isoformat() if row else None}
+        # crawl time of the supplier's site; old records without it fall back to the search finish date
+        item["collected_at"] = (item["research"] or {}).get("researched_at") or finished
     items.sort(key=lambda item: item["ranking"]["rank"])
-    return {"suppliers": items, "recommended_ids": [i["id"] for i in items if i["ranking"]["recommended"]]}
+    return {"suppliers": items, "recommended_ids": [i["id"] for i in items if i["ranking"]["recommended"]]}, run
+
+
+STATUSES = ("new", "called", "awaiting_price", "shortlisted", "declined")
+
+
+class StatusBody(BaseModel):
+    status: str
+
+
+@router.put("/{run_id}/suppliers/{supplier_id}/status")
+async def set_supplier_status(run_id: int, supplier_id: int, body: StatusBody, session: AsyncSession = Depends(get_session)) -> dict:
+    """Work status of a supplier within one search; persisted with the time of the change."""
+    if body.status not in STATUSES:
+        raise HTTPException(status_code=422, detail=f"Статус: {', '.join(STATUSES)}")
+    found = await session.scalar(select(RunSupplier).where(RunSupplier.run_id == run_id, RunSupplier.supplier_id == supplier_id))
+    if found is None:
+        raise HTTPException(status_code=404, detail="Поставщик в этом поиске не найден")
+    stmt = insert(SupplierStatus).values(run_id=run_id, supplier_id=supplier_id, status=body.status)
+    stmt = stmt.on_conflict_do_update(index_elements=["run_id", "supplier_id"], set_={"status": body.status, "updated_at": func.now()})
+    await session.execute(stmt)
+    await session.commit()
+    row = await session.scalar(select(SupplierStatus).where(SupplierStatus.run_id == run_id, SupplierStatus.supplier_id == supplier_id))
+    return {"value": row.status, "updated_at": row.updated_at.isoformat()}
+
+
+@router.get("/{run_id}/export")
+async def export_run(
+    run_id: int,
+    format: str = Query("xlsx", pattern="^(xlsx|csv)$"),
+    ids: str | None = Query(None, max_length=200, description="supplier ids in the wanted order, comma separated; all suppliers when absent"),
+    session: AsyncSession = Depends(get_session),
+) -> Response:
+    """The result of a search as a file: the whole list or the chosen suppliers, in the given (table) order."""
+    payload, run = await build_run_payload(session, run_id)
+    items = payload["suppliers"]
+    if ids:
+        wanted = [int(x) for x in ids.split(",") if x.strip().isdigit()]
+        by_id = {item["id"]: item for item in items}
+        items = [by_id[i] for i in dict.fromkeys(wanted) if i in by_id]
+    run_info = {"category": run.category_name, "location": run.location_label, "include_neighbors": run.include_neighbors,
+                "supplier_type": run.supplier_type, "created_at": run.created_at.isoformat()}
+    rows = export_rows(run_info, items)
+    if format == "csv":
+        body, media = build_csv(HEADERS, rows), "text/csv; charset=utf-8"
+    else:
+        body, media = build_xlsx(HEADERS, rows), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    name = file_name(run_info, format)
+    return Response(content=body, media_type=media, headers={
+        "Content-Disposition": f"attachment; filename=\"suppliers.{format}\"; filename*=UTF-8''{quote(name)}",
+        "Cache-Control": "no-store",
+    })

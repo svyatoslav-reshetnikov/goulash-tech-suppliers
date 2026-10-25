@@ -33,7 +33,7 @@ class Limits:
     max_seconds: int = 600
     max_total_tokens: int = 200_000  # вместе с вызовами модели при изучении сайтов
     target_suppliers: int = 5
-    max_fetches: int = 45
+    max_fetches: int = 70  # при 45 бюджет кончался на неудачных сайтах раньше, чем набиралось 5 поставщиков
     max_searches: int = 8  # поиски кандидатов; поиски по сайту поставщика считаются отдельно
     max_site_searches: int = 12
     max_site_searches_per_supplier: int = 3

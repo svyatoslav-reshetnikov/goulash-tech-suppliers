@@ -53,3 +53,19 @@ def test_eval_cases_resolve_to_known_places_and_region_codes():
     for case in cases:
         assert get_locations().resolve(case["location_kind"], case["location_key"]) is not None, case["id"]
         assert yandex_region(case["location_kind"], case["location_key"]) != 225, case["id"]  # у всех мест есть код Яндекса
+
+
+def test_problems_report_lists_dropped_sites_rejected_fields_and_check_failures():
+    from scripts.eval.metrics import problems_report
+
+    case = result("boxes", ("nn.russcarton.ru", PHONE))
+    case["stats"].update(rejected=1, reused=0)
+    case["checked_sites"] = [{"domain": "a.test", "qualification": {"supplier": "no"}, "saved": False},
+                             {"domain": "b.test", "qualification": {"error": "ответ проверки не разобрался"}, "saved": False}]
+    case["problems"] = [{"type": "research_skipped", "domain": "a.test", "message": "a.test: не подходит — ресторан"},
+                        {"type": "fields_rejected", "domain": "nn.russcarton.ru",
+                         "rejected": [{"поле": "name", "причина": "значение не следует из цитаты"}]}]
+    text = problems_report([case, result("empty")])
+    assert "boxes: проверено сайтов 2, отсеяно 1" in text and "не подходит — ресторан" in text
+    assert "nn.russcarton.ru: отклонены поля — name: значение не следует" in text and "b.test: сбой проверки" in text
+    assert "empty" not in text

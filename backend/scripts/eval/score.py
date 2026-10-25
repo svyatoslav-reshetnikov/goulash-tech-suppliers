@@ -9,7 +9,7 @@ import json
 import sys
 from pathlib import Path
 
-from .metrics import LABELS, OUT_DIR, read_labels, report, score_case
+from .metrics import LABELS, OUT_DIR, problems_report, read_labels, report, score_case
 
 
 def main() -> int:
@@ -25,6 +25,9 @@ def main() -> int:
     labels = read_labels(args.labels)
     print(f"Прогон: {path}\n")
     print(report([score_case(case, labels) for case in results]))
+    problems = problems_report(results)
+    if problems:
+        print("\n## Отсеяно и отклонено\n" + problems)
     return 0
 
 

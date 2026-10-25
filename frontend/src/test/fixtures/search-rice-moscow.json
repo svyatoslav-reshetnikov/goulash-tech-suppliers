@@ -192,6 +192,11 @@
      "reliability": 15
     }
    },
+   "status": {
+    "value": "new",
+    "updated_at": null
+   },
+   "collected_at": "2026-10-24T22:13:01.164730+00:00",
    "commerce": {
     "price_headline": {
      "item_name": "Рис для суши 'Легендагро Приморье' ГОСТ",
@@ -370,6 +375,11 @@
      "reliability": 15
     }
    },
+   "status": {
+    "value": "new",
+    "updated_at": null
+   },
+   "collected_at": "2026-10-24T21:03:42.241407+00:00",
    "commerce": {
     "price_headline": null,
     "prices_other": [],
@@ -582,6 +592,11 @@
      "reliability": 15
     }
    },
+   "status": {
+    "value": "new",
+    "updated_at": null
+   },
+   "collected_at": "2026-10-24T21:53:25.212192+00:00",
    "commerce": {
     "price_headline": null,
     "prices_other": [],
@@ -714,6 +729,11 @@
      "reliability": 15
     }
    },
+   "status": {
+    "value": "new",
+    "updated_at": null
+   },
+   "collected_at": "2026-10-24T21:04:02.027053+00:00",
    "commerce": {
     "price_headline": null,
     "prices_other": [],
@@ -864,6 +884,11 @@
      "reliability": 15
     }
    },
+   "status": {
+    "value": "new",
+    "updated_at": null
+   },
+   "collected_at": "2026-10-24T21:04:01.264132+00:00",
    "commerce": {
     "price_headline": null,
     "prices_other": [],
@@ -1003,6 +1028,11 @@
      "reliability": 15
     }
    },
+   "status": {
+    "value": "new",
+    "updated_at": null
+   },
+   "collected_at": "2026-10-24T21:04:01.038418+00:00",
    "commerce": {
     "price_headline": null,
     "prices_other": [],

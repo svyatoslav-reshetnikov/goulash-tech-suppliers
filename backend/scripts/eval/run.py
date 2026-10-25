@@ -42,15 +42,23 @@ def build_request(case: dict, target: int) -> RunRequest:
         regions = tuple(RegionRef(r.name, role) for r, role in locations.expand(selected.region_id, case.get("include_neighbors", False)))
     return RunRequest(category=case["category"], synonyms=tuple(case.get("synonyms", [])), regions=regions,
                       supplier_type=case.get("supplier_type"), target=target,
-                      search_region=yandex_region(case.get("location_kind"), case.get("location_key")))
+                      search_region=yandex_region(case.get("location_kind"), case.get("location_key")),
+                      city=case["location_key"].split("|", 1)[1] if case.get("location_kind") == "city" else None)
 
 
 async def run_case(case: dict, settings, cache: MemoryPageCache) -> dict:
     request, limits, deps = build_request(case, settings.agent_target_suppliers), limits_from(settings), default_deps(settings)
 
+    problems: list[dict] = []  # почему сайты отсеяны или не сохранены: без этого не разобрать, что пошло не так
+
     async def emit(type_: str, message: str = "", **data) -> None:
         if type_ in SHOWN and message:
             print(f"  [{case['id']}] {message}", file=sys.stderr)
+        if type_ in ("supplier_rejected", "research_skipped", "research_failed"):
+            problems.append({"type": type_, "domain": data.get("domain"), "message": message,
+                             **({"rejected": data["rejected"]} if data.get("rejected") else {})})
+        elif type_ == "supplier_saved" and data.get("rejected"):  # сохранён, но часть полей отклонена
+            problems.append({"type": "fields_rejected", "domain": data.get("domain"), "rejected": data["rejected"]})
 
     sink = MemorySink()
     toolbox = ToolBox(request, limits, deps.searcher, deps.fetcher, sink, emit, places=deps.places, cache=cache, llm=deps.llm)
@@ -65,8 +73,9 @@ async def run_case(case: dict, settings, cache: MemoryPageCache) -> dict:
         research = sink.research.get(domain, {})
         suppliers.append({"domain": domain, "website": draft.website, "name": (draft.values("name") or [domain])[0],
                           "fields": fields, "missing": research.get("missing"), "qualification": research.get("qualification")})
+    checked = [{"domain": d, "qualification": q, "saved": d in sink.suppliers} for d, q in toolbox.qualifications.items()]
     return {"id": case["id"], "request": case, "stop_reason": result.stop_reason, "error": result.error,
-            "summary": result.summary, "stats": stats, "suppliers": suppliers}
+            "summary": result.summary, "stats": stats, "suppliers": suppliers, "checked_sites": checked, "problems": problems}
 
 
 async def main() -> int:

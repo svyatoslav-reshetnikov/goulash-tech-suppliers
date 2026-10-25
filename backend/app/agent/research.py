@@ -187,7 +187,13 @@ class Qualification:
 
     @property
     def rejected(self) -> bool:
-        return self.supplier == "no" or self.product == "no"
+        """Отсеивается явное «нет» и сайт, по которому неясно и то и другое (так проходили колбасная база и посуда).
+
+        Сбой самой проверки сайт не отсеивает: лучше изучить лишний, чем потерять поставщика.
+        """
+        if self.error:
+            return False
+        return self.supplier == "no" or self.product == "no" or (self.supplier == "unclear" and self.product == "unclear")
 
 
 def build_qualify_messages(request: RunRequest, home: Page, snippet: str | None) -> list[dict]:
@@ -208,7 +214,7 @@ def parse_qualification(text: str | None) -> Qualification:
     except json.JSONDecodeError:
         data = None
     if not isinstance(data, dict):
-        return Qualification(error="ответ проверки не разобрался")
+        return Qualification(error=f"ответ проверки не разобрался: {(text or '')[:120]!r}")
 
     def verdict(key: str) -> str:
         value = str(data.get(key, "")).strip().lower()

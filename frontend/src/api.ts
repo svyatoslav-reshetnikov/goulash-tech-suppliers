@@ -189,7 +189,12 @@ export type SupplierData = {
   ranking: Ranking;
   /** Optional: absent in old responses; the UI then falls back to the raw field strings. */
   commerce?: Commerce;
+  /** Work status within this search; absent in old responses (treated as "new"). */
+  status?: { value: SupplierStatus; updated_at: string | null };
+  /** When the supplier's site was crawled (the search finish date for old records). */
+  collected_at?: string | null;
 };
+export type SupplierStatus = "new" | "called" | "awaiting_price" | "shortlisted" | "declined";
 export type RunRequest = {
   category_id: number;
   location_kind: "city" | "region" | null;
@@ -270,4 +275,22 @@ export async function saveSupplierNote(supplierId: number, note: string): Promis
   });
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
   return ((await response.json()) as { note: string | null }).note;
+}
+
+/** Sets the work status of a supplier within one search. */
+export async function setSupplierStatus(runId: number, supplierId: number, status: SupplierStatus): Promise<{ value: SupplierStatus; updated_at: string }> {
+  const response = await apiFetch(`/api/runs/${runId}/suppliers/${supplierId}/status`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status }),
+  });
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  return (await response.json()) as { value: SupplierStatus; updated_at: string };
+}
+
+/** Download address of the export; the session cookie authorizes a plain link. `ids` fixes the suppliers and their order. */
+export function exportUrl(runId: number, format: "xlsx" | "csv", ids: number[]): string {
+  const params = new URLSearchParams({ format });
+  if (ids.length > 0) params.set("ids", ids.join(","));
+  return `/api/runs/${runId}/export?${params}`;
 }

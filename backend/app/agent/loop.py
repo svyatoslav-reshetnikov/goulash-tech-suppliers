@@ -103,6 +103,8 @@ async def run_agent(request: RunRequest, llm: ChatModel, toolbox: ToolBox, emit:
             "suppliers_saved": toolbox.counters.saved,
             "researched": toolbox.counters.researched,
             "site_searches": toolbox.counters.site_searches,
+            "rejected": toolbox.counters.rejected,  # сайтов отсеяно проверкой главной страницы
+            "reused": toolbox.counters.reused,  # поставщиков взято из базы без нового извлечения
             "prompt_tokens": prompt_tokens + toolbox.extra_prompt_tokens,
             "completion_tokens": completion_tokens + toolbox.extra_completion_tokens,
             "seconds": round(time.monotonic() - started, 1),

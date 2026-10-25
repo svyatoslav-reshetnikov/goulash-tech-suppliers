@@ -87,3 +87,22 @@ class PlaceDetector:
 @lru_cache(maxsize=64)
 def detector_for(focus_regions: frozenset[str]) -> PlaceDetector:
     return PlaceDetector(get_locations(), focus_regions)
+
+
+# «г. Казань обслуживается через филиал г. Тула, Одоевское шоссе 130»: сам поставщик в Туле, а Казань он снабжает
+_SERVED_VIA = re.compile(
+    r"\b(?:обслуживает\w*|снабжает\w*|работает|поставк\w*|доставк\w*)\s+(?:через|из|со?)\s+"
+    r"(?:филиал\w*|склад\w*|представительств\w*|офис\w*|подразделени\w*)\b",
+    re.I,
+)
+
+
+def split_served_via(address: str) -> tuple[str, str]:
+    """Делит адрес вида «<город> обслуживается через филиал <адрес>» на (обслуживаемое место, настоящий адрес).
+
+    Обычный адрес возвращается как ("", адрес).
+    """
+    match = _SERVED_VIA.search(address)
+    if match is None:
+        return "", address
+    return address[: match.start()].strip(" ,.;:—-"), address[match.end() :].strip(" ,.;:—-")

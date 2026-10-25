@@ -115,3 +115,27 @@ def report(scores: list[CaseScore]) -> str:
     if labeled < found:
         lines.append(f"\nНе размечено поставщиков: {found - labeled}. Точность считается только по размеченным.")
     return "\n".join(lines)
+
+
+def problems_report(results: list[dict]) -> str:
+    """Что отсеяно и отклонено: сайты, не попавшие в результат, и отклонённые поля сохранённых поставщиков."""
+    lines: list[str] = []
+    for case in results:
+        problems = case.get("problems") or []
+        stats = case.get("stats") or {}
+        checked = case.get("checked_sites") or []
+        if not problems and not checked:
+            continue
+        lines.append(f"\n### {case['id']}: проверено сайтов {len(checked)}, отсеяно {stats.get('rejected', 0)}, "
+                     f"взято из базы {stats.get('reused', 0)}")
+        for item in problems:
+            if item["type"] == "fields_rejected":
+                reasons = "; ".join(f"{r.get('поле')}: {r.get('причина', '')[:80]}" for r in item["rejected"])
+                lines.append(f"- {item['domain']}: отклонены поля — {reasons}")
+            else:
+                lines.append(f"- {item['message']}")
+        for site in checked:
+            q = site.get("qualification") or {}
+            if q.get("error"):
+                lines.append(f"- {site['domain']}: сбой проверки — {q['error']}")
+    return "\n".join(lines).strip()

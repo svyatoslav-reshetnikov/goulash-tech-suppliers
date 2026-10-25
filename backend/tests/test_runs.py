@@ -456,3 +456,75 @@ async def test_db_sink_does_not_store_the_same_address_twice_and_keeps_the_fulle
         )).scalars().all()
         assert len(addresses) == 1
         assert addresses[0].value == full.value and addresses[0].quote == full.quote and addresses[0].source_url.endswith("/cart/checkout/")
+
+
+@needs_db
+@with_db
+async def test_supplier_status_is_saved_per_search_validated_and_exported(factory):
+    import io
+    import zipfile
+
+    from fastapi import HTTPException
+
+    from app.routes.runs import StatusBody, build_run_payload, export_run, set_supplier_status
+
+    run_a, run_b = await new_run(factory), await new_run(factory)
+    saved = await DbSink(factory, run_a).save(draft())
+    await DbSink(factory, run_b).save(draft())  # the same supplier found by another search
+    async with factory() as session:
+        payload, _ = await build_run_payload(session, run_a)
+        assert payload["suppliers"][0]["status"] == {"value": "new", "updated_at": None}
+        first = await set_supplier_status(run_a, saved.supplier_id, StatusBody(status="called"), session)
+        assert first["value"] == "called" and first["updated_at"]
+        second = await set_supplier_status(run_a, saved.supplier_id, StatusBody(status="shortlisted"), session)
+        assert second["value"] == "shortlisted" and second["updated_at"] >= first["updated_at"]  # replaced, not duplicated
+        assert (await build_run_payload(session, run_a))[0]["suppliers"][0]["status"]["value"] == "shortlisted"
+        assert (await build_run_payload(session, run_b))[0]["suppliers"][0]["status"]["value"] == "new"  # a status belongs to one search
+
+        for bad, code in ((StatusBody(status="купили"), 422),):
+            with pytest.raises(HTTPException) as error:
+                await set_supplier_status(run_a, saved.supplier_id, bad, session)
+            assert error.value.status_code == code
+        with pytest.raises(HTTPException) as error:
+            await set_supplier_status(run_a, 99999, StatusBody(status="called"), session)
+        assert error.value.status_code == 404
+
+        response = await export_run(run_a, format="xlsx", ids=None, session=session)
+        assert response.media_type.endswith("spreadsheetml.sheet") and "filename*=UTF-8''suppliers_" in response.headers["content-disposition"]
+        sheet = zipfile.ZipFile(io.BytesIO(response.body)).read("xl/worksheets/sheet1.xml").decode()
+        assert "В шорт-листе" in sheet and "СырМастер" in sheet
+        csv_response = await export_run(run_a, format="csv", ids=f"{saved.supplier_id},99999", session=session)
+        assert csv_response.body.startswith(b"\xef\xbb\xbf") and csv_response.body.decode("utf-8-sig").count("\r\n") == 2  # header + one supplier
+
+
+@needs_db
+@with_db
+async def test_collected_date_uses_the_crawl_time_and_falls_back_to_the_search_finish_date(factory):
+    from app.routes.runs import build_run_payload
+
+    run_id = await new_run(factory)
+    finished = datetime(2026, 10, 24, 19, 0, tzinfo=UTC)
+    async with factory() as session:
+        await session.execute(update(Run).where(Run.id == run_id).values(finished_at=finished))
+        await session.commit()
+    sink = DbSink(factory, run_id)
+    await sink.save(draft())
+    async with factory() as session:
+        item = (await build_run_payload(session, run_id))[0]["suppliers"][0]
+        assert item["collected_at"] == finished.isoformat()  # no crawl time stored: the search finish date
+    await sink.record_research("syrmaster-kazan.test", ["https://syrmaster-kazan.test/"], [])
+    async with factory() as session:
+        item = (await build_run_payload(session, run_id))[0]["suppliers"][0]
+        assert item["collected_at"] == item["research"]["researched_at"] and item["collected_at"] != finished.isoformat()
+
+
+@needs_db
+@with_db
+async def test_supplier_saved_under_domain_gets_its_name_once_confirmed(factory):
+    sink = DbSink(factory, await new_run(factory))
+    site = "https://pack-craft.test"
+    phone = AcceptedField("phone", "+7 (800) 250-76-65", "8 (800) 250-76-65", f"{site}/")
+    first = await sink.save(draft(domain="pack-craft.test", fields=[phone]))
+    assert first.created and first.name == "pack-craft.test"
+    later = await sink.save(draft(domain="pack-craft.test", fields=[AcceptedField("name", "Pack-Craft", "Pack-Craft — упаковка", f"{site}/about")]))
+    assert later.name == "Pack-Craft"

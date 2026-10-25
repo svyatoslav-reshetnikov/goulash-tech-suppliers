@@ -31,6 +31,9 @@ def build_messages(request: RunRequest, limits: Limits, places_enabled: bool) ->
             for n, region in enumerate(request.regions, start=1)
         ]
         where = "Регионы поиска по приоритету:\n" + "\n".join(lines)
+        if request.city:
+            where = (f"Город закупки: {request.city}. Ищи прежде всего поставщиков в этом городе и называй город в запросах "
+                     f"(«<продукт> оптом {request.city}»), затем регион.\n{where}")
     else:
         where = "Регион не выбран: ищи по всей России."
     synonyms = f"\nДругие названия: {', '.join(request.synonyms)}." if request.synonyms else ""

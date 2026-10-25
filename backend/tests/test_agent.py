@@ -281,13 +281,17 @@ def test_save_supplier_rejects_each_kind_of_bad_field_but_keeps_good_ones(bad, r
     assert bad["field"] not in {f.field for f in sink.suppliers["syrmaster-kazan.test"].fields if f.value == bad["value"]}
 
 
-def test_save_supplier_requires_name_and_contact_and_keeps_nothing_otherwise():
-    box, _, _, sink, _ = make_box()
+def test_save_supplier_requires_a_contact_and_without_confirmed_name_uses_the_domain():
+    box, _, _, sink, events = make_box()
     opened(box)
     only_name = call(box, "save_supplier", website=HOME_URL, fields=GOOD_FIELDS[:1])
     assert "phone или email" in only_name["ошибка"] and not sink.suppliers
-    no_name = call(box, "save_supplier", website=HOME_URL, fields=GOOD_FIELDS[1:3])
-    assert "name" in no_name["ошибка"] and not sink.suppliers
+    # название на сайте написано иначе, чем предложила модель: поставщика с телефоном не теряем, сохраняем под доменом
+    no_name = call(box, "save_supplier", website=HOME_URL, fields=[field("name", "Сыр-Мастер Групп", "Контакты"), *GOOD_FIELDS[1:3]])
+    assert no_name["результат"] == "создан" and no_name["отклонено"][0]["поле"] == "name"
+    assert box.saved_domains["syrmaster-kazan.test"] == "syrmaster-kazan.test"
+    named = call(box, "save_supplier", website=HOME_URL, fields=GOOD_FIELDS[:1])  # название подтвердилось позже
+    assert named["результат"] == "дополнен" and box.saved_domains["syrmaster-kazan.test"] == "ООО «СырМастер Казань»"
 
 
 def test_save_supplier_refuses_foreign_site_as_source_blocked_domains_and_empty_input():
@@ -412,6 +416,14 @@ def test_loop_gives_model_status_and_survives_tool_errors():
     tool_message = [m for m in llm.seen[1] if m["role"] == "tool"][0]
     data = json.loads(tool_message["content"])
     assert "не загрузилась" in data["ошибка"] and data["статус"]["осталось_шагов"] == Limits().max_turns - 1 and result.stop_reason == "finished"
+
+
+def test_chosen_city_is_named_in_the_prompt_before_the_region():
+    from app.agent.prompts import build_messages
+
+    user = build_messages(RunRequest(category="Моцарелла", regions=REQUEST.regions, city="Казань"), Limits(), False)[1]["content"]
+    assert "Город закупки: Казань" in user and "оптом Казань" in user and user.index("Казань") < user.index("Республика Татарстан")
+    assert "Город закупки" not in build_messages(REQUEST, Limits(), False)[1]["content"]
 
 
 def test_prompt_contains_category_regions_synonyms_and_budget():
