@@ -1,3 +1,5 @@
+import os
+
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 from sqlalchemy import text
@@ -19,5 +21,6 @@ async def health(session: AsyncSession = Depends(get_session)) -> JSONResponse:
     healthy = database == "ok"
     return JSONResponse(
         status_code=200 if healthy else 503,
-        content={"status": "ok" if healthy else "degraded", "database": database},
+        # version: the image tag written by the deployment (IMAGE_TAG in .env); "dev" when running locally
+        content={"status": "ok" if healthy else "degraded", "database": database, "version": os.environ.get("IMAGE_TAG", "dev")},
     )

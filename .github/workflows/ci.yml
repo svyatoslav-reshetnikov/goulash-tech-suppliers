@@ -145,7 +145,7 @@ jobs:
           # (не дольше 12 минут: запуск ограничен 10 минутами). У незавершённого запуска finished_at пуст
           for i in $(seq 1 48); do
             active=$(docker compose -f docker-compose.prod.yml exec -T db sh -c \
-              'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -tAc "select count(*) from runs where finished_at is null"' 2>/dev/null || true)
+              'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -tAc "select count(*) from runs where finished_at is null"' </dev/null 2>/dev/null || true)
             active=$(printf '%s' "$active" | tr -dc '0-9')
             if [ -z "$active" ] || [ "$active" = "0" ]; then break; fi
             echo "идут запуски поиска ($active), жду их завершения"
@@ -162,9 +162,11 @@ jobs:
           for i in $(seq 1 18); do
             page=$(curl -s -o /dev/null -w '%{http_code}' "https://$SITE_DOMAIN/" || true)
             api=$(curl -s -o /dev/null -w '%{http_code}' "https://$SITE_DOMAIN/api/runs?limit=1" || true)
-            echo "попытка $i: страница $page, API без входа $api"
-            [ "$page" = "200" ] && [ "$api" = "401" ] && exit 0
+            version=$(curl -s "https://$SITE_DOMAIN/api/health" | grep -o '"version":"[^"]*"' || true)
+            echo "попытка $i: страница $page, API без входа $api, $version"
+            # the running version must be the one just deployed: "page 200 and API 401" is also true for the old version
+            [ "$page" = "200" ] && [ "$api" = "401" ] && [ "$version" = "\"version\":\"$TAG\"" ] && exit 0
             sleep 10
           done
-          echo "Ожидалось: страница 200, API без входа 401" >&2
+          echo "Ожидалось: страница 200, API без входа 401 и версия $TAG" >&2
           exit 1
