@@ -62,6 +62,7 @@ class Settings(BaseSettings):
     agent_target_suppliers: int = 5
     agent_max_fetches: int = 70  # загрузка страниц бесплатна; расход ограничен бюджетом токенов
     agent_max_runs_per_day: int = 10
+    agent_max_products_per_search: int = 3  # products in one multi-product search (each is a separate paid run)
 
     # тарифы Yandex AI Studio (₽ с НДС) для оценки стоимости запуска; сверяйте с биллингом
     llm_price_per_1k_tokens_rub: float = 1.2  # YandexGPT Pro 5; у Pro 5.1 — 0.8

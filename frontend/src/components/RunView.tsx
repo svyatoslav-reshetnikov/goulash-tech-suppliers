@@ -112,7 +112,7 @@ export default function RunView({ runId, onFinished }: { runId: number; onFinish
                 live ? "bg-blue-100 text-blue-800" : run?.status === "failed" ? "bg-red-100 text-red-800" : "bg-emerald-100 text-emerald-800"
               }`}
             >
-              {live ? "Идёт поиск…" : run?.status === "failed" ? "Не удалось" : "Завершён"}
+              {live ? (run?.status === "queued" ? "В очереди" : "Идёт поиск…") : run?.status === "failed" ? "Не удалось" : "Завершён"}
             </span>
           </span>
         </button>

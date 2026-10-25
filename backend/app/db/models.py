@@ -89,6 +89,8 @@ class Run(Base):
     include_neighbors: Mapped[bool] = mapped_column(Boolean, default=False)
     regions: Mapped[list] = mapped_column(JSONB, default=list)  # [{id, name, role}]
     supplier_type: Mapped[str | None] = mapped_column(String(32))
+    extras: Mapped[dict | None] = mapped_column(JSONB)  # optional requirements: volume, documents, storage, delivery
+    group_id: Mapped[int | None] = mapped_column(index=True)  # id of the first run of a multi-product search; None for a single search
     status: Mapped[str] = mapped_column(String(16), default="queued")  # queued | running | done | failed
     stop_reason: Mapped[str | None] = mapped_column(String(32))
     summary: Mapped[str | None] = mapped_column(Text)

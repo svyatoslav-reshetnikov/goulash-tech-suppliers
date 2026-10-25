@@ -12,6 +12,7 @@ import zipfile
 from datetime import datetime
 from xml.sax.saxutils import escape
 
+from app.extras import describe
 from app.ranking.commerce import compact_price
 
 STATUS_LABELS = {"new": "Новый", "called": "Позвонили", "awaiting_price": "Ждём прайс", "shortlisted": "В шорт-листе", "declined": "Отказались"}
@@ -42,7 +43,7 @@ def _date(value: str | None) -> str:
 def search_parameters(run: dict) -> str:
     where = run.get("location") or "Вся Россия"
     parts = [run["category"], where, "с соседними регионами" if run.get("include_neighbors") else "без соседних регионов",
-             f"тип: {run['supplier_type']}" if run.get("supplier_type") else "тип: любой"]
+             f"тип: {run['supplier_type']}" if run.get("supplier_type") else "тип: любой", *describe(run.get("extras"))]
     return "; ".join(parts)
 
 

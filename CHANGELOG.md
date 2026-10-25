@@ -1,5 +1,21 @@
 # Changelog
 
+## Phase 4: search form
+
+- Free-text product: «Такой позиции нет в справочнике — искать как есть» (2–80 characters, sanitized on the server; category stays null,
+  the agent prompt takes the typed name). Previous searches of a free-text product are found by name.
+- Several products at once (default 3, `AGENT_MAX_PRODUCTS_PER_SEARCH`): `POST /api/runs/batch` creates one run per product with a shared
+  place, type and requirements; runs start one after another and are grouped in the history (`runs.group_id`, migration 0009).
+  A confirmation shows the estimate («Будет запущено 3 поиска, ≈ 210–300 ₽, 6–12 минут») and lists products that were already searched;
+  the progress block of every search is visible.
+- Optional «Дополнительно» block (collapsed): monthly volume, documents (ХАССП, ISO, Меркурий), storage, delivery. Stored in `runs.extras`,
+  passed to the agent, checked deterministically against the supplier's collected text: "Не найдено на сайте" warnings and questions first
+  in the call checklist. No score impact.
+- Form clarity: «Вся Россия» is a toggle chip with a selected state; the disabled «Включая соседние регионы» says «Сначала выберите регион»;
+  catalog category chips open `#search?product=<id>` with the product chosen.
+- Routing is a small tested module (`route.ts`); reload on `#history/<id>`, `#history`, `#catalog`, `#search` restores that view.
+- Catalog derivation: the semaphore now covers the write too (removes a race that made one test flaky in CI).
+
 ## Phase 3: export and work tracking
 
 - `GET /api/runs/{id}/export?format=xlsx|csv&ids=...`: the whole search or the chosen suppliers in the given (table) order. `.xlsx` is

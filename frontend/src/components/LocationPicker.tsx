@@ -66,22 +66,20 @@ export default function LocationPicker({ onChange }: { onChange?: (value: Locati
 
   return (
     <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-      <h2 className="mb-3 text-sm font-medium text-slate-500">Где искать поставщиков</h2>
+      <h2 className="mb-3 text-sm font-medium text-slate-700">Где искать поставщиков</h2>
 
       <div className="flex flex-wrap items-center gap-2">
-        <span
-          className={`rounded-full px-3 py-1 text-sm ${selected ? "bg-cyan-100 text-cyan-900" : "bg-slate-100 text-slate-600"}`}
+        <button
+          onClick={() => setSelected(null)}
+          aria-pressed={!selected}
+          className={`rounded-full px-3 py-1 text-sm ${!selected ? "bg-cyan-600 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"}`}
         >
-          {selected
-            ? selected.kind === "city"
-              ? `${selected.label} · ${selected.region_name}`
-              : selected.label
-            : "Вся Россия"}
-        </span>
+          Вся Россия
+        </button>
         {selected && (
-          <button onClick={() => setSelected(null)} className="text-sm text-slate-500 hover:text-slate-800">
-            Сбросить: вся Россия
-          </button>
+          <span className="rounded-full bg-cyan-100 px-3 py-1 text-sm text-cyan-900">
+            {selected.kind === "city" ? `${selected.label} · ${selected.region_name}` : selected.label}
+          </span>
         )}
       </div>
 
@@ -129,15 +127,21 @@ export default function LocationPicker({ onChange }: { onChange?: (value: Locati
         )}
       </div>
 
-      <label className={`mt-4 flex items-center gap-2 text-sm ${selected ? "" : "text-slate-400"}`}>
+      <label className={`mt-4 flex items-center gap-2 text-sm ${selected ? "text-slate-800" : "text-slate-500"}`}>
         <input
           type="checkbox"
           checked={withNeighbors}
           disabled={!selected}
+          aria-describedby={selected ? undefined : "neighbors-hint"}
           onChange={(e) => setWithNeighbors(e.target.checked)}
         />
         Включая соседние регионы
       </label>
+      {!selected && (
+        <p id="neighbors-hint" className="mt-1 text-xs text-slate-600">
+          Сначала выберите регион
+        </p>
+      )}
 
       {primary && (
         <div className="mt-3 text-sm">

@@ -3,23 +3,17 @@ import { UNAUTHORIZED_EVENT, fetchAuth, fetchHealth, logout, type AuthState, typ
 import CatalogPage from "./components/CatalogPage";
 import HistoryPage from "./components/HistoryPage";
 import LoginPage from "./components/LoginPage";
+import { parseRoute } from "./route";
 import SearchPage from "./components/SearchPage";
 
-type Route = { tab: "search" | "history" | "catalog"; runId: number | null };
-
-/** Адрес вида #search, #search/3 (открыт запуск 3), #history, #history/3 или #catalog: ссылку на запуск можно сохранить и открыть позже. */
-const parse = (hash: string): Route => {
-  const [tab, id] = hash.replace(/^#/, "").split("/");
-  return { tab: tab === "catalog" ? "catalog" : tab === "history" ? "history" : "search", runId: id && /^\d+$/.test(id) ? Number(id) : null };
-};
 
 export default function App() {
-  const [route, setRoute] = useState<Route>(() => parse(window.location.hash));
+  const [route, setRoute] = useState(() => parseRoute(window.location.hash));
   const [health, setHealth] = useState<Health | "unreachable" | null>(null);
   const [auth, setAuth] = useState<AuthState | null>(null);
 
   useEffect(() => {
-    const onHash = () => setRoute(parse(window.location.hash));
+    const onHash = () => setRoute(parseRoute(window.location.hash));
     // сессия закончилась посреди работы: любой ответ 401 возвращает на страницу входа
     const onUnauthorized = () => setAuth((prev) => (prev ? { ...prev, authenticated: false } : prev));
     window.addEventListener("hashchange", onHash);
@@ -68,7 +62,7 @@ export default function App() {
         <button onClick={() => go("catalog")} className={tabClass(route.tab === "catalog")}>Справочник</button>
       </nav>
 
-      {route.tab === "search" && <SearchPage runId={route.runId} onOpen={(id) => go(`search/${id}`)} />}
+      {route.tab === "search" && <SearchPage runId={route.runId} initialProduct={route.product} onOpen={(id) => go(`search/${id}`)} />}
       {route.tab === "history" && <HistoryPage runId={route.runId} onOpen={(id) => go(`history/${id}`)} onBack={() => go("history")} />}
       {route.tab === "catalog" && <CatalogPage />}
 

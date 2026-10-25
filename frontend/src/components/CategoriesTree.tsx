@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { fetchCategories, type CategoryGroup } from "../api";
 
-/** Справочник категорий (ингредиентов), по которым ищем поставщиков. Выбор категории для поиска появится на этапе 6. */
+/** Справочник категорий (ингредиентов), по которым ищем поставщиков. Нажмите на категорию, чтобы открыть форму поиска с этим товаром. */
 export default function CategoriesTree() {
   const [groups, setGroups] = useState<CategoryGroup[]>([]);
   const [total, setTotal] = useState(0);
@@ -40,6 +40,7 @@ export default function CategoriesTree() {
           className="w-56 rounded-lg border border-slate-300 px-3 py-1.5 text-sm outline-none focus:border-cyan-500"
         />
       </div>
+      <p className="mb-3 text-sm text-slate-600">Нажмите на категорию: откроется форма поиска с этим товаром.</p>
       <div className="space-y-2">
         {shown.map((group) => (
           <details key={group.id} open={query.trim() !== ""} className="rounded-lg border border-slate-100">
@@ -56,13 +57,15 @@ export default function CategoriesTree() {
             </summary>
             <ul className="flex flex-wrap gap-2 px-3 pb-3">
               {group.categories.map((c) => (
-                <li
-                  key={c.id}
-                  title={c.synonyms.length ? `Синонимы: ${c.synonyms.join(", ")}` : undefined}
-                  className="rounded-full bg-slate-100 px-3 py-1 text-sm text-slate-700"
-                >
-                  {c.name}
-                  {c.items > 0 && <span className="ml-1.5 text-xs text-slate-400">{c.items}</span>}
+                <li key={c.id}>
+                  <a
+                    href={`#search?product=${c.id}`}
+                    title={`Искать поставщиков: ${c.name}${c.synonyms.length ? `. Синонимы: ${c.synonyms.join(", ")}` : ""}`}
+                    className="block rounded-full bg-slate-100 px-3 py-1 text-sm text-slate-700 hover:bg-cyan-100 hover:text-cyan-900"
+                  >
+                    {c.name}
+                    {c.items > 0 && <span className="ml-1.5 text-xs text-slate-500">{c.items}</span>}
+                  </a>
                 </li>
               ))}
             </ul>

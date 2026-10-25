@@ -82,6 +82,20 @@ async def mark_interrupted(session_factory: async_sessionmaker[AsyncSession] = S
         await session.commit()
 
 
+async def start_next_in_group(session_factory: async_sessionmaker[AsyncSession], finished_run_id: int) -> None:
+    """Multi-product search: when a run ends, the next queued run of its group starts (one at a time)."""
+    async with session_factory() as session:
+        group_id = await session.scalar(select(Run.group_id).where(Run.id == finished_run_id))
+        if group_id is None:
+            return
+        running = await session.scalar(select(func.count()).select_from(Run).where(Run.group_id == group_id, Run.status == "running"))
+        following = await session.scalar(
+            select(Run.id).where(Run.group_id == group_id, Run.status == "queued", Run.id > finished_run_id).order_by(Run.id).limit(1)
+        )
+    if following is not None and not running:
+        await start_run(following)
+
+
 async def start_run(run_id: int) -> None:
     task = asyncio.create_task(execute_run(SessionLocal, run_id))
     _tasks.add(task)
@@ -119,6 +133,7 @@ async def execute_run(
                 synonyms=tuple(category.synonyms or []) if category else (),
                 regions=tuple(RegionRef(r["name"], r["role"]) for r in run.regions),
                 supplier_type=run.supplier_type,
+                extras=run.extras,
                 target=settings.agent_target_suppliers,
                 search_region=yandex_region(run.location_kind, run.location_key),
                 city=run.location_key.split("|", 1)[1] if run.location_kind == "city" and run.location_key else None,
@@ -156,6 +171,11 @@ async def execute_run(
                 )
             )
             await session.commit()
+        if error != "остановлено":  # not on shutdown: the app restarts and closes queued runs itself
+            try:
+                await start_next_in_group(session_factory, run_id)
+            except Exception:
+                log.exception("Не удалось запустить следующий поиск группы после запуска %s", run_id)
 
 
 async def stream_events(

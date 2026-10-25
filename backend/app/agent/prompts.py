@@ -2,6 +2,7 @@
 
 from app.agent.config import Limits
 from app.agent.models import RunRequest
+from app.extras import describe
 
 SYSTEM_PROMPT = """Ты — агент-закупщик сети суши- и пицца-доставки. Твоя задача: найти в интернете реальных \
 поставщиков нужного продукта; по каждому нужно собрать полные данные.
@@ -39,8 +40,14 @@ def build_messages(request: RunRequest, limits: Limits, places_enabled: bool) ->
     synonyms = f"\nДругие названия: {', '.join(request.synonyms)}." if request.synonyms else ""
     kind = f"\nТип поставщика: {request.supplier_type}." if request.supplier_type else ""
     places = "\nМожно также искать организации в 2GIS через search_places." if places_enabled else ""
+    wishes = describe(request.extras)
+    needs = (
+        "\nДополнительные требования закупщика: " + "; ".join(wishes) + ". Если на сайте есть подтверждение этих требований "
+        "(сертификаты, условия хранения и доставки), включи его в данные. Поставщика без подтверждения не отбрасывай."
+        if wishes else ""
+    )
     user = (
-        f"Продукт для закупки: {request.category}.{synonyms}\n{where}{kind}\n"
+        f"Продукт для закупки: {request.category}.{synonyms}\n{where}{kind}{needs}\n"
         f"Найди и сохрани до {request.target} поставщиков. Шагов у тебя не больше {limits.max_turns}.{places}"
     )
     return [{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": user}]

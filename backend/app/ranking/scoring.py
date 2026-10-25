@@ -6,6 +6,7 @@ The supplier type is not scored: a mismatching type only blocks the recommendati
 import re
 from dataclasses import dataclass, field
 
+from app import extras as extras_module
 from app.locations import fold, get_locations
 from app.ranking.config import (
     LOCATION_POINTS,
@@ -76,6 +77,7 @@ class RankContext:
     primary_region_id: str | None = None  # None: «Вся Россия», локация не влияет на оценку
     neighbor_region_ids: tuple[str, ...] = ()
     supplier_type: str | None = None  # None: тип не важен
+    extras: dict | None = None  # optional requirements of the search (see app/extras.py)
 
 
 @dataclass
@@ -241,6 +243,10 @@ def rank_suppliers(suppliers: list[SupplierInfo], ctx: RankContext) -> list[Rank
             site_domain=info.domain, emails=info.values("email"), pages_studied=info.pages_studied, tier=tier,
             product_confirmed=confirmed, has_inn=bool(info.inn), substitute=substitute,
         )
+        missing_extras, extra_questions = extras_module.check(
+            ctx.extras, info.values("certificates") + info.values("description") + info.values("assortment") + info.values("delivery_terms")
+        )
+        warnings += [{"code": "extra_not_found", "severity": "warn", "text": f"Не найдено на сайте: {label}"} for label in missing_extras]
         # the badge needs a phone, a fitting type, a confirmed product and a known region
         if info.fields.get("phone") and type_match != "mismatch" and confirmed and tier != "unknown":
             eligible.add(info.id)
@@ -248,7 +254,7 @@ def rank_suppliers(suppliers: list[SupplierInfo], ctx: RankContext) -> list[Rank
             Ranked(
                 supplier_id=info.id, rank=0, score=sum(breakdown.values()), tier=tier, tier_label=TIER_LABELS[tier],
                 breakdown=breakdown, reasons=_reasons(info, ctx, evidence, location_note, type_match), missing=missing,
-                questions=_questions(missing, ctx, tier, regions, substitute), warnings=warnings, evidence=evidence,
+                questions=extra_questions + _questions(missing, ctx, tier, regions, substitute), warnings=warnings, evidence=evidence,
             )
         )
     names = {s.id: s.name for s in suppliers}
