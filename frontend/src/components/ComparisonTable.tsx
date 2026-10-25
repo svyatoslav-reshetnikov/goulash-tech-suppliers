@@ -70,6 +70,16 @@ export default function ComparisonTable({
                 </td>
               ))}
             </tr>
+            {suppliers.some((s) => s.ranking.warnings.length > 0) && (
+              <tr className="border-t border-slate-100">
+                <th className="sticky left-0 bg-white p-2 text-xs font-normal text-slate-400">Внимание</th>
+                {suppliers.map((s) => (
+                  <td key={s.id} className="p-2 text-amber-800">
+                    {s.ranking.warnings.length ? s.ranking.warnings.join(" ") : <span className="italic text-slate-300">нет</span>}
+                  </td>
+                ))}
+              </tr>
+            )}
             <tr className="border-t border-slate-100">
               <th className="sticky left-0 bg-white p-2 text-xs font-normal text-slate-400">Расположение</th>
               {suppliers.map((s) => (

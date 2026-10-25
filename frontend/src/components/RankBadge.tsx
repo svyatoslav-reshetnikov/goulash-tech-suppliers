@@ -4,6 +4,7 @@ const TIER_STYLE: Record<Ranking["tier"], string> = {
   local: "bg-emerald-100 text-emerald-800",
   delivers: "bg-cyan-100 text-cyan-800",
   neighbor: "bg-blue-100 text-blue-800",
+  nationwide: "bg-slate-100 text-slate-700",
   other: "bg-amber-100 text-amber-800",
   unknown: "bg-slate-100 text-slate-600",
   any: "bg-slate-100 text-slate-600",

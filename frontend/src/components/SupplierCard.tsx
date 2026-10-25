@@ -16,7 +16,7 @@ const LABELS: Record<string, string> = {
   certificates: "Сертификаты",
 };
 const MISSING_LABELS: Record<string, string> = {
-  phone: "контакты",
+  phone: "телефон",
   description: "чем занимается",
   address: "адрес",
   regions: "регионы работы",
@@ -60,8 +60,9 @@ type CardProps = {
 const PARTS: [keyof SupplierData["ranking"]["breakdown"], string, number][] = [
   ["relevance", "Совпадение с продуктом", 20],
   ["location", "Расположение", 30],
-  ["completeness", "Полнота данных", 35],
+  ["completeness", "Полнота данных", 25],
   ["reliability", "Надёжность", 15],
+  ["supplier_type", "Тип поставщика", 10],
 ];
 
 /** Заметка закупщика: хранится у поставщика и видна в любом запуске, где он найден. */
@@ -134,6 +135,11 @@ export default function SupplierCard({ supplier, selected = false, canSelect = t
           </label>
         )}
       </div>
+      {ranking.warnings.map((w) => (
+        <p key={w} className="my-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+          ⚠ {w}
+        </p>
+      ))}
       <a href={supplier.website} target="_blank" rel="noreferrer" className="text-sm text-cyan-700 hover:underline">
         {supplier.domain}
       </a>

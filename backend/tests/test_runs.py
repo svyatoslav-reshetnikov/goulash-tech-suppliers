@@ -406,12 +406,15 @@ async def test_research_coverage_is_stored_and_returned_with_run_results(factory
     run_id = await new_run(factory)
     sink = DbSink(factory, run_id)
     await sink.save(draft())
-    await sink.record_research("syrmaster-kazan.test", ["https://syrmaster-kazan.test/", "https://syrmaster-kazan.test/contacts"], ["moq", "certificates"])
+    await sink.record_research("syrmaster-kazan.test", ["https://syrmaster-kazan.test/", "https://syrmaster-kazan.test/contacts"], ["phone", "moq", "certificates"])
     await sink.record_research("unknown.test", ["https://unknown.test/"], [])  # неизвестного поставщика пропускаем молча
+    # минимальный заказ нашёлся уже после изучения сайта: в «не найдено на сайте» его быть не должно
+    await sink.save(draft(fields=[AcceptedField("moq", "от 20 кг", "Минимальный заказ — от 20 кг", "https://syrmaster-kazan.test/opt")]))
     async with factory() as session:
         supplier = (await run_suppliers(run_id, session))["suppliers"][0]
-    assert supplier["research"]["missing"] == ["moq", "certificates"] and len(supplier["research"]["pages"]) == 2
-    assert supplier["research"]["researched_at"]
+    missing = supplier["research"]["missing"]
+    assert "moq" not in missing and "phone" not in missing and "certificates" in missing
+    assert len(supplier["research"]["pages"]) == 2 and supplier["research"]["researched_at"]
 
 
 @needs_db

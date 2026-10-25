@@ -183,3 +183,55 @@ def value_supported_by_quote(field: str, value: str, quote: str) -> bool:
     if field in _DESCRIPTIVE and not words_supported(value, quote):
         return False
     return numbers_supported(value, quote)
+
+
+_STOP_WORDS = {"для", "без", "или", "под", "при"}
+
+
+def product_stems(phrases: tuple[str, ...]) -> list[str]:
+    """Основы слов продукта и его синонимов: «моцарелла» → «моцарел», «сыр» → «сыр»."""
+    stems = []
+    for phrase in phrases:
+        for word in re.findall(r"[a-zа-я0-9]+", norm_text(phrase)):
+            if len(word) == 3 and word not in _STOP_WORDS:
+                stems.append(word)
+            elif len(word) >= 4:
+                stems.append(word[: max(4, len(word) - 2)])
+    return stems
+
+
+def mentions_product(text: str, stems: list[str]) -> bool:
+    folded = norm_text(text)
+    return any(re.search(rf"\b{re.escape(s)}", folded) for s in stems)
+
+
+# «Бесплатная доставка при заказе от 11 000 ₽» и «при заказе от 5000 ₽ доставка бесплатно»: порог доставки, а не минимальный заказ
+_FREE_DELIVERY_FROM = re.compile(
+    r"бесплатн[^.;!]{0,60}?(?:при|от)\s+(?:заказ|сумм|покупк)\w*\s+(?:от\s+)?(\d[\d\s]*)"
+    r"|(?:при|от)\s+(?:заказ|сумм|покупк)\w*\s+(?:от\s+)?(\d[\d\s]*)[^.;!]{0,40}?бесплатн"
+)
+_ORDER_MINIMUM = re.compile(r"минимал|минимум|мин\.")
+
+
+def text_around(quote: str, text: str, chars: int = 200) -> str:
+    """Фрагмент страницы вокруг цитаты: в прайсе цена часто стоит рядом с названием товара, а не в одной строке с ним."""
+    norm, q = norm_text(text), norm_text(quote)
+    at = norm.find(q)
+    return norm[max(0, at - chars) : at + len(q) + chars] if at >= 0 else ""
+
+
+def fact_problem(field: str, value: str, quote: str, product: list[str], context: str = "") -> str | None:
+    """Смысловая проверка: цитата есть на странице, но говорит ли она о том, что записано в поле.
+
+    product — основы слов искомого продукта (product_stems); пустой список отключает проверку цены.
+    context — заголовок страницы и текст вокруг цитаты; у сохранённых раньше полей его нет, проверяется только цитата.
+    """
+    if field == "moq":
+        text = re.sub(r"\b(руб|р)\.", r"\1", norm_text(quote))  # точка в «руб.» — не конец предложения
+        thresholds = {n for m in _FREE_DELIVERY_FROM.finditer(text) for n in _numbers(m.group(1) or m.group(2))}
+        amounts = _numbers(value)
+        if amounts and amounts <= thresholds and not _ORDER_MINIMUM.search(text):
+            return "это сумма заказа для бесплатной доставки, а не минимальный заказ: такое значение относится к delivery_terms"
+    if field == "price_hint" and product and not mentions_product(f"{value} {quote} {context}", product):
+        return "цена не на нужный продукт: ни в цитате, ни рядом с ней продукт не назван. Цены на другие товары не сохраняй"
+    return None

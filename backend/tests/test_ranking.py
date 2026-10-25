@@ -64,10 +64,15 @@ def test_detects_nationwide_delivery():
         ({"address": "г. Казань, ул. Бухарская 4В"}, "local"),
         ({"address": "Республика Татарстан, г. Набережные Челны"}, "local"),
         ({"regions": "Доставка по Татарстану"}, "delivers"),
-        ({"delivery_terms": "Доставляем по всей России"}, "delivers"),
-        ({"address": "г. Москва", "regions": "по России"}, "delivers"),  # доставка важнее чужого адреса
+        ({"delivery_terms": "Доставляем по всей России"}, "nationwide"),  # общее обещание: регион не назван
+        ({"address": "г. Москва", "regions": "по России"}, "nationwide"),  # обещание доставки важнее чужого адреса
+        ({"address": "г. Москва", "regions": "по Татарстану и России"}, "delivers"),
         ({"address": "г. Ижевск, ул. Пушкинская 1"}, "neighbor"),
         ({"address": "г. Москва, ул. Тверская 1"}, "other"),
+        ({"regions": "Москва, Санкт-Петербург, Краснодар"}, "other"),  # перечислены регионы, нашего среди них нет
+        # адрес без региона: регион берётся из описания компании (пгт Рыбная Слобода — Татарстан)
+        ({"address": "пгт. Рыбная Слобода, ул. Октябрьская, д.36/2",
+          "description": "Современное предприятие молочной отрасли Республики Татарстан."}, "local"),
         ({"description": "Производим сыр"}, "unknown"),
         ({}, "unknown"),
     ],
@@ -136,7 +141,7 @@ def test_explanation_lists_what_is_missing_and_what_to_ask():
     assert result.missing[:3] == ["минимальный заказ", "цены", "условия доставки"]
     questions = " ".join(result.questions)
     assert "минимальный заказ и цены" in questions and "Республика Татарстан" in questions and "ИНН" in questions
-    full = only(supplier(inn="7707083893", moq="20 кг", price_hint="500", delivery_terms="бесплатно", regions="Татарстан",
+    full = only(supplier(inn="7707083893", phone="+7 (843) 555-01-23", moq="20 кг", price_hint="500", delivery_terms="бесплатно", regions="Татарстан",
                          certificates="ХАССП", address="г. Казань"))
     assert full.missing == [] and full.questions == []
     assert any("7707083893" in r for r in full.reasons)
@@ -162,7 +167,7 @@ def test_top_three_are_recommended_only_above_threshold():
     assert weak[0].score < 40 and not weak[0].recommended  # данных слишком мало: рекомендовать нечего
 
 
-def test_ties_are_broken_by_completeness_then_name():
+def test_ties_are_broken_by_location_then_completeness_then_name():
     a = supplier(1, name="Б-сыр", phone="+7 (843) 555-01-23", email="a@b.ru")
     b = supplier(2, name="А-сыр", phone="+7 (843) 555-01-23", email="a@b.ru")
     assert [r.supplier_id for r in rank_suppliers([a, b], CTX)] == [2, 1]
@@ -180,3 +185,54 @@ def test_real_run_3_suppliers_are_ranked_sensibly():
     assert [r.supplier_id for r in ranked] == [1, 2, 3]
     assert [r.tier for r in ranked] == ["local", "unknown", "unknown"]
     assert ranked[0].recommended and ranked[0].score > ranked[1].score > ranked[2].score
+
+
+# --- рекомендация только тем, кому можно позвонить и кто подходит по типу ---
+
+
+def test_supplier_without_phone_is_not_recommended_and_the_next_one_is():
+    rich = dict(email="a@b.ru", address="г. Казань, ул. Бухарская 4В", description="Моцарелла", moq="20 кг", delivery_terms="бесплатно")
+    no_phone = supplier(1, name="Без телефона", inn="7707083893", price_hint="моцарелла 500 руб/кг", certificates="ХАССП", **rich)
+    callable_ = [supplier(i, name=f"Поставщик {i}", phone="+7 (843) 555-01-23", **rich) for i in (2, 3, 4)]
+    ranked = rank_suppliers([no_phone, *callable_], CTX)
+    assert ranked[0].supplier_id == 1 and not ranked[0].recommended  # лучшая оценка, но звонить некуда
+    assert [r.recommended for r in ranked[1:]] == [True, True, True]
+    assert any("Телефона на сайте нет" in r for r in ranked[0].reasons) and "телефон" in ranked[0].missing
+
+
+def test_requested_supplier_type_counts_in_score_and_recommendation():
+    ctx = RankContext(category="Моцарелла", primary_region_id=TA, neighbor_region_ids=CTX.neighbor_region_ids, supplier_type="производитель")
+    base = dict(phone="+7 (843) 555-01-23", email="a@b.ru", address="г. Казань, ул. Бухарская 4В", description="Моцарелла")
+    maker = only(supplier(1, supplier_type="производитель", **base), ctx)
+    dealer = only(supplier(2, supplier_type="дистрибьютор", **base), ctx)
+    unknown = only(supplier(3, **base), ctx)
+    assert (maker.breakdown["supplier_type"], unknown.breakdown["supplier_type"], dealer.breakdown["supplier_type"]) == (10, 4, 0)
+    assert maker.recommended and unknown.recommended and not dealer.recommended
+    assert any("вы искали: производитель" in r for r in dealer.reasons)
+    assert only(supplier(4, supplier_type="дистрибьютор", **base)).breakdown["supplier_type"] == 10  # тип не важен
+
+
+def test_local_producer_outranks_moscow_wholesaler_who_only_promises_delivery_across_russia():
+    """Данные запуска №5 («Моцарелла», Казань) после проверки полей."""
+    gfc = supplier(1, name="GFC", inn="7726410031", phone=["+7 (800) 550-41-83", "+7 (903) 410-60-20"], email="msk@gfc-russia.ru",
+                   address="123022, г. Москва, Звенигородское шоссе, д. 9/27с1", supplier_type="оптовик",
+                   description="Компания GFC предлагает сыр моцарелла оптом", assortment="Молочная продукция, сыры",
+                   regions=["16 регионов России", "Москва"], moq="от 11 000 ₽",
+                   delivery_terms="Доставка осуществляется по всей России и регионам транспортом компании.")
+    inlut = supplier(2, name='ООО "Инлут"', phone="+7 (905) 038-20-96", email="info@farfatorre.ru", address="г. Казань, ул. Бухарская 4В",
+                     description="Производим и поставляем сыры Моцарелла по итальянским рецептам", supplier_type="производитель",
+                     assortment="Моцарелла, молокосодержащий продукт с заменителем молочного жира")
+    ranked = rank_suppliers([gfc, inlut], CTX)
+    assert ranked[0].score == ranked[1].score  # оценки равны: выше тот, кто в вашем регионе
+    assert [r.supplier_id for r in ranked] == [2, 1]
+    assert ranked[1].tier == "nationwide" and ranked[1].tier_label == "Заявляет доставку по России"
+    # у местного производителя не спрашиваем, возят ли в Татарстан, но предупреждаем об аналоге
+    assert ranked[0].warnings and "заменителем молочного жира" in ranked[0].warnings[0]
+    assert not any("доставляют ли" in q for q in ranked[0].questions) and "СЗМЖ" in ranked[0].questions[0]
+    assert not ranked[1].warnings
+
+
+def test_village_address_does_not_match_a_similar_city_name():
+    # «Рыбно-Слободский район» — не город Слободской Кировской области
+    assert detector.detect("Рыбно-Слободский район, пгт. Рыбная Слобода, ул. Октябрьская, д.36/2") == set()
+    assert {L.regions[i].name for i in detector.detect("г. Слободской, ул. Ленина 1")} == {"Кировская область"}

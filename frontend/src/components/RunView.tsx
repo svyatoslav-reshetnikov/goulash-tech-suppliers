@@ -185,7 +185,7 @@ export default function RunView({ runId, onFinished }: { runId: number; onFinish
             </p>
             {!live && !suppliers.some((s) => s.ranking.recommended) && (
               <p className="mt-2 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">
-                Рекомендовать пока некого: по найденным поставщикам слишком мало подтверждённых данных (оценка ниже 40 из 100).
+                Рекомендовать пока некого: у найденных поставщиков нет телефона, не тот тип или слишком мало подтверждённых данных (оценка ниже 40 из 100).
               </p>
             )}
           </div>

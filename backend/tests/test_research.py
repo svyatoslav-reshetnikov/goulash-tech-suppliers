@@ -36,7 +36,7 @@ PAGES = {
     f"{BASE}/price": "<html><body><p>Моцарелла для пиццы 45% — 520 руб/кг</p></body></html>",
     f"{BASE}/docs/certs": "<html><body><p>Сертификат соответствия ХАССП № 123</p></body></html>",
     f"{BASE}/blog/1": "<html><body><p>Новости</p></body></html>",
-    f"{BASE}/hidden/opt": "<html><body><p>Минимальный заказ — от 20 кг.</p><p>Цена: 520 руб/кг</p></body></html>",
+    f"{BASE}/hidden/opt": "<html><body><p>Моцарелла для пиццы оптом.</p><p>Минимальный заказ — от 20 кг.</p><p>Цена: 520 руб/кг</p></body></html>",
     f"{BASE}/hidden/cert": "<html><body><p>Сертификат соответствия ХАССП № 123</p></body></html>",
 }
 REQUEST = RunRequest(category="Моцарелла", synonyms=("Сыр моцарелла",),
@@ -376,3 +376,37 @@ def test_same_address_in_different_writing_is_collapsed_to_the_fullest():
     other = ["г. Казань, ул. Бухарская, 4В", "г. Казань, ул. Бухарская, 6"]
     assert collapse_duplicates("address", other) == other  # разные дома не склеиваются
     assert collapse_duplicates("phone", ["+7 (843) 555-01-23", "+7 (843) 555-01-23 доб. 5"]) == ["+7 (843) 555-01-23", "+7 (843) 555-01-23 доб. 5"]  # только описательные поля
+
+
+def test_free_delivery_threshold_is_not_a_minimum_order_and_prices_must_be_for_the_product():
+    from app.agent.validation import fact_problem, product_stems
+
+    product = product_stems(("Моцарелла", "Сыр моцарелла"))
+    gfc = "Бесплатная доставка курьером при заказе от 11 000 ₽, условия самовывоза"  # реальная цитата запуска №5
+    assert "бесплатной доставки" in fact_problem("moq", "от 11 000 ₽", gfc, product)
+    assert fact_problem("moq", "от 5000 руб.", "При заказе от 5000 руб. доставка бесплатно", product)
+    assert fact_problem("moq", "от 10 коробок или от 50.000 рублей", "Минимальный заказ продукции от 10 коробок или от 50.000 рублей!", product) is None
+    assert fact_problem("moq", "Самовывоз — от 3 000 ₽", "Самовывоз — от 3 000 ₽. Доставка — от 5 000 ₽, бесплатно", product) is None
+    butter = "от 665 рублей за упаковку сливочного масла"  # реальная «цена» в поиске моцареллы
+    assert "не на нужный продукт" in fact_problem("price_hint", butter, butter, product)
+    assert fact_problem("price_hint", "520 руб/кг", "Моцарелла для пиццы 45% — 520 руб/кг", product) is None
+    assert fact_problem("price_hint", "520 руб/кг", "Цена: 520 руб/кг", product, context="моцарелла для пиццы оптом") is None
+    assert fact_problem("price_hint", "520 руб/кг", "Цена: 520 руб/кг", []) is None  # продукт неизвестен: не проверяем
+
+
+def test_threshold_and_foreign_price_are_rejected_when_saving():
+    pages = dict(PAGES)
+    pages[f"{BASE}/delivery"] = "<html><body><p>Бесплатная доставка курьером при заказе от 11 000 ₽.</p><p>Сливочное масло от 665 рублей за упаковку.</p></body></html>"
+    answer = [e for e in FIRST_PASS_FULL if e["field"] not in {"moq", "price_hint"}] + [
+        entry("moq", "от 11 000 ₽", "Бесплатная доставка курьером при заказе от 11 000 ₽.", "/delivery"),
+        entry("price_hint", "от 665 рублей за упаковку", "Сливочное масло от 665 рублей за упаковку.", "/delivery"),
+    ]
+    box, _, sink, events = make_box(ExtractLLM([answer] + [[] for _ in range(4)]), SiteSearch({}), pages)
+    research(box, BASE)
+    saved = {f.field for f in sink.suppliers["syrmaster-kazan.test"].fields}
+    assert "moq" not in saved and "price_hint" not in saved and {"phone", "address"} <= saved
+
+
+def test_phone_is_required_even_when_email_is_found():
+    assert missing_fields({"email"})[0] == "phone"
+    assert "phone" not in missing_fields({"phone"})

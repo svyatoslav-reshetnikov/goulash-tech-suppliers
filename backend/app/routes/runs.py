@@ -8,7 +8,8 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.agent.validation import SUPPLIER_TYPES, address_problem, collapse_duplicates
+from app.agent.research import missing_fields
+from app.agent.validation import SUPPLIER_TYPES, address_problem, collapse_duplicates, fact_problem, product_stems
 from app.config import get_settings
 from app.db.models import Category, Run, RunEvent, RunSupplier, Supplier, SupplierField
 from app.db.session import SessionLocal, get_session
@@ -158,23 +159,30 @@ async def run_suppliers(run_id: int, session: AsyncSession = Depends(get_session
             select(SupplierField).where(SupplierField.supplier_id.in_([s.id for s in suppliers])).order_by(SupplierField.id)
         )
     ).scalars().all() if suppliers else []
+    category = await session.get(Category, run.category_id) if run.category_id else None
+    synonyms = tuple(category.synonyms or []) if category else ()
+    product = product_stems((run.category_name, *synonyms))
     by_supplier: dict[int, dict[str, list[SupplierField]]] = {}
     for f in fields:
         by_supplier.setdefault(f.supplier_id, {}).setdefault(f.field, []).append(f)
-    for per_field in by_supplier.values():  # данные прошлых запусков: прячем не-адреса и дубли одного и того же
+    for sid, per_field in by_supplier.items():
+        # данные прошлых запусков проверяем по нынешним правилам: прячем не-адреса, порог доставки вместо
+        # минимального заказа, цены на другие товары и дубли одного и того же
         if "address" in per_field:
             per_field["address"] = [f for f in per_field["address"] if address_problem(f.value) is None]
         for name, items in per_field.items():
+            items = [f for f in items if fact_problem(name, f.value, f.quote, product) is None]
             keep = set(collapse_duplicates(name, [f.value for f in items]))
             per_field[name] = [f for f in items if f.value in keep]
+        by_supplier[sid] = {name: items for name, items in per_field.items() if items}
 
-    category = await session.get(Category, run.category_id) if run.category_id else None
     primary = next((r["id"] for r in run.regions if r["role"] == "primary"), None)
     ctx = RankContext(
         category=run.category_name,
-        synonyms=tuple(category.synonyms or []) if category else (),
+        synonyms=synonyms,
         primary_region_id=primary,
         neighbor_region_ids=tuple(get_locations().regions[primary].neighbors) if primary else (),
+        supplier_type=run.supplier_type,
     )
     infos = [
         SupplierInfo(
@@ -187,7 +195,8 @@ async def run_suppliers(run_id: int, session: AsyncSession = Depends(get_session
     items = [
         {
             "id": s.id, "domain": s.domain, "website": s.website, "name": s.name, "inn": s.inn, "note": s.note,
-            "research": s.research,
+            # «не найдено на сайте» считаем по нынешним полям: поле могло найтись позже изучения сайта или в другом запуске
+            "research": {**s.research, "missing": missing_fields(set(by_supplier.get(s.id, {})))} if s.research else None,
             "fields": {
                 name: [{"value": f.value, "quote": f.quote, "source_url": f.source_url, "verified_at": f.verified_at} for f in values]
                 for name, values in by_supplier.get(s.id, {}).items()

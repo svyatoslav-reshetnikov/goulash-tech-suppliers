@@ -32,11 +32,14 @@ from app.agent.research import (
 from app.agent.validation import (
     CONTACT_FIELDS,
     FIELDS,
+    fact_problem,
     host_of,
     norm_text,
     normalize_value,
+    product_stems,
     quote_in_text,
     same_site,
+    text_around,
     value_supported_by_quote,
 )
 
@@ -149,6 +152,7 @@ class ToolBox:
         llm: object | None = None,
     ):
         self.request, self.limits, self.emit = request, limits, emit
+        self.product = product_stems((request.category, *request.synonyms))  # для проверки, что цена на нужный продукт
         self.searcher, self.fetcher, self.sink, self.places = searcher, fetcher, sink, places
         self.cache = cache or MemoryPageCache()
         self.pages: dict[str, Page] = {}  # страницы этого запуска: только по ним проверяются цитаты
@@ -375,6 +379,8 @@ class ToolBox:
             return problem or "некорректное значение"
         if not value_supported_by_quote(field_name, normalized, quote):
             return "значение не следует из цитаты"
+        if problem := fact_problem(field_name, normalized, quote, self.product, f"{page.title} {text_around(quote, page.text)}"):
+            return problem
         return AcceptedField(field=field_name, value=normalized, quote=quote.strip(), source_url=page.url)
 
     def _may_finish(self) -> bool:

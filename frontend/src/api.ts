@@ -141,12 +141,13 @@ export type Ranking = {
   supplier_id: number;
   rank: number;
   score: number;
-  tier: "local" | "delivers" | "neighbor" | "other" | "unknown" | "any";
+  tier: "local" | "delivers" | "neighbor" | "nationwide" | "other" | "unknown" | "any";
   tier_label: string;
-  breakdown: { relevance: number; location: number; completeness: number; reliability: number };
+  breakdown: { relevance: number; location: number; completeness: number; reliability: number; supplier_type: number };
   reasons: string[];
   missing: string[];
   questions: string[];
+  warnings: string[];
   recommended: boolean;
 };
 export type SupplierData = {
