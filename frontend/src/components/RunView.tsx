@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { fetchRun, fetchRunSuppliers, subscribeRun, type Run, type RunEvent, type SupplierData } from "../api";
-import ComparisonTable from "./ComparisonTable";
-import SupplierCard from "./SupplierCard";
+import ResultsPanel from "./ResultsPanel";
 
 const KINDS: Record<string, { label: string; style: string }> = {
   run_started: { label: "Старт", style: "bg-slate-100 text-slate-700" },
@@ -38,10 +37,7 @@ export default function RunView({ runId, onFinished }: { runId: number; onFinish
   const [suppliers, setSuppliers] = useState<SupplierData[]>([]);
   const [live, setLive] = useState(true);
   const [userOpen, setUserOpen] = useState<boolean | null>(null); // null — решает ход поиска: пока идёт, блок раскрыт, после завершения свёрнут
-  const [selected, setSelected] = useState<number[]>([]);
-  const [comparing, setComparing] = useState(false);
   const feed = useRef<HTMLUListElement>(null);
-  const comparison = useRef<HTMLDivElement>(null);
   const shown = events.filter((e) => e.type !== "usage");
   const inProgress = run === null ? false : run.status === "queued" || run.status === "running";
   const expanded = userOpen ?? inProgress;
@@ -50,8 +46,6 @@ export default function RunView({ runId, onFinished }: { runId: number; onFinish
     setRun(null);
     setEvents([]);
     setSuppliers([]);
-    setSelected([]);
-    setComparing(false);
     setLive(true);
     setUserOpen(null);
     const refresh = () => {
@@ -167,66 +161,13 @@ export default function RunView({ runId, onFinished }: { runId: number; onFinish
         )}
       </div>
 
-      {comparing && selected.length >= 2 && (
-        <div ref={comparison}>
-          <ComparisonTable
-            suppliers={suppliers.filter((s) => selected.includes(s.id))}
-            onClose={() => setComparing(false)}
-            onRemove={(id) => setSelected((prev) => prev.filter((x) => x !== id))}
-          />
-        </div>
-      )}
-
       {suppliers.length > 0 && (
-        <div className="space-y-3">
-          <div>
-            <h2 className="text-lg font-semibold">Найденные поставщики ({suppliers.length})</h2>
-            <p className="text-sm text-slate-500">
-              По рейтингу, лучшие отмечены «Рекомендуем связаться». Чтобы сравнить, отметьте галочкой «Сравнить» у 2–4 поставщиков: внизу появится кнопка.
-            </p>
-            {!live && !suppliers.some((s) => s.ranking.recommended) && (
-              <p className="mt-2 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">
-                Рекомендовать пока некого: у найденных поставщиков нет телефона, не тот тип или слишком мало подтверждённых данных (оценка ниже 40 из 100).
-              </p>
-            )}
-          </div>
-          {suppliers.map((s) => (
-            <SupplierCard
-              key={s.id}
-              supplier={s}
-              selected={selected.includes(s.id)}
-              canSelect={selected.length < 4}
-              onToggle={() => setSelected((prev) => (prev.includes(s.id) ? prev.filter((x) => x !== s.id) : [...prev, s.id]))}
-              onNote={(id, note) => setSuppliers((prev) => prev.map((x) => (x.id === id ? { ...x, note } : x)))}
-            />
-          ))}
-        </div>
-      )}
-      {selected.length > 0 && (
-        <div className="fixed inset-x-0 bottom-4 z-10 mx-auto flex w-fit max-w-[calc(100%-2rem)] flex-wrap items-center gap-3 rounded-xl bg-slate-900 px-4 py-2.5 text-sm text-white shadow-lg">
-          <span>
-            Для сравнения выбрано: {selected.length} из 4{selected.length < 2 ? ". Выберите ещё хотя бы одного" : ""}
-          </span>
-          <button
-            onClick={() => {
-              setComparing(true);
-              setTimeout(() => comparison.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
-            }}
-            disabled={selected.length < 2}
-            className="rounded-lg bg-white px-3 py-1 font-medium text-slate-900 hover:bg-slate-200 disabled:opacity-40"
-          >
-            Сравнить
-          </button>
-          <button
-            onClick={() => {
-              setSelected([]);
-              setComparing(false);
-            }}
-            className="text-slate-300 hover:text-white"
-          >
-            Сбросить
-          </button>
-        </div>
+        <ResultsPanel
+          runId={runId}
+          suppliers={suppliers}
+          live={live}
+          onNote={(id, note) => setSuppliers((prev) => prev.map((x) => (x.id === id ? { ...x, note } : x)))}
+        />
       )}
       {!live && suppliers.length === 0 && run?.status !== "failed" && (
         <p className="rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800">Подходящих поставщиков не найдено. Попробуйте другую категорию или локацию.</p>

@@ -142,6 +142,14 @@ def parse_min_order(raws: list[tuple[str, str]]) -> MinOrder | None:
         return None
     order = {"RUB": 0, "kg": 1, "pcs": 2, None: 3}
     parsed.sort(key=lambda p: order[p.unit])
+    seen: set[tuple[str | None, float | None, str]] = set()
+    unique = []
+    for item in parsed:  # the same threshold stored twice (two pages) is one line
+        key = (item.unit, item.value, item.raw if item.value is None else "")
+        if key not in seen:
+            seen.add(key)
+            unique.append(item)
+    parsed = unique
     main, others = parsed[0], parsed[1:]
     if others:
         extra = "; ".join(p.display for p in others)

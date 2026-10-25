@@ -158,3 +158,7 @@ def test_fixture_commerce_for_every_supplier_is_well_formed():
             assert payload["min_order"] and payload["min_order"]["unit"] in ("RUB", "kg", "pcs")
         else:
             assert payload["min_order"] is None
+
+
+def test_identical_min_order_values_from_two_pages_are_one_line():
+    assert parse_min_order([("от 50 ₽", "a"), ("50 рублей", "b")]).display == "от 50 ₽"

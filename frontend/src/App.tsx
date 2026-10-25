@@ -43,7 +43,7 @@ export default function App() {
   if (!auth.authenticated) return <LoginPage onLoggedIn={setAuth} />;
 
   return (
-    <div className="mx-auto max-w-3xl space-y-5 px-4 py-8">
+    <div className="mx-auto max-w-[1100px] space-y-5 px-4 py-8">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold">Поиск поставщиков продуктов питания</h1>
         <span className="flex items-center gap-3">

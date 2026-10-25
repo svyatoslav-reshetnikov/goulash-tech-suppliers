@@ -1,5 +1,20 @@
 # Changelog
 
+## Phase 2: results layout
+
+- Supplier cards are collapsed by default: name, type, score, one region badge, headline price, minimum order, main phone and
+  email (tap-to-call / mailto), warning chips and one "Уточнить" line. "Подробнее" expands the full card (`aria-expanded`).
+- One page-level toggle "Показывать источники" (off by default) replaces the per-value source buttons; on, it shows source links inline.
+- "Развернуть все / Свернуть все"; expanded state, view mode and the source toggle are remembered per search (sessionStorage)
+  while switching tabs.
+- "Карточки / Таблица" toggle. Table columns: rank, supplier, type, score, region, price per base unit, minimum order, delivery,
+  phone, email, warnings; every column sorts (missing values always last); horizontal scroll on narrow screens.
+- Compare works from cards and from the table; a supplier can be removed from the comparison. Regression tests cover 2, 3 and 4
+  selected suppliers, the minimum of two, the limit of four and reset.
+- Main container widened to 1100 px; scraped URLs are rendered as links only when they are http(s).
+- Frontend tests (Vitest + Testing Library, dev dependencies only) run in CI; `npm test`.
+- Identical minimum-order values stored from two pages are shown once.
+
 ## Phase 1: result correctness (ranking, prices, warnings)
 
 - Scoring weights are now product match 40, location 20, completeness 25, reliability 15 (constants in `backend/app/ranking/config.py`).
