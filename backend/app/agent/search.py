@@ -47,11 +47,12 @@ class YandexSearch:
         self._per_page = per_page
         self._ssl = build_ssl_context(settings.extra_ca_bundle)
 
-    def _request(self, query: str) -> str:
+    def _request(self, query: str, region: int | None = None) -> str:
         body = {
             "query": {"searchType": "SEARCH_TYPE_RU", "queryText": query, "familyMode": "FAMILY_MODE_NONE", "page": "0"},
             "groupSpec": {"groupMode": "GROUP_MODE_DEEP", "groupsOnPage": str(self._per_page), "docsInGroup": "1"},
             "maxPassages": "2",
+            **({"region": str(region)} if region else {}),  # код региона (lr): выдача ранжируется для этого места
             "l10N": "LOCALIZATION_RU",
             "folderId": self._folder,
             "responseFormat": "FORMAT_XML",
@@ -69,8 +70,8 @@ class YandexSearch:
             raise RuntimeError(f"Yandex Search: HTTP {exc.code} {exc.read().decode('utf-8', 'replace')[:200]}") from None
         return base64.b64decode(data["rawData"]).decode("utf-8", "replace")
 
-    async def search(self, query: str) -> list[SearchHit]:
-        return parse_yandex_xml(await asyncio.to_thread(self._request, query))
+    async def search(self, query: str, region: int | None = None) -> list[SearchHit]:
+        return parse_yandex_xml(await asyncio.to_thread(self._request, query, region))
 
 
 def parse_dgis(data: dict) -> list[Place]:

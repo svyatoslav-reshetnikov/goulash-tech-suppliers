@@ -74,7 +74,7 @@ def focus_text(text: str, chars: int) -> str:
     """Начало страницы и окна вокруг слов про цены, заказ, доставку, сертификаты: так в запрос попадает главное."""
     if len(text) <= chars:
         return text
-    head = min(900, chars // 3)
+    head = min(500, chars // 6)  # начало страницы (название, первый экран); меню навигации вырезает загрузчик
     ranges: list[list[int]] = []
     for match in _FOCUS_WORDS.finditer(text, head):
         start, end = max(head, match.start() - 160), min(len(text), match.end() + 240)
@@ -114,7 +114,9 @@ delivery_terms (условия и стоимость доставки, само�
 - quote — ДОСЛОВНЫЙ фрагмент страницы (до 200 символов), source_url — адрес страницы из заголовка «=== адрес ===», с которой взят фрагмент.
 - Значение бери только из текста. Не выдумывай и не додумывай: если на страницах поля нет, не включай его.
 - Телефонов не больше трёх, email не больше двух; остальные поля по одному значению (для price_hint можно до трёх).
-- Числа (цены, минимальный заказ) переписывай как в тексте."""
+- Числа (цены, минимальный заказ) переписывай как в тексте.
+- price_hint пиши одной строкой «товар, фасовка — цена с единицей»: «Рис для суши, 25 кг — 2100 руб.». Название товара обязательно: цена без названия товара бесполезна. Цены других товаров в эту строку не добавляй.
+- moq пиши с единицей измерения: «от 11 000 ₽», «от 20 кг», «от 1 шт.». Число без единицы не записывай."""
 
 
 @dataclass
@@ -160,3 +162,56 @@ def missing_fields(have: set[str]) -> list[str]:
     if "phone" not in have:
         missing.insert(0, "phone")
     return missing
+
+
+# --- проверка кандидата до подробного изучения ---
+
+QUALIFY_SYSTEM = """Ты помогаешь закупщику сети суши- и пицца-доставки отобрать поставщиков. По главной странице сайта \
+и отрывку из поиска определи:
+1. supplier — это компания, которая продаёт бизнесу (производитель, дистрибьютор, оптовая база, поставщик для HoReCa)? \
+«no», если это розничный магазин только для частных покупателей, ресторан, кафе, доставка готовой еды, СМИ, блог, \
+справочник, маркетплейс или сайт не о продаже продуктов.
+2. product — продаёт ли компания нужный продукт или продукты этой категории?
+Ответ — только JSON: {"supplier": "yes|no|unclear", "product": "yes|no|unclear", "reason": "одно короткое предложение"}
+«no» ставь, только если это явно следует из текста; если по главной странице не понять, ставь «unclear»."""
+
+QUALIFY_CHARS = 2500
+
+
+@dataclass
+class Qualification:
+    supplier: str = "unclear"  # yes | no | unclear
+    product: str = "unclear"
+    reason: str = ""
+    error: str | None = None
+
+    @property
+    def rejected(self) -> bool:
+        return self.supplier == "no" or self.product == "no"
+
+
+def build_qualify_messages(request: RunRequest, home: Page, snippet: str | None) -> list[dict]:
+    product = request.category + (f" (также: {', '.join(request.synonyms)})" if request.synonyms else "")
+    kind = f"\nНужный тип поставщика: {request.supplier_type}." if request.supplier_type else ""
+    found = f"\nОтрывок из поиска: {snippet}" if snippet else ""
+    user = (f"Нужный продукт: {product}.{kind}{found}\n\n=== {home.url} ===\nЗаголовок: {home.title}\n"
+            f"{home.text[:QUALIFY_CHARS]}")
+    return [{"role": "system", "content": QUALIFY_SYSTEM}, {"role": "user", "content": user}]
+
+
+def parse_qualification(text: str | None) -> Qualification:
+    """Ответ не по формату не отсеивает сайт: лучше изучить лишний, чем потерять поставщика."""
+    cleaned = re.sub(r"```(?:json)?", "", text or "")
+    start, end = cleaned.find("{"), cleaned.rfind("}")
+    try:
+        data = json.loads(cleaned[start : end + 1]) if start != -1 and end > start else None
+    except json.JSONDecodeError:
+        data = None
+    if not isinstance(data, dict):
+        return Qualification(error="ответ проверки не разобрался")
+
+    def verdict(key: str) -> str:
+        value = str(data.get(key, "")).strip().lower()
+        return value if value in ("yes", "no", "unclear") else "unclear"
+
+    return Qualification(supplier=verdict("supplier"), product=verdict("product"), reason=str(data.get("reason", "")).strip()[:200])

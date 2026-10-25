@@ -1,11 +1,24 @@
-"""Баллы (0–100): совпадение с категорией 20, локация 30, полнота данных 25, надёжность 15, тип поставщика 10."""
+"""Scoring (0-100): product match 40, location 20, data completeness 25, reliability 15 (see `ranking/config.py`).
+
+The supplier type is not scored: a mismatching type only blocks the recommendation badge.
+"""
 
 import re
 from dataclasses import dataclass, field
 
-from app.agent.validation import mentions_product, product_stems
 from app.locations import fold, get_locations
+from app.ranking.config import (
+    LOCATION_POINTS,
+    NEUTRAL_LOCATION_POINTS,
+    PRODUCT_POINTS,
+    RECOMMEND_MIN_PRODUCT_SHARE,
+    RECOMMEND_MIN_SCORE,
+    RECOMMEND_TOP,
+    WEIGHTS,
+)
 from app.ranking.places import PlaceDetector, detector_for
+from app.ranking.product import first_matching_phrase, is_generic, partially_matches
+from app.ranking.warnings import build_warnings
 
 # вес полей в оценке полноты данных (сумма 25): больше всего весят телефон и условия закупки, а не тексты о компании,
 # иначе первым оказывается сайт с длинным описанием, а не поставщик, у которого понятно, как и почём купить
@@ -21,10 +34,6 @@ FIELD_NAMES = {
 }
 # что стоит выяснить в первую очередь, если данных нет (в порядке важности)
 WANTED = ["phone", "moq", "price_hint", "delivery_terms", "regions", "certificates", "inn", "address"]
-# «доставка по всей России» без названия региона — обещание общее, оно ниже соседнего региона;
-# «другой регион» ниже «неизвестно»: у поставщика с известным чужим адресом есть и баллы за заполненный адрес
-LOCATION_POINTS = {"local": 30, "delivers": 26, "neighbor": 18, "nationwide": 14, "other": 2, "unknown": 10}
-NEUTRAL_LOCATION_POINTS = 15  # локация не выбрана: у всех одинаково
 TIER_LABELS = {
     "local": "В вашем регионе",
     "delivers": "Доставляет в ваш регион",
@@ -34,10 +43,6 @@ TIER_LABELS = {
     "unknown": "Регион неизвестен",
     "any": "Вся Россия",
 }
-# тип поставщика: совпал с искомым (или не важен) 10, не указан на сайте 4, другой 0
-TYPE_POINTS = {"match": 10, "unknown": 4, "mismatch": 0}
-RECOMMEND_TOP = 3
-RECOMMEND_MIN_SCORE = 40
 # признаки аналога вместо натурального продукта: для пиццы и роллов важно, сыр это или продукт с заменителем
 SUBSTITUTE = re.compile(r"заменител\w*\s+молочн\w*\s+жир|\bсзмж\b|молокосодержащ|растительн\w*\s+жир|сырн\w*\s+продукт")
 
@@ -55,6 +60,7 @@ class SupplierInfo:
     name: str
     inn: str | None
     fields: dict[str, list[FieldInfo]] = field(default_factory=dict)
+    pages_studied: int | None = None  # None: unknown (the supplier was saved before page counts were recorded)
 
     def values(self, name: str) -> list[str]:
         return [f.value for f in self.fields.get(name, [])]
@@ -83,8 +89,10 @@ class Ranked:
     reasons: list[str]
     missing: list[str]
     questions: list[str]
-    warnings: list[str] = field(default_factory=list)
+    warnings: list[dict] = field(default_factory=list)  # [{code, severity, text}]
     recommended: bool = False
+    evidence: dict | None = None  # what confirmed the product: {kind, phrase, where, text, label}
+    breakdown_max: dict[str, int] = field(default_factory=lambda: dict(WEIGHTS))
 
 
 def _region_names(ids: set[str]) -> str:
@@ -134,29 +142,38 @@ def _type_match(info: SupplierInfo, ctx: RankContext) -> str:
     return "match" if ctx.supplier_type in kinds else "mismatch"
 
 
-def _score(info: SupplierInfo, ctx: RankContext, tier: str, type_match: str) -> tuple[dict[str, int], str | None]:
-    stems = product_stems((ctx.category, *ctx.synonyms))
-    if mentions_product(info.text("description", "assortment"), stems):
-        relevance, relevance_note = 20, "В описании или ассортименте упоминается нужный продукт."
-    elif mentions_product(info.name, stems):
-        relevance, relevance_note = 15, "Нужный продукт упоминается в названии компании."
-    else:
-        relevance, relevance_note = 8, None  # найден поиском по этому продукту, но подтверждения в данных нет
+def product_evidence(info: SupplierInfo, ctx: RankContext) -> tuple[int, dict]:
+    """Product match points by the strongest evidence: price list > assortment > description > name > generic claim."""
+    phrases = (ctx.category, *ctx.synonyms)
+    for field_name, kind, where in (("price_hint", "price_list", "в прайс-листе"), ("assortment", "assortment", "в ассортименте"),
+                                    ("description", "description", "в описании")):
+        for value in info.values(field_name):
+            if phrase := first_matching_phrase(value, phrases):
+                return PRODUCT_POINTS[kind], {"kind": kind, "phrase": phrase, "where": where, "text": value[:200],
+                                              "label": f"найдено: {phrase} — {where}"}
+    if phrase := first_matching_phrase(info.name, phrases):
+        return PRODUCT_POINTS["name"], {"kind": "name", "phrase": phrase, "where": "в названии", "text": info.name,
+                                        "label": f"только в названии компании ({phrase}): это не подтверждает товар"}
+    texts = [*info.values("assortment"), *info.values("description"), *info.values("price_hint")]
+    if any(is_generic(v) for v in texts) or any(partially_matches(v, phrases) for v in texts):
+        return PRODUCT_POINTS["generic"], {"kind": "generic", "phrase": None, "where": None, "text": None,
+                                           "label": "товар не назван: только общие формулировки"}
+    return PRODUCT_POINTS["none"], {"kind": "none", "phrase": None, "where": None, "text": None, "label": "товар на сайте не найден"}
 
+
+def _score(info: SupplierInfo, ctx: RankContext, tier: str) -> tuple[dict[str, int], dict]:
+    relevance, evidence = product_evidence(info, ctx)
     location = NEUTRAL_LOCATION_POINTS if tier == "any" else LOCATION_POINTS[tier]
     completeness = sum(points for name, points in COMPLETENESS.items() if info.fields.get(name))
     contacts = {name for name in ("phone", "email") if info.fields.get(name)}
     sources = {f.source_url for values in info.fields.values() for f in values if f.source_url}
     reliability = (8 if info.inn else 0) + (4 if len(contacts) >= 2 else 0) + (3 if len(sources) >= 2 else 0)
-    breakdown = {"relevance": relevance, "location": location, "completeness": completeness, "reliability": reliability,
-                 "supplier_type": TYPE_POINTS[type_match]}
-    return breakdown, relevance_note
+    breakdown = {"relevance": relevance, "location": location, "completeness": completeness, "reliability": reliability}
+    return breakdown, evidence
 
 
-def _reasons(info: SupplierInfo, ctx: RankContext, relevance_note: str | None, location_note: str, type_match: str) -> list[str]:
-    reasons = []
-    if relevance_note:
-        reasons.append(relevance_note)
+def _reasons(info: SupplierInfo, ctx: RankContext, evidence: dict, location_note: str, type_match: str) -> list[str]:
+    reasons = [evidence["label"][0].upper() + evidence["label"][1:] + "."]
     reasons.append(location_note)
     contacts = [label for key, label in (("phone", "телефон"), ("email", "email")) if info.fields.get(key)]
     if contacts:
@@ -178,17 +195,14 @@ def _reasons(info: SupplierInfo, ctx: RankContext, relevance_note: str | None, l
     return reasons
 
 
-def _warnings(info: SupplierInfo) -> list[str]:
+def _substitute(info: SupplierInfo) -> bool:
     text = fold(" ".join([info.name, info.text("description", "assortment", "price_hint")]))
-    if SUBSTITUTE.search(text):
-        return ["В ассортименте есть продукт с заменителем молочного жира (молокосодержащий или «сырный» продукт). "
-                "Уточните, предлагают ли натуральный продукт, а не аналог."]
-    return []
+    return SUBSTITUTE.search(text) is not None
 
 
-def _questions(missing: list[str], ctx: RankContext, tier: str, regions, warnings: list[str]) -> list[str]:
+def _questions(missing: list[str], ctx: RankContext, tier: str, regions, substitute: bool) -> list[str]:
     asks = []
-    if warnings:
+    if substitute:
         asks.append(f"Уточните, что «{ctx.category}» натуральный продукт, а не аналог с заменителем молочного жира (СЗМЖ).")
     if "минимальный заказ" in missing or "цены" in missing:
         parts = [p for p in ("минимальный заказ" if "минимальный заказ" in missing else "", "цены" if "цены" in missing else "") if p]
@@ -206,8 +220,8 @@ def _questions(missing: list[str], ctx: RankContext, tier: str, regions, warning
 
 
 def rank_suppliers(suppliers: list[SupplierInfo], ctx: RankContext) -> list[Ranked]:
-    """Ранжирует поставщиков запуска и помечает рекомендованных: первые три с оценкой не ниже порога,
-    телефоном и подходящим типом (без телефона связаться не получится, чужой тип закупщику не нужен)."""
+    """Ranks the run's suppliers and marks the recommended ones: the first three with a score above the threshold that also have
+    a phone, a fitting type, a confirmed product (at least half of the product points) and a known region."""
     focus = frozenset(({ctx.primary_region_id} if ctx.primary_region_id else set()) | set(ctx.neighbor_region_ids))
     detector = detector_for(focus)
     regions = get_locations().regions
@@ -216,16 +230,22 @@ def rank_suppliers(suppliers: list[SupplierInfo], ctx: RankContext) -> list[Rank
     for info in suppliers:
         tier, location_note = classify_location(info, ctx, detector)
         type_match = _type_match(info, ctx)
-        breakdown, relevance_note = _score(info, ctx, tier, type_match)
+        breakdown, evidence = _score(info, ctx, tier)
         missing = [FIELD_NAMES[f] for f in WANTED if not (info.inn if f == "inn" else info.fields.get(f))]
-        warnings = _warnings(info)
-        if info.fields.get("phone") and type_match != "mismatch":
+        substitute = _substitute(info)
+        confirmed = breakdown["relevance"] >= RECOMMEND_MIN_PRODUCT_SHARE * WEIGHTS["relevance"]
+        warnings = build_warnings(
+            site_domain=info.domain, emails=info.values("email"), pages_studied=info.pages_studied, tier=tier,
+            product_confirmed=confirmed, has_inn=bool(info.inn), substitute=substitute,
+        )
+        # the badge needs a phone, a fitting type, a confirmed product and a known region
+        if info.fields.get("phone") and type_match != "mismatch" and confirmed and tier != "unknown":
             eligible.add(info.id)
         ranked.append(
             Ranked(
                 supplier_id=info.id, rank=0, score=sum(breakdown.values()), tier=tier, tier_label=TIER_LABELS[tier],
-                breakdown=breakdown, reasons=_reasons(info, ctx, relevance_note, location_note, type_match), missing=missing,
-                questions=_questions(missing, ctx, tier, regions, warnings), warnings=warnings,
+                breakdown=breakdown, reasons=_reasons(info, ctx, evidence, location_note, type_match), missing=missing,
+                questions=_questions(missing, ctx, tier, regions, substitute), warnings=warnings, evidence=evidence,
             )
         )
     names = {s.id: s.name for s in suppliers}

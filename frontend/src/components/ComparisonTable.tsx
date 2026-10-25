@@ -11,7 +11,7 @@ const ROWS: [string, string][] = [
   ["regions", "Регионы поставки"],
   ["delivery_terms", "Доставка"],
   ["moq", "Минимальный заказ"],
-  ["price_hint", "Цены"],
+  ["price_hint", "Цена на искомый товар"],
   ["certificates", "Сертификаты"],
 ];
 
@@ -27,6 +27,12 @@ export default function ComparisonTable({
 }) {
   const best = Math.max(...suppliers.map((s) => s.ranking.score));
   const cell = (s: SupplierData, field: string) => {
+    // structured price and minimum order when the server sent them, raw strings for old responses
+    if (field === "moq" && s.commerce?.min_order) return [s.commerce.min_order.display];
+    if (field === "price_hint" && s.commerce && s.fields.price_hint?.length) {
+      const headline = s.commerce.price_headline;
+      return [headline ? headline.display + (headline.note ? ` · ${headline.note}` : "") : "Цена на искомый товар не найдена"];
+    }
     const values = s.fields[field]?.map((v) => v.value) ?? [];
     return values.length ? values : null;
   };
@@ -75,7 +81,11 @@ export default function ComparisonTable({
                 <th className="sticky left-0 bg-white p-2 text-xs font-normal text-slate-400">Внимание</th>
                 {suppliers.map((s) => (
                   <td key={s.id} className="p-2 text-amber-800">
-                    {s.ranking.warnings.length ? s.ranking.warnings.join(" ") : <span className="italic text-slate-300">нет</span>}
+                    {s.ranking.warnings.some((w) => w.severity === "warn") ? (
+                      s.ranking.warnings.filter((w) => w.severity === "warn").map((w) => <div key={w.code}>{w.text}</div>)
+                    ) : (
+                      <span className="italic text-slate-300">нет</span>
+                    )}
                   </td>
                 ))}
               </tr>

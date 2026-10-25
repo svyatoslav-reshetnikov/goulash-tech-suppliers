@@ -18,6 +18,7 @@ from app.agent.config import Limits
 from app.agent.models import RunRequest
 from app.agent.prompts import build_messages
 from app.agent.tools import ToolBox
+from app.llm import LLMTruncated
 
 log = logging.getLogger(__name__)
 
@@ -121,6 +122,11 @@ async def run_agent(request: RunRequest, llm: ChatModel, toolbox: ToolBox, emit:
         compact(messages, limits.keep_recent_tool_results)
         try:
             reply = await llm.chat(messages, toolbox.schemas())
+        except LLMTruncated as exc:  # оплаченный, но обрезанный ответ: токены учитываем, найденное сохраняется
+            prompt_tokens += exc.prompt_tokens
+            completion_tokens += exc.completion_tokens
+            stop_reason, error = "llm_error", "ответ модели обрезан по длине"
+            break
         except Exception as exc:
             log.exception("Ошибка модели")
             stop_reason, error = "llm_error", str(exc)[:300]

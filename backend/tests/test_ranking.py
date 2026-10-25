@@ -85,7 +85,7 @@ def test_without_selected_location_region_does_not_matter():
     no_location = RankContext(category="Моцарелла")
     local = only(supplier(address="г. Казань"), no_location)
     far = only(supplier(address="г. Москва"), no_location)
-    assert local.tier == far.tier == "any" and local.breakdown["location"] == far.breakdown["location"] == 15
+    assert local.tier == far.tier == "any" and local.breakdown["location"] == far.breakdown["location"] == 10
     assert "не выбрана" in local.reasons[0] or any("не выбрана" in r for r in local.reasons)
 
 
@@ -119,7 +119,7 @@ def test_more_confirmed_data_gives_a_higher_score_and_perfect_supplier_gets_100(
     perfect = only(supplier(
         name="Моцарелла Сыр", inn="7707083893", phone="+7 (843) 555-01-23", email="a@b.ru", address="г. Казань",
         supplier_type="производитель", description="Производим моцареллу", assortment="Моцарелла", regions="Татарстан",
-        delivery_terms="бесплатно", moq="20 кг", price_hint="500 руб", certificates="ХАССП"))
+        delivery_terms="бесплатно", moq="20 кг", price_hint="Моцарелла 500 руб/кг", certificates="ХАССП"))
     assert perfect.score == 100 and sum(perfect.breakdown.values()) == 100
 
 
@@ -127,7 +127,7 @@ def test_relevance_and_reliability_components():
     mentions = only(supplier(description="Поставляем сыр моцарелла оптом"))
     in_name = only(supplier(name="Моцарелла-Маркет"))
     nothing = only(supplier(description="Разные продукты"))
-    assert (mentions.breakdown["relevance"], in_name.breakdown["relevance"], nothing.breakdown["relevance"]) == (20, 15, 8)
+    assert (mentions.breakdown["relevance"], in_name.breakdown["relevance"], nothing.breakdown["relevance"]) == (20, 10, 0)
     assert only(supplier(description="Моцарелла")).breakdown["reliability"] == 0
     two_pages = supplier(phone="+7 (843) 555-01-23", email="a@b.ru", inn="7707083893")
     assert only(two_pages).breakdown["reliability"] == 8 + 4 + 3
@@ -206,10 +206,10 @@ def test_requested_supplier_type_counts_in_score_and_recommendation():
     maker = only(supplier(1, supplier_type="производитель", **base), ctx)
     dealer = only(supplier(2, supplier_type="дистрибьютор", **base), ctx)
     unknown = only(supplier(3, **base), ctx)
-    assert (maker.breakdown["supplier_type"], unknown.breakdown["supplier_type"], dealer.breakdown["supplier_type"]) == (10, 4, 0)
+    assert "supplier_type" not in maker.breakdown  # the type is a gate for the badge, not points
     assert maker.recommended and unknown.recommended and not dealer.recommended
     assert any("вы искали: производитель" in r for r in dealer.reasons)
-    assert only(supplier(4, supplier_type="дистрибьютор", **base)).breakdown["supplier_type"] == 10  # тип не важен
+    assert only(supplier(4, supplier_type="дистрибьютор", **base)).recommended  # тип не важен
 
 
 def test_local_producer_outranks_moscow_wholesaler_who_only_promises_delivery_across_russia():
@@ -223,13 +223,12 @@ def test_local_producer_outranks_moscow_wholesaler_who_only_promises_delivery_ac
                      description="Производим и поставляем сыры Моцарелла по итальянским рецептам", supplier_type="производитель",
                      assortment="Моцарелла, молокосодержащий продукт с заменителем молочного жира")
     ranked = rank_suppliers([gfc, inlut], CTX)
-    assert ranked[0].score == ranked[1].score  # оценки равны: выше тот, кто в вашем регионе
-    assert [r.supplier_id for r in ranked] == [2, 1]
+    assert [r.supplier_id for r in ranked] == [2, 1]  # the local producer is first
     assert ranked[1].tier == "nationwide" and ranked[1].tier_label == "Заявляет доставку по России"
     # у местного производителя не спрашиваем, возят ли в Татарстан, но предупреждаем об аналоге
-    assert ranked[0].warnings and "заменителем молочного жира" in ranked[0].warnings[0]
+    assert "substitute_product" in [w["code"] for w in ranked[0].warnings]
     assert not any("доставляют ли" in q for q in ranked[0].questions) and "СЗМЖ" in ranked[0].questions[0]
-    assert not ranked[1].warnings
+    assert not [w for w in ranked[1].warnings if w["code"] == "substitute_product"]
 
 
 def test_village_address_does_not_match_a_similar_city_name():

@@ -5,16 +5,24 @@ from dataclasses import asdict
 from fastapi import APIRouter, Depends, Header, HTTPException, Query
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
-from sqlalchemy import select
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.agent.research import missing_fields
-from app.agent.validation import SUPPLIER_TYPES, address_problem, collapse_duplicates, fact_problem, product_stems
+from app.agent.validation import (
+    SUPPLIER_TYPES,
+    address_problem,
+    collapse_duplicates,
+    fact_problem,
+    product_stems,
+    value_supported_by_quote,
+)
 from app.config import get_settings
 from app.db.models import Category, Run, RunEvent, RunSupplier, Supplier, SupplierField
 from app.db.session import SessionLocal, get_session
 from app.locations import get_locations
 from app.ranking import FieldInfo, RankContext, SupplierInfo, rank_suppliers
+from app.ranking.commerce import commerce_payload
 from app.runs import service
 
 router = APIRouter(prefix="/runs", tags=["запуски"])
@@ -56,6 +64,8 @@ async def create_run(body: RunCreate, session: AsyncSession = Depends(get_sessio
         regions = [{"id": r.id, "name": r.name, "role": role}
                    for r, role in locations.expand(selected.region_id, body.include_neighbors)]
 
+    # проверка лимитов и создание запуска — под одной блокировкой: два одновременных запроса не пройдут оба
+    await session.execute(select(func.pg_advisory_xact_lock(func.hashtext("runs:create"))))
     limit = get_settings().agent_max_runs_per_day
     if await service.runs_last_day(session) >= limit:
         raise HTTPException(status_code=429, detail=f"Достигнут суточный лимит запусков ({limit}): каждый запуск платный. Попробуйте завтра")
@@ -156,7 +166,11 @@ async def run_suppliers(run_id: int, session: AsyncSession = Depends(get_session
     ).scalars().all()
     fields = (
         await session.execute(
-            select(SupplierField).where(SupplierField.supplier_id.in_([s.id for s in suppliers])).order_by(SupplierField.id)
+            # поля, найденные этим запуском и раньше: найденное позже не меняет результаты прошлого запуска
+            select(SupplierField).where(
+                SupplierField.supplier_id.in_([s.id for s in suppliers]),
+                or_(SupplierField.first_run_id.is_(None), SupplierField.first_run_id <= run_id),
+            ).order_by(SupplierField.id)
         )
     ).scalars().all() if suppliers else []
     category = await session.get(Category, run.category_id) if run.category_id else None
@@ -171,7 +185,8 @@ async def run_suppliers(run_id: int, session: AsyncSession = Depends(get_session
         if "address" in per_field:
             per_field["address"] = [f for f in per_field["address"] if address_problem(f.value) is None]
         for name, items in per_field.items():
-            items = [f for f in items if fact_problem(name, f.value, f.quote, product) is None]
+            items = [f for f in items if value_supported_by_quote(name, f.value, f.quote)
+                     and fact_problem(name, f.value, f.quote, product) is None]
             keep = set(collapse_duplicates(name, [f.value for f in items]))
             per_field[name] = [f for f in items if f.value in keep]
         by_supplier[sid] = {name: items for name, items in per_field.items() if items}
@@ -188,6 +203,7 @@ async def run_suppliers(run_id: int, session: AsyncSession = Depends(get_session
         SupplierInfo(
             id=s.id, domain=s.domain, name=s.name, inn=s.inn,
             fields={name: [FieldInfo(f.value, f.source_url) for f in items] for name, items in by_supplier.get(s.id, {}).items()},
+            pages_studied=len(s.research["pages"]) if s.research else None,
         )
         for s in suppliers
     ]
@@ -202,6 +218,11 @@ async def run_suppliers(run_id: int, session: AsyncSession = Depends(get_session
                 for name, values in by_supplier.get(s.id, {}).items()
             },
             "ranking": asdict(ranking[s.id]),
+            "commerce": commerce_payload(
+                [(f.value, f.source_url) for f in by_supplier.get(s.id, {}).get("price_hint", [])],
+                [(f.value, f.source_url) for f in by_supplier.get(s.id, {}).get("moq", [])],
+                (run.category_name, *ctx.synonyms),
+            ),
         }
         for s in suppliers
     ]

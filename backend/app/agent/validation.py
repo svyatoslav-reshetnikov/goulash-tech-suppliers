@@ -23,9 +23,12 @@ def norm_text(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
+MIN_QUOTE = 5  # цитата «ООО» или «Да» есть на любой странице и ничего не подтверждает
+
+
 def quote_in_text(quote: str, text: str) -> bool:
     quote = norm_text(quote)
-    return len(quote) >= 3 and quote in norm_text(text)
+    return len(quote) >= MIN_QUOTE and quote in norm_text(text)
 
 
 def digits(text: str) -> str:
@@ -156,20 +159,66 @@ def normalize_value(field: str, value: str) -> tuple[str | None, str | None]:
 _DESCRIPTIVE = {"delivery_terms", "moq", "price_hint", "certificates", "regions", "address", "description", "assortment"}
 
 
-def _stems(text: str) -> set[str]:
-    return {w[:5] for w in re.findall(r"[a-zа-я0-9]+", norm_text(text)) if len(w) >= 5}
+# служебные слова не подтверждают значение: «вся Россия» должно опираться на «Россия», а не на «вся»
+_FILLER = {
+    "для", "без", "или", "под", "при", "над", "про", "как", "так", "также", "это", "что", "все", "всё", "вся", "весь",
+    "всей", "всех", "наш", "наша", "наши", "ваш", "ваша", "ваши", "мы", "вы", "the", "and", "for",
+}
+# организационно-правовые формы и общие слова в названиях: «ООО ТД Ромашка» подтверждается цитатой «Ромашка»
+_NAME_FILLER = _FILLER | {
+    "ооо", "оао", "зао", "пао", "ао", "ип", "нао", "тд", "гк", "пк", "кфх", "llc", "ltd", "компания", "группа",
+    "компаний", "торговый", "дом", "общество", "ограниченной", "ответственностью",
+}
+# единицы у чисел: «от 10 кг» не подтверждается цитатой «скидка 10%»
+_UNITS = [
+    ("кг", r"кг|килограмм\w*"), ("т", r"т|тн|тонн\w*"), ("г", r"г|гр|грамм\w*"), ("шт", r"шт\w*|штук\w*"),
+    ("уп", r"уп\w*"), ("кор", r"кор\w*"), ("ящ", r"ящ\w*"), ("пал", r"паллет\w*|палет\w*"), ("меш", r"меш\w*"),
+    ("л", r"л|литр\w*"), ("руб", r"руб\w*|р|₽"), ("%", r"%"),
+]
+_UNIT_PATTERNS = [(name, re.compile(rf"\d\s*(?:{body})(?![a-zа-я])")) for name, body in _UNITS]
+# тип поставщика должен быть назван в цитате своими словами
+_TYPE_WORDS = {
+    "производитель": ("производ", "завод", "фабрик", "комбинат", "собственн"),
+    "дистрибьютор": ("дистриб", "официальн", "эксклюзивн"),
+    "оптовик": ("опт",),
+}
 
 
-def words_supported(value: str, quote: str, threshold: float = 0.5) -> bool:
-    """Не меньше половины значимых слов значения встречаются в цитате (по началу слова, чтобы не мешали падежи).
+def _words(text: str, filler: set[str]) -> list[str]:
+    return [w for w in re.findall(r"[a-zа-я0-9]+", norm_text(text)) if len(w) >= 2 and not w.isdigit() and w not in filler]
 
-    Защита от значения, которое лишь по числам совпадает с цитатой («бесплатная доставка…» под цитатой про сумму заказа).
-    Короткие значения (меньше трёх значимых слов) проверяются только по числам.
+
+def _word_matches(word: str, others: list[str]) -> bool:
+    """Одно слово в разных падежах: общее начало не короче 5 букв или короткое слово целиком («сыр» — «сыры»)."""
+    for other in others:
+        common = 0
+        for a, b in zip(word, other):
+            if a != b:
+                break
+            common += 1
+        shorter = min(len(word), len(other))
+        if common >= 5 or common == shorter or (shorter <= 5 and common >= 3 and common >= shorter - 1):
+            return True
+    return False
+
+
+def words_supported(value: str, quote: str, filler: set[str] = _FILLER) -> bool:
+    """Слова значения есть в цитате (с поправкой на падежи).
+
+    Короткое значение (до трёх слов) должно опираться на цитату целиком: «Татарстан» не подтверждается цитатой
+    «Москва и область». В длинном (описание, ассортимент) модель пересказывает, поэтому достаточно половины слов.
     """
-    value_stems = _stems(value)
-    if len(value_stems) < 3:
-        return True
-    return len(value_stems & _stems(quote)) / len(value_stems) >= threshold
+    words, quoted = _words(value, filler), _words(quote, filler)
+    if not words:
+        return True  # значение из одних чисел и единиц: проверяется по ним
+    found = sum(_word_matches(w, quoted) for w in words)
+    return found == len(words) if len(words) <= 3 else found / len(words) >= 0.5
+
+
+def units_supported(value: str, quote: str) -> bool:
+    """Единицы при числах значения (кг, руб, шт…) есть и в цитате."""
+    v, q = norm_text(value), norm_text(quote)
+    return all(pattern.search(q) for _, pattern in _UNIT_PATTERNS if pattern.search(v))
 
 
 def value_supported_by_quote(field: str, value: str, quote: str) -> bool:
@@ -180,7 +229,12 @@ def value_supported_by_quote(field: str, value: str, quote: str) -> bool:
         return value.lower() in quote.lower()
     if field == "inn":
         return digits(value) in digits(quote)
-    if field in _DESCRIPTIVE and not words_supported(value, quote):
+    if field == "supplier_type":
+        return any(stem in norm_text(quote) for stem in _TYPE_WORDS.get(value, ()))
+    if field == "name":  # название из одних «ООО», «Торговый дом» проверяется по всем словам
+        filler = _NAME_FILLER if _words(value, _NAME_FILLER) else _FILLER
+        return bool(_words(value, filler)) and words_supported(value, quote, filler) and numbers_supported(value, quote)
+    if field in _DESCRIPTIVE and not (words_supported(value, quote) and units_supported(value, quote)):
         return False
     return numbers_supported(value, quote)
 

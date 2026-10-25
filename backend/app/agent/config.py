@@ -42,7 +42,11 @@ class Limits:
     research_pages_second: int = 3  # страниц на один дополнительный поиск по сайту
     evidence_chars_per_page: int = 3200
     tool_timeout: int = 45
-    research_timeout: int = 240
+    research_timeout: int = 240  # весь вызов research_suppliers (сайты изучаются параллельно)
+    research_site_timeout: int = 180  # один сайт: медленный сайт не отменяет изучение остальных
+    qualify: bool = True  # перед подробным изучением короткая проверка главной: продаёт ли сайт нужное бизнесу
+    reuse_days: int = 7  # поставщик, изученный за эти дни, берётся из базы без повторного извлечения
+    extraction_max_tokens: int = 4096
     page_text_limit: int = 5000  # сколько символов страницы видит модель при ручном fetch_page
     max_links: int = 8
     keep_recent_tool_results: int = 3  # более старые результаты инструментов сжимаются, чтобы контекст не рос

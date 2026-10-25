@@ -19,7 +19,7 @@ from app.agent.research import (
 )
 from app.agent.tools import ToolBox, tool_schemas
 from app.llm import Reply, ToolCall
-from tests.test_agent import FakeFetcher, FakeSearch, ScriptedLLM, page
+from tests.test_agent import QUALIFIED, FakeFetcher, FakeSearch, ScriptedLLM, is_qualify, page
 
 BASE = "https://syrmaster-kazan.test"
 HOME_HTML = f"""<html><head><title>СырМастер</title></head><body><h1>ООО «СырМастер Казань»</h1>
@@ -41,6 +41,7 @@ PAGES = {
 }
 REQUEST = RunRequest(category="Моцарелла", synonyms=("Сыр моцарелла",),
                      regions=(RegionRef("Республика Татарстан", "primary"),), target=1)
+WIDE = RunRequest(category="Моцарелла", synonyms=("Сыр моцарелла",), regions=REQUEST.regions, target=5)  # несколько сайтов за вызов
 
 
 def entry(field, value, quote, path="/"):
@@ -68,7 +69,9 @@ class ExtractLLM:
     def __init__(self, answers: list[list[dict] | str]):
         self.answers, self.seen = list(answers), []
 
-    async def chat(self, messages, tools=None):
+    async def chat(self, messages, tools=None, **kwargs):
+        if is_qualify(messages):
+            return Reply(text=QUALIFIED, prompt_tokens=50, completion_tokens=10)
         self.seen.append(messages)
         answer = self.answers.pop(0)
         text = answer if isinstance(answer, str) else json.dumps({"fields": answer}, ensure_ascii=False)
@@ -81,7 +84,7 @@ class SiteSearch:
     def __init__(self, hits_by_word: dict[str, list[str]] | None = None):
         self.queries, self.by_word = [], hits_by_word or {}
 
-    async def search(self, query: str):
+    async def search(self, query: str, region=None):
         self.queries.append(query)
         for word, urls in self.by_word.items():
             if word in query:
@@ -163,7 +166,7 @@ def test_first_pass_opens_all_sections_and_saves_every_required_field():
     saved = sink.suppliers["syrmaster-kazan.test"]
     assert {f.field for f in saved.fields} >= {"name", "phone", "email", "address", "description", "regions", "delivery_terms", "moq", "price_hint", "certificates", "inn"}
     assert sink.research["syrmaster-kazan.test"]["missing"] == [] and len(sink.research["syrmaster-kazan.test"]["pages"]) == 6
-    assert (box.extra_prompt_tokens, box.extra_completion_tokens) == (1000, 200) and box.counters.researched == 1
+    assert (box.extra_prompt_tokens, box.extra_completion_tokens) == (1050, 210) and box.counters.researched == 1  # проверка сайта и извлечение
     assert len(llm.seen) == 1 and "site:" not in str(box.searcher.queries) and any(t == "research_done" for t, _ in events)
 
 
@@ -213,13 +216,14 @@ def test_site_without_confirmed_name_and_contact_is_not_saved():
 
 
 def test_bad_sites_unreachable_home_duplicates_and_limits():
-    box, fetcher, sink, _ = make_box(ExtractLLM([FIRST_PASS_FULL]), limits=Limits(max_research=2))
+    # в лимит идут только подробно изученные сайты: неоткрывшийся и отсеянный проверкой стоят одну загрузку
+    box, fetcher, sink, _ = make_box(ExtractLLM([FIRST_PASS_FULL]), limits=Limits(max_research=1), request=WIDE)
     out = research(box, "https://www.avito.ru/x", "https://missing.test/", BASE)["сайты"]
     assert "не поставщик" in out[0]["результат"] and "не открылась" in out[1]["результат"] and out[2]["результат"] == "сохранён"
     calls = len(fetcher.calls)
     again = research(box, BASE)["сайты"][0]
     assert again["примечание"].startswith("этот сайт уже изучен") and len(fetcher.calls) == calls  # повторно не изучаем
-    assert "лимит изучаемых" in research(box, "https://one.test/")["сайты"][0]["результат"]  # 2 из 2 уже использованы
+    assert "лимит изучаемых" in research(box, "https://one.test/")["сайты"][0]["результат"]  # 1 из 1 уже использован
     assert "websites" in json.loads(asyncio.run(box.execute("research_suppliers", "{}")).text)["ошибка"]
 
 
@@ -232,7 +236,7 @@ def test_several_sites_are_researched_at_once_but_no_more_than_three():
         answers.append([{"field": "name", "value": f"ООО {host}", "quote": f"ООО {host}", "source_url": f"https://{host}.test/"},
                         {"field": "phone", "value": f"+7 (843) 555-01-2{ord(host) - 96}", "quote": f"Телефон: +7 (843) 555-01-2{ord(host) - 96}", "source_url": f"https://{host}.test/"}])
     llm = ExtractLLM(answers + [[]] * 12)
-    box, *_ = make_box(llm, pages=pages, limits=Limits(max_site_searches=0))
+    box, *_ = make_box(llm, pages=pages, limits=Limits(max_site_searches=0), request=WIDE)
     out = research(box, "https://a.test/", "https://b.test/", "https://c.test/", "https://d.test/")["сайты"]
     assert len(out) == 3 and box.counters.researched == 3  # четвёртый адрес отброшен
 
@@ -257,7 +261,7 @@ def test_loop_with_research_counts_extraction_tokens_in_stats():
     main = ScriptedLLM([tool("search_web", query="моцарелла оптом Казань"), tool("research_suppliers", websites=[BASE]), tool("finish", summary="готово")])
     result = run(main, box)
     assert result.stop_reason == "target_reached" and result.stats["suppliers_saved"] == 1 and result.stats["researched"] == 1
-    assert result.stats["prompt_tokens"] == 200 + 1000 and result.stats["completion_tokens"] == 40 + 200  # две реплики основного агента + извлечение
+    assert result.stats["prompt_tokens"] == 200 + 50 + 1000 and result.stats["completion_tokens"] == 40 + 10 + 200  # две реплики агента, проверка сайта, извлечение
 
 
 def test_token_budget_includes_tokens_spent_inside_tools():
@@ -308,7 +312,7 @@ def test_network_failures_are_reported_in_feed_and_do_not_break_other_sites():
 
     pages = dict(PAGES)
     fetcher = BrokenFetcher(pages)
-    box = ToolBox(REQUEST, Limits(), SiteSearch(), fetcher, MemorySink(), emit, llm=ExtractLLM([FIRST_PASS_FULL]))
+    box = ToolBox(WIDE, Limits(), SiteSearch(), fetcher, MemorySink(), emit, llm=ExtractLLM([FIRST_PASS_FULL]))
     out = research(box, "https://broken.test/", BASE)["сайты"]
     assert "не открылась" in out[0]["результат"] and "обрыв соединения" in out[0]["результат"] and out[1]["результат"] == "сохранён"
     assert any(t == "research_failed" and "broken.test" in m for t, m in events)
@@ -318,7 +322,7 @@ def test_network_failures_are_reported_in_feed_and_do_not_break_other_sites():
 
 def test_unexpected_exception_inside_one_research_is_isolated():
     class Exploding(ExtractLLM):
-        async def chat(self, messages, tools=None):
+        async def chat(self, messages, tools=None, **kwargs):
             raise RuntimeError("модель недоступна")
 
     box, *_ = make_box(Exploding([]))
@@ -410,3 +414,190 @@ def test_threshold_and_foreign_price_are_rejected_when_saving():
 def test_phone_is_required_even_when_email_is_found():
     assert missing_fields({"email"})[0] == "phone"
     assert "phone" not in missing_fields({"phone"})
+
+
+# выдуманные значения рядом с настоящей цитатой: раньше проверялись только числа, и всё это принималось
+FABRICATED = [
+    ("name", "ООО «Сырная Империя»", "Контакты"),
+    ("supplier_type", "производитель", "Контакты"),
+    ("certificates", "ХАССП", "Доставка по городу"),
+    ("regions", "вся Россия", "Каталог продукции"),
+    ("regions", "Татарстан", "Москва и область"),
+    ("moq", "от 10 кг", "Скидка 10% новым клиентам"),
+    ("price_hint", "моцарелла 450 руб/кг", "Сыр пармезан 450 руб/кг"),
+    ("delivery_terms", "бесплатная доставка", "Самовывоз со склада"),
+    ("description", "производитель моцареллы", "Мы продаём кофе"),
+    ("assortment", "моцарелла", "Мы продаём кофе"),
+]
+SUPPORTED = [
+    ("name", "ООО «Инлут»", "Производитель бренда Фарфаторре ООО Инлут"),
+    ("name", "Торговый дом Ромашка", "ТД «Ромашка», Казань"),
+    ("supplier_type", "производитель", "Собственное производство сыров с 2012 года"),
+    ("supplier_type", "оптовик", "Продаём оптом и в розницу"),
+    ("supplier_type", "дистрибьютор", "Официальный дистрибьютор Unagrande"),
+    ("regions", "Татарстан", "Доставка по Татарстану"),
+    ("regions", "вся Россия", "Отгружаем по всей России транспортными компаниями"),
+    ("assortment", "сыры", "Сыр моцарелла, сулугуни"),
+    ("moq", "от 20 кг", "Минимальный заказ — от 20 кг."),
+    ("description", "Производство мясных полуфабрикатов", "Мы занимаемся производством мясных полуфабрикатов"),
+]
+
+
+@pytest.mark.parametrize("field,value,quote", FABRICATED)
+def test_fabricated_value_next_to_a_real_quote_is_rejected(field, value, quote):
+    from app.agent.validation import normalize_value, value_supported_by_quote
+
+    normalized, _ = normalize_value(field, value)
+    assert normalized is None or not value_supported_by_quote(field, normalized, quote)
+
+
+@pytest.mark.parametrize("field,value,quote", SUPPORTED)
+def test_value_written_in_other_words_or_cases_is_accepted(field, value, quote):
+    from app.agent.validation import normalize_value, value_supported_by_quote
+
+    normalized, _ = normalize_value(field, value)
+    assert normalized is not None and value_supported_by_quote(field, normalized, quote)
+
+
+def test_too_short_quote_confirms_nothing():
+    from app.agent.validation import quote_in_text
+
+    assert not quote_in_text("ООО", "ООО Ромашка") and quote_in_text("ООО Ромашка", "ООО «Ромашка», Казань")
+
+
+# --- проверка сайта до изучения, повторное использование, обрезанные ответы, таймауты ---
+
+
+class JudgingLLM(ExtractLLM):
+    """Проверка сайта отвечает заданным вердиктом; извлечение — заготовленными ответами."""
+
+    def __init__(self, verdict: str, answers=()):
+        super().__init__(list(answers))
+        self.verdict, self.qualify_calls = verdict, 0
+
+    async def chat(self, messages, tools=None, **kwargs):
+        from tests.test_agent import is_qualify
+
+        if is_qualify(messages):
+            self.qualify_calls += 1
+            return Reply(text=self.verdict, prompt_tokens=40, completion_tokens=8)
+        return await super().chat(messages, tools, **kwargs)
+
+
+def test_site_that_does_not_sell_the_product_to_business_is_skipped_before_research():
+    llm = JudgingLLM('{"supplier": "no", "product": "yes", "reason": "ресторан, продаёт готовую пиццу"}')
+    box, fetcher, sink, events = make_box(llm)
+    out = research(box, BASE)["сайты"][0]
+    assert "не подходит" in out["результат"] and "ресторан" in out["результат"]
+    assert fetcher.calls == [f"{BASE}/"] and llm.seen == [] and not sink.suppliers  # только главная, без извлечения
+    assert box.counters.rejected == 1 and box.counters.researched == 0
+    assert any(t == "research_skipped" for t, _ in events)
+    assert "уже изучен" in research(box, BASE)["сайты"][0]["примечание"]  # второй раз не проверяем
+
+
+def test_unclear_or_broken_verdict_does_not_drop_the_site():
+    for verdict in ('{"supplier": "unclear", "product": "unclear", "reason": "мало текста"}', "не JSON"):
+        box, _, sink, _ = make_box(JudgingLLM(verdict, [FIRST_PASS_FULL]))
+        assert research(box, BASE)["сайты"][0]["результат"] == "сохранён"
+        assert sink.research["syrmaster-kazan.test"]["qualification"]["supplier"] == "unclear"
+
+
+def test_recently_researched_supplier_is_reused_without_paying_for_extraction_again():
+    sink = MemorySink()
+    first, *_ = make_box(ExtractLLM([FIRST_PASS_FULL]))
+    first.sink = sink
+    research(first, BASE)
+    llm = ExtractLLM([])  # заготовленных ответов нет: извлечение упало бы
+    second = ToolBox(REQUEST, Limits(), SiteSearch(), FakeFetcher(dict(PAGES)), sink, first.emit, llm=llm)
+    out = research(second, BASE)["сайты"][0]
+    assert "данные изучения" in out["результат"] and "phone" in out["сохранено_полей"]
+    assert second.counters.saved == 1 and second.counters.reused == 1 and llm.seen == []
+    stale = ToolBox(REQUEST, Limits(reuse_days=0), SiteSearch(), FakeFetcher(dict(PAGES)), sink, first.emit, llm=ExtractLLM([FIRST_PASS_FULL]))
+    sink.research["syrmaster-kazan.test"]["at"] -= 10
+    assert research(stale, BASE)["сайты"][0]["результат"] == "сохранён" and stale.counters.reused == 0  # устарело: изучаем заново
+
+
+def test_truncated_extraction_is_split_in_halves_and_its_tokens_are_counted():
+    from app.llm import LLMTruncated
+
+    class Truncating(ExtractLLM):
+        truncated = False
+
+        async def chat(self, messages, tools=None, **kwargs):
+            from tests.test_agent import is_qualify
+
+            if not is_qualify(messages) and not self.truncated:
+                self.truncated = True
+                raise LLMTruncated(prompt_tokens=3000, completion_tokens=4096)
+            return await super().chat(messages, tools, **kwargs)
+
+    llm = Truncating([FIRST_PASS_FULL[:6], FIRST_PASS_FULL[6:]])
+    box, _, sink, _ = make_box(llm, limits=Limits(max_site_searches=0))
+    out = research(box, BASE)["сайты"][0]
+    assert out["результат"] == "сохранён" and len(llm.seen) == 2  # две половины страниц
+    assert box.extra_prompt_tokens == 50 + 3000 + 2000 and box.extra_completion_tokens == 10 + 4096 + 400
+
+
+def test_slow_site_times_out_alone_and_is_not_retried():
+    class SlowFetcher(FakeFetcher):
+        async def fetch(self, url):
+            if "slow" in url:
+                await asyncio.sleep(5)
+            return await super().fetch(url)
+
+    box = ToolBox(WIDE, Limits(research_site_timeout=0.3, max_site_searches=0), SiteSearch(), SlowFetcher(dict(PAGES)),
+                  MemorySink(), make_box(None)[0].emit, llm=ExtractLLM([FIRST_PASS_FULL]))
+    out = research(box, "https://slow.test/", BASE)["сайты"]
+    assert "слишком медленно" in out[0]["результат"] and out[1]["результат"] == "сохранён"
+    assert "уже изучен" in research(box, "https://slow.test/")["сайты"][0]["примечание"]
+
+
+def test_no_more_sites_are_researched_than_are_missing_to_the_target():
+    request = RunRequest(category="Моцарелла", target=2)
+    llm = ExtractLLM([[]] * 6)
+    box, *_ = make_box(llm, request=request, limits=Limits(max_site_searches=0))
+    out = research(box, "https://a.test/", "https://b.test/", "https://c.test/")
+    assert len(out["сайты"]) == 2 and "не хватало 2" in out["примечание"]
+
+
+def test_early_finish_in_research_mode_points_to_research_tool_not_fetch_page():
+    box, *_ = make_box(ExtractLLM([]), request=WIDE)
+    refusal = json.loads(asyncio.run(box.execute("finish", '{"summary": "x"}')).text)["ошибка"]
+    assert "research_suppliers" in refusal and "fetch_page" not in refusal
+
+
+def test_search_uses_region_code_but_site_search_does_not():
+    request = RunRequest(category="Моцарелла", target=1, search_region=43)
+    searcher = FakeSearch([SearchHit("СырМастер", f"{BASE}/", "моцарелла оптом", "syrmaster-kazan.test")])
+    box = ToolBox(request, Limits(), searcher, FakeFetcher(dict(PAGES)), MemorySink(), make_box(None)[0].emit,
+                  llm=ExtractLLM([FIRST_PASS_FULL[:4], [], [], []]))
+    asyncio.run(box.execute("search_web", '{"query": "моцарелла оптом Казань"}'))
+    research(box, BASE)
+    assert searcher.regions[0] == 43 and all(r is None for r in searcher.regions[1:]) and len(searcher.regions) > 1
+    assert box.snippets["syrmaster-kazan.test"].startswith("СырМастер")
+
+
+def test_yandex_region_codes_for_city_region_and_whole_country():
+    from app.locations import yandex_region
+
+    assert yandex_region("city", "RU-KDA|Сочи") == 239  # у города свой код
+    assert yandex_region("city", "RU-TA|Набережные Челны") == 43  # нет своего: код региона (столицы)
+    assert yandex_region("region", "RU-TA") == 43 and yandex_region("region", "RU-MOS") == 1
+    assert yandex_region("region", "RU-SA") == 225 and yandex_region(None, None) == 225  # нет кода: вся Россия
+
+
+def test_menu_is_left_out_of_page_text_but_its_links_keep_labels():
+    result = page(f"{BASE}/", HOME_HTML)
+    assert "Прайс-лист" not in result.text and "Производим моцареллу" in result.text
+    assert (f"{BASE}/price", "Прайс-лист") in result.links
+
+
+def test_truncated_reply_in_main_loop_stops_with_tokens_counted():
+    from app.llm import LLMTruncated
+    from tests.test_agent import tool
+
+    box, *_ = make_box(ExtractLLM([]))
+    main = ScriptedLLM([tool("search_web", query="моцарелла"), LLMTruncated(prompt_tokens=700, completion_tokens=2048)])
+    result = run(main, box)
+    assert result.stop_reason == "llm_error" and "обрезан" in result.error
+    assert result.stats["prompt_tokens"] == 100 + 700 and result.stats["completion_tokens"] == 20 + 2048

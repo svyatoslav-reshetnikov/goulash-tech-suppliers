@@ -141,7 +141,9 @@ class SupplierField(Base):
     value: Mapped[str] = mapped_column(Text)
     source_url: Mapped[str] = mapped_column(Text)
     quote: Mapped[str] = mapped_column(Text)
-    run_id: Mapped[int | None] = mapped_column(ForeignKey("runs.id", ondelete="SET NULL"))
+    run_id: Mapped[int | None] = mapped_column(ForeignKey("runs.id", ondelete="SET NULL"))  # последний запуск, подтвердивший поле
+    # запуск, в котором поле впервые найдено: результаты прошлого запуска не меняются от того, что нашли позже
+    first_run_id: Mapped[int | None] = mapped_column(index=True)
     verified_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 

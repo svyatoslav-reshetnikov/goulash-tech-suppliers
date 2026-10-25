@@ -135,3 +135,23 @@ def get_locations() -> Locations:
         City(c["name"], c["region"], c["population"], c["lat"], c["lon"], c["capital"]) for c in cities_data
     ]
     return Locations(regions, cities)
+
+
+@lru_cache
+def _yandex_codes() -> dict:
+    return json.loads((DATA_DIR / "yandex_regions.json").read_text(encoding="utf-8"))
+
+
+def yandex_region(kind: str | None, key: str | None) -> int:
+    """Код региона Яндекс Поиска для выбранного места: у города свой код, если он есть, иначе код региона, иначе России.
+
+    Поиск с кодом региона ранжирует выдачу для этого места: местные поставщики оказываются выше.
+    """
+    codes = _yandex_codes()
+    if kind == "city" and key:
+        if key in codes["cities"]:
+            return codes["cities"][key]
+        key = key.split("|", 1)[0]
+    if key and key in codes["regions"]:
+        return codes["regions"][key]["lr"]
+    return codes["russia"]

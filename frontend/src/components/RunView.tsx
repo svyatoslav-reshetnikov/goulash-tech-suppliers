@@ -12,6 +12,7 @@ const KINDS: Record<string, { label: string; style: string }> = {
   research_extract: { label: "Анализ", style: "bg-indigo-50 text-indigo-700" },
   research_more: { label: "Доп. поиск", style: "bg-amber-50 text-amber-700" },
   research_failed: { label: "Не открылся", style: "bg-red-50 text-red-700" },
+  research_skipped: { label: "Не подходит", style: "bg-slate-100 text-slate-600" },
   research_done: { label: "Сайт готов", style: "bg-emerald-50 text-emerald-700" },
   supplier_saved: { label: "Сохранён", style: "bg-emerald-100 text-emerald-800" },
   supplier_rejected: { label: "Отклонено", style: "bg-amber-100 text-amber-800" },

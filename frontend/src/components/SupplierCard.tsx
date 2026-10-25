@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { saveSupplierNote, type FieldValue, type SupplierData } from "../api";
+import { MinOrderLine, PriceBlock } from "./CommerceBlock";
 import { FieldText } from "./Linkified";
 import RankBadge from "./RankBadge";
 
@@ -57,12 +58,11 @@ type CardProps = {
   onNote?: (supplierId: number, note: string | null) => void;
 };
 
-const PARTS: [keyof SupplierData["ranking"]["breakdown"], string, number][] = [
-  ["relevance", "Совпадение с продуктом", 20],
-  ["location", "Расположение", 30],
-  ["completeness", "Полнота данных", 25],
-  ["reliability", "Надёжность", 15],
-  ["supplier_type", "Тип поставщика", 10],
+const PARTS: [keyof SupplierData["ranking"]["breakdown"], string][] = [
+  ["relevance", "Совпадение с продуктом"],
+  ["location", "Расположение"],
+  ["completeness", "Полнота данных"],
+  ["reliability", "Надёжность"],
 ];
 
 /** Заметка закупщика: хранится у поставщика и видна в любом запуске, где он найден. */
@@ -135,11 +135,14 @@ export default function SupplierCard({ supplier, selected = false, canSelect = t
           </label>
         )}
       </div>
-      {ranking.warnings.map((w) => (
-        <p key={w} className="my-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
-          ⚠ {w}
-        </p>
-      ))}
+      <div className="my-2 flex flex-wrap gap-1.5">
+        {ranking.warnings.map((w) => (
+          <span key={w.code} className={`rounded-full px-2.5 py-0.5 text-xs ${w.severity === "warn" ? "bg-amber-100 text-amber-900" : "bg-slate-100 text-slate-600"}`}>
+            {w.severity === "warn" ? "⚠ " : ""}
+            {w.text}
+          </span>
+        ))}
+      </div>
       <a href={supplier.website} target="_blank" rel="noreferrer" className="text-sm text-cyan-700 hover:underline">
         {supplier.domain}
       </a>
@@ -149,15 +152,19 @@ export default function SupplierCard({ supplier, selected = false, canSelect = t
       {why && (
         <div className="mt-2 rounded-lg bg-slate-50 p-3 text-sm">
           <div className="space-y-1">
-            {PARTS.map(([key, label, max]) => (
-              <div key={key} className="grid grid-cols-[10rem_1fr_3rem] items-center gap-2 text-xs">
-                <span className="text-slate-500">{label}</span>
-                <span className="h-1.5 overflow-hidden rounded bg-slate-200">
-                  <span className="block h-full bg-cyan-500" style={{ width: `${(ranking.breakdown[key] / max) * 100}%` }} />
-                </span>
-                <span className="text-right text-slate-500">{ranking.breakdown[key]}/{max}</span>
-              </div>
-            ))}
+            {PARTS.map(([key, label]) => {
+              const max = ranking.breakdown_max[key];
+              return (
+                <div key={key} className="grid grid-cols-[10rem_1fr_3rem] items-center gap-2 text-xs">
+                  <span className="text-slate-500">{label}</span>
+                  <span className="h-1.5 overflow-hidden rounded bg-slate-200">
+                    <span className="block h-full bg-cyan-500" style={{ width: `${(ranking.breakdown[key] / max) * 100}%` }} />
+                  </span>
+                  <span className="text-right text-slate-500">{ranking.breakdown[key]}/{max}</span>
+                </div>
+              );
+            })}
+            {ranking.evidence && <p className="pt-1 text-xs text-slate-500">Товар: {ranking.evidence.label}</p>}
           </div>
           {!ranking.recommended && (
             <>
@@ -189,6 +196,9 @@ export default function SupplierCard({ supplier, selected = false, canSelect = t
             : "Все обязательные данные найдены."}
         </p>
       )}
+      {supplier.research?.qualification?.reason && (
+        <p className="mt-1 text-xs text-slate-500">Проверка сайта перед изучением: {supplier.research.qualification.reason}</p>
+      )}
       {ranking.recommended && (
         <div className="mt-3 space-y-2 text-sm">
           <ul className="list-disc space-y-0.5 pl-5 text-slate-600">
@@ -210,16 +220,27 @@ export default function SupplierCard({ supplier, selected = false, canSelect = t
       )}
       {names.length > 1 && <p className="mt-1 text-xs text-slate-400">Также: {names.slice(1).map((n) => n.value).join("; ")}</p>}
       <dl className="mt-3 space-y-1.5">
-        {rows.map((field) => (
-          <div key={field} className="grid grid-cols-[8.5rem_1fr] gap-2">
-            <dt className="text-xs text-slate-400">{LABELS[field]}</dt>
-            <dd className="space-y-1">
-              {supplier.fields[field].map((item) => (
-                <Value key={`${field}-${item.value}`} field={field} item={item} />
-              ))}
-            </dd>
-          </div>
-        ))}
+        {rows.map((field) => {
+          // structured price and minimum order replace the raw strings; old responses without them show the raw values
+          const priceBlock = field === "price_hint" && supplier.commerce;
+          const minOrder = field === "moq" ? supplier.commerce?.min_order : null;
+          return (
+            <div key={field} className="grid grid-cols-[8.5rem_1fr] gap-2">
+              <dt className="text-xs text-slate-400">{priceBlock ? "Цена на искомый товар" : LABELS[field]}</dt>
+              <dd className="space-y-1">
+                {priceBlock && supplier.commerce ? (
+                  <PriceBlock commerce={supplier.commerce} />
+                ) : minOrder ? (
+                  <div className="text-sm">
+                    <MinOrderLine order={minOrder} />
+                  </div>
+                ) : (
+                  supplier.fields[field].map((item) => <Value key={`${field}-${item.value}`} field={field} item={item} />)
+                )}
+              </dd>
+            </div>
+          );
+        })}
         {supplier.inn && (
           <div className="grid grid-cols-[8.5rem_1fr] gap-2">
             <dt className="text-xs text-slate-400">ИНН</dt>

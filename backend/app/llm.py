@@ -6,7 +6,11 @@ from app.config import Settings, get_settings
 
 
 class LLMTruncated(ValueError):
-    """Ответ модели обрезан по длине: JSON получился неполным."""
+    """Ответ модели обрезан по длине: JSON получился неполным. Токены обрезанного ответа тоже оплачены и учитываются."""
+
+    def __init__(self, message: str = "ответ модели обрезан по длине", prompt_tokens: int = 0, completion_tokens: int = 0):
+        super().__init__(message)
+        self.prompt_tokens, self.completion_tokens = prompt_tokens, completion_tokens
 
 
 @dataclass
@@ -49,7 +53,6 @@ class LLM:
             raise LLMTruncated("ответ модели обрезан по длине")
         return choice.message.content or ""
 
-
     async def chat(
         self, messages: list[dict], tools: list[dict] | None = None, temperature: float = 0.0, max_tokens: int = 2048
     ) -> Reply:
@@ -59,9 +62,10 @@ class LLM:
             model=self._model, messages=messages, temperature=temperature, max_tokens=max_tokens, **kwargs
         )
         choice = response.choices[0]
-        if choice.finish_reason == "length":
-            raise LLMTruncated("ответ модели обрезан по длине")
         usage = response.usage
+        if choice.finish_reason == "length":
+            raise LLMTruncated(prompt_tokens=getattr(usage, "prompt_tokens", 0) or 0,
+                               completion_tokens=getattr(usage, "completion_tokens", 0) or 0)
         return Reply(
             text=choice.message.content or None,
             tool_calls=[

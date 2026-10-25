@@ -21,6 +21,7 @@ from app.config import Settings, get_settings
 from app.db.models import Category, Run, RunEvent
 from app.db.session import SessionLocal
 from app.llm import get_llm
+from app.locations import yandex_region
 from app.net import settings_ssl_context
 from app.runs.store import DbPageCache, DbSink, EventWriter
 
@@ -119,6 +120,7 @@ async def execute_run(
                 regions=tuple(RegionRef(r["name"], r["role"]) for r in run.regions),
                 supplier_type=run.supplier_type,
                 target=settings.agent_target_suppliers,
+                search_region=yandex_region(run.location_kind, run.location_key),
             )
             run.status, run.started_at = "running", datetime.now(UTC)
             await session.commit()
@@ -133,7 +135,8 @@ async def execute_run(
         toolbox = ToolBox(request, limits, deps.searcher, deps.fetcher, DbSink(session_factory, run_id), emit_with_cost,
                           places=deps.places, cache=DbPageCache(session_factory), llm=deps.llm)
         result = await run_agent(request, deps.llm, toolbox, emit_with_cost, limits)
-        status = "failed" if result.stop_reason == "llm_error" else "done"
+        # сбой модели в середине запуска не перечёркивает уже найденных поставщиков: запуск завершён с причиной
+        status = "failed" if result.stop_reason == "llm_error" and not result.stats.get("suppliers_saved") else "done"
         stop_reason, summary, error, stats = result.stop_reason, result.summary, result.error, result.stats
         stats = {**stats, **estimate_cost(stats, settings)}
     except asyncio.CancelledError:

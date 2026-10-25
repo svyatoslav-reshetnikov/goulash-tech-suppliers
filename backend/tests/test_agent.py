@@ -65,8 +65,9 @@ class FakeSearch:
     def __init__(self, hits: list[SearchHit]):
         self.hits, self.queries = hits, []
 
-    async def search(self, query: str):
+    async def search(self, query: str, region=None):
         self.queries.append(query)
+        self.regions = getattr(self, "regions", []) + [region]
         return self.hits
 
 
@@ -304,7 +305,7 @@ def test_save_supplier_refuses_foreign_site_as_source_blocked_domains_and_empty_
 
 def test_second_save_extends_supplier_and_duplicate_inn_is_rejected():
     box, _, _, sink, _ = make_box(pages={HOME_URL: HOME_HTML, CONTACTS_URL: CONTACTS_HTML,
-                                         "https://twin.test/contacts": CONTACTS_HTML})
+                                         "https://twin.test/contacts": CONTACTS_HTML.replace("<p>Телефон", "<p>ООО «Двойник»</p><p>Телефон")})
     opened(box)
     call(box, "save_supplier", website=HOME_URL, fields=GOOD_FIELDS[:3])
     again = call(box, "save_supplier", website=HOME_URL, fields=[GOOD_FIELDS[3], GOOD_FIELDS[4]] + GOOD_FIELDS[:3])
@@ -313,7 +314,7 @@ def test_second_save_extends_supplier_and_duplicate_inn_is_rejected():
 
     call(box, "fetch_page", url="https://twin.test/contacts")
     twin = call(box, "save_supplier", website="https://twin.test/", fields=[
-        field("name", "Двойник", "Контакты", "https://twin.test/contacts"),
+        field("name", "Двойник", "ООО «Двойник»", "https://twin.test/contacts"),
         field("phone", "8 843 555 01 23", "Телефон: +7 (843) 555-01-23", "https://twin.test/contacts"),
         field("inn", "7707083893", "ИНН 7707083893", "https://twin.test/contacts")])
     assert "дубликат" in twin["ошибка"] and "twin.test" not in sink.suppliers
@@ -322,11 +323,23 @@ def test_second_save_extends_supplier_and_duplicate_inn_is_rejected():
 # --- цикл ---
 
 
+QUALIFIED = '{"supplier": "yes", "product": "yes", "reason": "оптовый поставщик сыров"}'
+
+
+def is_qualify(messages) -> bool:
+    """Проверка сайта перед изучением: заглушки отвечают «подходит», не тратя заготовленные ответы."""
+    from app.agent.research import QUALIFY_SYSTEM
+
+    return messages[0]["content"] == QUALIFY_SYSTEM
+
+
 class ScriptedLLM:
     def __init__(self, replies: list[Reply | Exception]):
         self.replies, self.seen = list(replies), []
 
-    async def chat(self, messages, tools=None):
+    async def chat(self, messages, tools=None, **kwargs):
+        if is_qualify(messages):
+            return Reply(text=QUALIFIED, prompt_tokens=50, completion_tokens=10)
         self.seen.append(copy.deepcopy(messages))
         reply = self.replies.pop(0)
         if isinstance(reply, Exception):

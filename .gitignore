@@ -27,3 +27,4 @@ frontend/dist/
 # Загруженные данные для сборки справочника локаций
 backend/scripts/locations_cache/
 .jbeval/
+backend/scripts/eval/out/

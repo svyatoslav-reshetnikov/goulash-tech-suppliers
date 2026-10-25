@@ -22,6 +22,7 @@ MAX_BYTES = 2_000_000
 MAX_REDIRECTS = 4
 MAX_STORED_TEXT = 60_000
 _SKIP = {"script", "style", "noscript", "svg", "iframe", "template", "head"}
+_MENU = {"nav"}  # меню навигации: подписи ссылок нужны для выбора разделов, а в текст страницы оно не идёт
 _BREAK = {"p", "div", "br", "li", "tr", "h1", "h2", "h3", "h4", "h5", "h6", "section", "article", "table", "ul", "ol",
           "footer", "header", "address", "dd", "dt", "form"}
 
@@ -46,6 +47,7 @@ class _Extractor(HTMLParser):
         self.title = ""
         self._in_title = False
         self._skip_depth = 0
+        self._menu_depth = 0
         self._chunks: list[str] = []
         self.links: list[tuple[str, str]] = []
         self._href: str | None = None
@@ -57,6 +59,8 @@ class _Extractor(HTMLParser):
             self._in_title = True
         if tag in _SKIP and tag != "head":
             self._skip_depth += 1
+        if tag in _MENU:
+            self._menu_depth += 1
         if tag in _BREAK:
             self._chunks.append("\n")
         if tag == "a" and attrs.get("href"):
@@ -71,6 +75,8 @@ class _Extractor(HTMLParser):
             self._in_title = False
         if tag in _SKIP and tag != "head" and self._skip_depth:
             self._skip_depth -= 1
+        if tag in _MENU and self._menu_depth:
+            self._menu_depth -= 1
         if tag in _BREAK:
             self._chunks.append("\n")
         if tag == "a" and self._href:
@@ -83,7 +89,8 @@ class _Extractor(HTMLParser):
             self.title += data
         if self._skip_depth:
             return
-        self._chunks.append(data)
+        if not self._menu_depth:
+            self._chunks.append(data)
         if self._href is not None:
             self._link_text.append(data)
 

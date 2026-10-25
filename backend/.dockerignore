@@ -5,3 +5,4 @@
 .venv
 tests
 scripts/model_check/out
+scripts/eval/out

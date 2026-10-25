@@ -19,6 +19,7 @@ class RunRequest:
     regions: tuple[RegionRef, ...] = ()  # пусто — вся Россия
     supplier_type: str | None = None
     target: int = 5
+    search_region: int | None = None  # код региона Яндекс Поиска (lr): выдача ранжируется для этого места
 
 
 @dataclass(frozen=True)
@@ -66,7 +67,7 @@ class SaveOutcome:
 
 
 class SearchProvider(Protocol):
-    async def search(self, query: str) -> list[SearchHit]: ...
+    async def search(self, query: str, region: int | None = None) -> list[SearchHit]: ...
 
 
 class PlacesProvider(Protocol):
@@ -80,9 +81,19 @@ class PageFetcher(Protocol):
 class SupplierSink(Protocol):
     async def save(self, draft: SupplierDraft) -> SaveOutcome: ...
 
-    async def record_research(self, domain: str, pages: list[str], missing: list[str]) -> None:
-        """Запоминает, какие страницы сайта изучены и каких обязательных полей на них не нашлось."""
+    async def record_research(self, domain: str, pages: list[str], missing: list[str], qualification: dict | None = None) -> None:
+        """Запоминает, какие страницы сайта изучены, каких обязательных полей на них не нашлось и итог проверки сайта."""
         ...
+
+    async def reuse(self, domain: str, max_age_days: int) -> "Reused | None":
+        """Поставщик, подробно изученный не раньше max_age_days назад: привязывается к запуску без нового извлечения."""
+        ...
+
+
+@dataclass(frozen=True)
+class Reused:
+    name: str
+    fields: frozenset[str]
 
 
 class PageCache(Protocol):

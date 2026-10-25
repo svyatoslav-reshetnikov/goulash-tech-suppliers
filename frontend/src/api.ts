@@ -143,13 +143,35 @@ export type Ranking = {
   score: number;
   tier: "local" | "delivers" | "neighbor" | "nationwide" | "other" | "unknown" | "any";
   tier_label: string;
-  breakdown: { relevance: number; location: number; completeness: number; reliability: number; supplier_type: number };
+  breakdown: { relevance: number; location: number; completeness: number; reliability: number };
+  breakdown_max: { relevance: number; location: number; completeness: number; reliability: number };
   reasons: string[];
   missing: string[];
   questions: string[];
-  warnings: string[];
+  warnings: Warning[];
   recommended: boolean;
+  /** What confirmed the product (absent for old API responses). */
+  evidence?: { kind: string; phrase: string | null; where: string | null; text: string | null; label: string };
 };
+export type Warning = { code: string; severity: "warn" | "info"; text: string };
+
+/** Structured price, derived on the server from the raw strings; `display` is ready to show. */
+export type Price = {
+  item_name: string | null;
+  pack_value: number | null;
+  pack_unit: string | null;
+  price_rub: number | null;
+  price_per_base_unit: number | null;
+  base_unit: "kg" | "l" | "pcs" | null;
+  raw: string;
+  source_ref: string;
+  needs_confirmation: boolean;
+  note: string | null;
+  display: string;
+  matches_product: boolean;
+};
+export type MinOrder = { value: number | null; unit: "RUB" | "kg" | "pcs" | null; raw: string; source_ref: string; display: string; note: string | null };
+export type Commerce = { price_headline: Price | null; prices_other: Price[]; min_order: MinOrder | null };
 export type SupplierData = {
   id: number;
   domain: string;
@@ -157,9 +179,16 @@ export type SupplierData = {
   name: string;
   inn: string | null;
   note: string | null;
-  research: { pages: string[]; missing: string[]; researched_at: string } | null;
+  research: {
+    pages: string[];
+    missing: string[];
+    researched_at: string;
+    qualification?: { supplier: string; product: string; reason: string };
+  } | null;
   fields: Record<string, FieldValue[]>;
   ranking: Ranking;
+  /** Optional: absent in old responses; the UI then falls back to the raw field strings. */
+  commerce?: Commerce;
 };
 export type RunRequest = {
   category_id: number;

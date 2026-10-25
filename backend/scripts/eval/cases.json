@@ -1,0 +1,17 @@
+{
+  "note": "Набор для измерения качества: продукты из справочника и места в разных частях России. location_key — как в форме поиска (регион: id, город: «id региона|название»).",
+  "cases": [
+    {"id": "mozzarella-kazan", "category": "Моцарелла", "location_kind": "city", "location_key": "RU-TA|Казань"},
+    {"id": "salmon-spb", "category": "Лосось", "location_kind": "region", "location_key": "RU-SPE"},
+    {"id": "sushi-rice-moscow", "category": "Рис для суши", "location_kind": "region", "location_key": "RU-MOW"},
+    {"id": "nori-ekb", "category": "Нори", "synonyms": ["Водоросли нори"], "location_kind": "city", "location_key": "RU-SVE|Екатеринбург"},
+    {"id": "cream-cheese-nsk", "category": "Сливочный сыр", "synonyms": ["Творожный сыр"], "location_kind": "city", "location_key": "RU-NVS|Новосибирск"},
+    {"id": "pizza-boxes-nn", "category": "Коробки для пиццы", "location_kind": "city", "location_key": "RU-NIZ|Нижний Новгород"},
+    {"id": "soy-sauce-krasnodar", "category": "Соус соевый", "location_kind": "city", "location_key": "RU-KDA|Краснодар"},
+    {"id": "pepperoni-samara", "category": "Пепперони", "synonyms": ["Пеперони"], "location_kind": "city", "location_key": "RU-SAM|Самара"},
+    {"id": "shrimp-vladivostok", "category": "Креветка", "location_kind": "city", "location_key": "RU-PRI|Владивосток"},
+    {"id": "flour-rostov", "category": "Мука", "synonyms": ["Пшеничная мука"], "location_kind": "city", "location_key": "RU-ROS|Ростов-на-Дону"},
+    {"id": "tuna-tatarstan-neighbors", "category": "Тунец", "location_kind": "region", "location_key": "RU-TA", "include_neighbors": true},
+    {"id": "ginger-ufa", "category": "Имбирь маринованный", "synonyms": ["Имбирь"], "location_kind": "city", "location_key": "RU-BA|Уфа"}
+  ]
+}

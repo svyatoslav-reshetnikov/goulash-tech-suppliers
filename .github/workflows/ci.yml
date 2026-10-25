@@ -138,6 +138,16 @@ jobs:
           # тег образов записывается в .env: откат = вернуть прежний тег и выполнить up -d
           if grep -q '^IMAGE_TAG=' .env; then sed -i "s/^IMAGE_TAG=.*/IMAGE_TAG=$TAG/" .env; else echo "IMAGE_TAG=$TAG" >> .env; fi
           docker compose -f docker-compose.prod.yml pull
+          # запуски поиска идут внутри api и платные: перезапуск их обрывает, поэтому ждём, пока идущие закончатся
+          # (не дольше 12 минут: запуск ограничен 10 минутами). У незавершённого запуска finished_at пуст
+          for i in $(seq 1 48); do
+            active=$(docker compose -f docker-compose.prod.yml exec -T db sh -c \
+              'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -tAc "select count(*) from runs where finished_at is null"' 2>/dev/null || true)
+            active=$(printf '%s' "$active" | tr -dc '0-9')
+            if [ -z "$active" ] || [ "$active" = "0" ]; then break; fi
+            echo "идут запуски поиска ($active), жду их завершения"
+            sleep 15
+          done
           docker compose -f docker-compose.prod.yml up -d --remove-orphans
           docker logout ghcr.io
           docker image prune -f
