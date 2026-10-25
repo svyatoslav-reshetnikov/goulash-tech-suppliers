@@ -318,43 +318,44 @@ async def derive(
         log.warning("Пакет позиций %s не разобран: %s", source_ids, exc)
 
     async def process(ids: list[int], depth: int = 0) -> None:
+        pieces: list[list[int]] = []
+        # the semaphore covers the model call AND the write: with concurrency=1 the next batch sees the categories of the previous one
         async with semaphore:
             async with session_factory() as session:
                 rows = (await session.execute(select(Item).where(Item.id.in_(ids)).order_by(Item.source_id))).scalars()
                 snapshot = [ItemRow(i.id, i.source_id, i.name, i.description) for i in rows]
                 ctx = await Context.load(session)
                 groups, existing = ctx.group_names(), ctx.existing_by_group()
-            pieces: list[list[int]] = []
             parsed: dict[int, list[tuple[str, str | None]]] = {}
             try:
                 parsed = await _ask(llm, build_messages(snapshot, groups, existing), groups)
             except Exception as exc:
-                if len(ids) > 1 and depth < MAX_SPLIT_DEPTH:  # длинный ответ мог оборваться: пробуем меньшими частями
+                if len(ids) > 1 and depth < MAX_SPLIT_DEPTH:  # долгий ответ мог оборваться: пробуем меньшими частями
                     half = len(ids) // 2
                     pieces = [ids[:half], ids[half:]]
                 else:
                     record_failure(len(ids), exc, [r.source_id for r in snapshot])
                     return
-        if pieces:
+            if not pieces:
+                async with apply_lock:
+                    async with session_factory() as session:
+                        try:
+                            batch = list(
+                                (await session.execute(select(Item).where(Item.id.in_(ids)).order_by(Item.source_id))).scalars()
+                            )
+                            apply_ctx = await Context.load(session)
+                            done = await _apply_batch(session, apply_ctx, stats, batch, parsed)
+                            await session.commit()
+                        except Exception as exc:
+                            await session.rollback()
+                            record_failure(len(ids), exc, [r.source_id for r in snapshot])
+                            return
+                    stats.items_done += done
+                    stats.items_failed += len(ids) - done
+                    # событие внутри замка: числа прогресса приходят по возрастанию, даже если пакеты завершаются в другом порядке
+                    await notify(type="deriving", done=stats.items_done + stats.items_failed, total=stats.items_total)
+        if pieces:  # the semaphore is released first: the pieces need it themselves
             await asyncio.gather(*(process(piece, depth + 1) for piece in pieces))
-            return
-        async with apply_lock:
-            async with session_factory() as session:
-                try:
-                    batch = list(
-                        (await session.execute(select(Item).where(Item.id.in_(ids)).order_by(Item.source_id))).scalars()
-                    )
-                    apply_ctx = await Context.load(session)
-                    done = await _apply_batch(session, apply_ctx, stats, batch, parsed)
-                    await session.commit()
-                except Exception as exc:
-                    await session.rollback()
-                    record_failure(len(ids), exc, [r.source_id for r in snapshot])
-                    return
-            stats.items_done += done
-            stats.items_failed += len(ids) - done
-            # событие внутри замка: числа прогресса приходят по возрастанию, даже если пакеты завершаются в другом порядке
-            await notify(type="deriving", done=stats.items_done + stats.items_failed, total=stats.items_total)
 
     chunks = [pending_ids[i : i + batch_size] for i in range(0, len(pending_ids), batch_size)]
     await asyncio.gather(*(process(chunk) for chunk in chunks))
