@@ -33,12 +33,16 @@ async def seed(factory):
         moq = field(supplier, "moq", "от 5 000 ₽", r3)  # really found by run 3: must stay hidden from runs 1 and 2
         early = field(supplier, "name", "S", r1)  # already correct
         unlogged = field(supplier, "certificates", "ХАССП", r3)  # no event mentions it: left alone
+        later_page = SupplierField(supplier_id=supplier.id, field="price_hint", value="Нори 100 ₽", source_url="https://s.test/nori", quote="x", run_id=r3, first_run_id=r3)
+        session.add(later_page)  # a price of the same field name, but from a page that only run 3 read: it cannot be older
         theirs = field(other, "phone", "+7 (495) 999-99-99", r2)  # a supplier of another run, already correct
-        for run_id, sup, fields in ((r1, supplier, ["email", "name", "phone"]), (r2, supplier, ["phone"]), (r3, supplier, ["moq"]), (r2, other, ["phone"])):
+        for run_id, url in ((r1, "https://s.test/"), (r3, "https://s.test/nori")):
+            session.add(RunEvent(run_id=run_id, seq=10, type="fetch", payload={"url": url, "message": "Читаю страницу"}))
+        for run_id, sup, fields in ((r1, supplier, ["email", "name", "phone", "price_hint"]), (r2, supplier, ["phone"]), (r3, supplier, ["moq"]), (r2, other, ["phone"])):
             session.add(RunEvent(run_id=run_id, seq=1 + (sup.id == other.id), type="supplier_saved",
                                  payload={"domain": sup.domain, "fields": fields, "message": "Сохранён поставщик"}))
         await session.commit()
-        return supplier.id, (r1, r2, r3), {"phone": phone.id, "email": email.id, "moq": moq.id, "name": early.id, "cert": unlogged.id, "other": theirs.id}
+        return supplier.id, (r1, r2, r3), {"phone": phone.id, "email": email.id, "moq": moq.id, "name": early.id, "cert": unlogged.id, "other": theirs.id, "nori": later_page.id}
 
 
 @needs_db
@@ -47,7 +51,7 @@ async def test_plan_lowers_only_what_the_step_log_proves_and_never_raises(factor
     _, (r1, r2, r3), ids = await seed(factory)
     async with factory() as session:
         proposed = {c["id"]: c["proposed"] for c in await plan(session)}
-        assert proposed == {ids["phone"]: r1, ids["email"]: r1}  # moq (run 3), name, certificates and the other supplier stay as they are
+        assert proposed == {ids["phone"]: r1, ids["email"]: r1}  # moq (run 3), the nori price (page read first by run 3), name, certificates and the other supplier stay as they are
         assert all(c["proposed"] < c["current"] for c in await plan(session))
 
 
@@ -60,15 +64,17 @@ async def test_apply_restores_visibility_keeps_a_backup_and_is_safe_to_repeat(fa
         assert before[(r1, "s.test")] == 1  # only "name" is visible in run 1 before the repair
         assert await apply(session) == 2
         after = await visible_fields(session)
-        assert after[(r1, "s.test")] == 3 and after[(r2, "s.test")] == 3 and after[(r3, "s.test")] == 5  # run 3 still sees everything
+        assert after[(r1, "s.test")] == 3 and after[(r2, "s.test")] == 3 and after[(r3, "s.test")] == 6  # run 3 still sees everything
         assert after[(r2, "o.test")] == before[(r2, "o.test")]
         rows = (await session.execute(text("select field_id, old_first_run_id, new_first_run_id from supplier_fields_first_run_backup order by field_id"))).all()
         assert [(r.field_id, r.old_first_run_id, r.new_first_run_id) for r in rows] == sorted([(ids["phone"], r3, r1), (ids["email"], r3, r1)])
         assert await apply(session) == 0  # nothing left to change
         count = (await session.execute(text("select count(*) from supplier_fields"))).scalar()
-        assert count == 6  # nothing was deleted
+        assert count == 7  # nothing was deleted
         moq_first = (await session.execute(text("select first_run_id from supplier_fields where id = :id"), {"id": ids["moq"]})).scalar()
         assert moq_first == r3  # a value that really appeared later stays hidden from the older searches
+        nori_first = (await session.execute(text("select first_run_id from supplier_fields where id = :id"), {"id": ids["nori"]})).scalar()
+        assert nori_first == r3  # its page was first read by run 3
 
 
 @needs_db

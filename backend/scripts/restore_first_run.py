@@ -4,9 +4,11 @@ Migration 0007 gave every old field `first_run_id` = the LAST run that confirmed
 was finished long ago and was later confirmed by newer searches then lost those fields on screen: its result only shows fields with
 `first_run_id <= run_id`.
 
-The step log of every search (`run_events`, event `supplier_saved`) records which fields of which supplier each run saved. This script sets
-`first_run_id` of a field to the earliest run that saved a field with that name for that supplier, when that run is earlier than the stored
-value. It only ever LOWERS first_run_id, so old searches show more and nothing is deleted or rewritten. Before changing anything it copies the
+The step log of every search (`run_events`) records which fields of which supplier each run saved (`supplier_saved`) and which pages it read
+(`fetch`). A field cannot have been found before the run that first read its source page, nor before the first run that saved a field of that
+name for that supplier. So this script sets `first_run_id` to the later of those two runs, when that is earlier than the stored value. It only
+ever LOWERS first_run_id, so old searches show more and nothing is deleted or rewritten. A value found later on a page that an earlier run had
+also read may still appear in the older search: the log does not allow to tell more precisely. Before changing anything it copies the
 affected rows to the table `supplier_fields_first_run_backup`, from which the change is reversible.
 
     python -m scripts.restore_first_run            # shows what would change
@@ -28,13 +30,18 @@ with saved as (
     where e.type = 'supplier_saved'
 ), earliest as (
     select supplier_id, field, min(run_id) as run_id from saved group by supplier_id, field
+), pages as (
+    select e.payload ->> 'url' as url, min(e.run_id) as run_id from run_events e where e.type = 'fetch' group by 1
+), candidates as (
+    select f.id, s.domain, f.field, left(f.value, 40) as value, f.first_run_id as current,
+           greatest(e.run_id, coalesce(p.run_id, e.run_id)) as proposed
+    from supplier_fields f
+    join suppliers s on s.id = f.supplier_id
+    join earliest e on e.supplier_id = f.supplier_id and e.field = f.field
+    left join pages p on p.url = f.source_url
+    where f.first_run_id is not null
 )
-select f.id, s.domain, f.field, left(f.value, 40) as value, f.first_run_id as current, e.run_id as proposed
-from supplier_fields f
-join suppliers s on s.id = f.supplier_id
-join earliest e on e.supplier_id = f.supplier_id and e.field = f.field
-where f.first_run_id is not null and e.run_id < f.first_run_id
-order by s.domain, f.field, f.id
+select * from candidates where proposed < current order by domain, field, id
 """
 
 VISIBLE = """
