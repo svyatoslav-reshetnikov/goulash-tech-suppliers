@@ -66,7 +66,7 @@ export default function SearchForm({ onStarted, onOpenPrevious, busy, initialPro
         >
           {starting ? "Запускаем…" : "Найти поставщиков"}
         </button>
-        <span className="text-xs text-slate-600">Агент изучает сайты поставщиков подробно, поэтому поиск идёт 2–4 минуты.</span>
+        <span className="text-xs text-slate-600">Агент изучает всех найденных поставщиков подробно, поэтому поиск идёт 5–15 минут.</span>
       </div>
 
       {previous && (

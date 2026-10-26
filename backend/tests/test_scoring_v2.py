@@ -25,7 +25,6 @@ def fixture_infos() -> list[SupplierInfo]:
         SupplierInfo(
             id=s["id"], domain=s["domain"], name=s["name"], inn=s["inn"],
             fields={k: [FieldInfo(v["value"], v["source_url"]) for v in vs] for k, vs in s["fields"].items()},
-            pages_studied=len(s["research"]["pages"]) if s["research"] else None,
         )
         for s in FIXTURE["suppliers"]
     ]
@@ -38,7 +37,7 @@ def ranked_by_name() -> dict[str, object]:
 
 def make(sid=1, name="Поставщик", domain="s1.test", **fields) -> SupplierInfo:
     return SupplierInfo(id=sid, domain=domain, name=name, inn=fields.pop("inn", None),
-                        fields={k: [FieldInfo(v, f"https://{domain}/{k}")] for k, v in fields.items()}, pages_studied=5)
+                        fields={k: [FieldInfo(v, f"https://{domain}/{k}")] for k, v in fields.items()})
 
 
 # --- weights and the recommendation gate ---
@@ -86,15 +85,14 @@ def test_email_domain_mismatch_and_free_mail():
     assert email_mismatches(["me@gmail.com", "x@mail.ru", "sales@mail.vosttorg.ru"], "vosttorg.ru") == []
     vostorg = next(i for i in fixture_infos() if i.name == "Восторг")
     texts = {w["code"]: w["text"] for w in build_warnings(site_domain=vostorg.domain, emails=vostorg.values("email"),
-                                                         pages_studied=vostorg.pages_studied, tier="other", has_inn=bool(vostorg.inn))}
+                                                         tier="other", has_inn=bool(vostorg.inn))}
     assert texts["email_domain_mismatch"] == "Домен почты (osttorg.ru) не совпадает с сайтом (vosttorg.ru) — проверьте поставщика"
-    assert "low_evidence" in texts and texts["no_inn"] == "ИНН не найден"
+    assert "low_evidence" not in texts and texts["no_inn"] == "ИНН не найден"
 
 
-def test_one_studied_page_is_low_evidence_and_many_pages_are_not():
+def test_a_one_page_site_is_not_penalised():
     for name, ranked in ranked_by_name().items():
-        pages = len(next(s for s in FIXTURE["suppliers"] if s["name"] == name)["research"]["pages"])
-        assert ("low_evidence" in [w["code"] for w in ranked.warnings]) == (pages <= 1), name
+        assert "low_evidence" not in [w["code"] for w in ranked.warnings], name
 
 
 # --- prices ---

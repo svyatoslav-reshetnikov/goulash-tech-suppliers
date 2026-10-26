@@ -1,5 +1,30 @@
 # Changelog
 
+## Agent: coverage and field validation (analysis of run #7, champignons, Moscow + neighbours)
+
+- Validation: a number glued to its unit ("от 3кг", "500кг", "5000₽") no longer fails "value follows from the quote"
+  (the tokenizer made "3кг" one word); the preposition "от" does not count as a word of the value.
+- Quotes: if the model garbles a quote (glues two places of the page, "fixes" a typo) or cites a neighbouring sentence, the code
+  picks a verbatim fragment of the same page that passes the same checks. A fact absent from the page is still rejected.
+  Rejected fields now log the model's quote; `supplier_saved` lists the fields whose quote was replaced (`snapped`).
+- Page text for the model: a page up to 9000 characters goes whole (was 3200 with keyword windows that ran out on news
+  paragraphs and cut off the contacts at the bottom); a trimmed page keeps its footer. Long inputs are split into several requests.
+- Page choice: a menu label beats a news headline ("Сертификат на удобрение" is not the certificates page); up to two pages named
+  after the product are read too.
+- Candidates are found by code: every region with its own Yandex region code × 4 phrasings × two result pages (+ product synonyms),
+  no repeated queries; the model joins afterwards and may search more. Sites are ranked by product in title/snippet.
+- No caps on the number of studied sites (8) or site searches (12): every found candidate is studied (up to 40), until `AGENT_TARGET_SUPPLIERS`
+  (now 20) confirmed suppliers; token (800k), time (30 min) and fetch (500) budgets are the cost guards.
+- A site that does not name the product is dropped after the first extraction and one product search instead of four searches for
+  missing fields; the home page check also rejects a site whose home page and snippet never mention the product.
+- Candidate queue: before studying, the home pages of all candidates are loaded (no model) and the mentions of the product (and its
+  synonyms) on them are counted; sites that name the product are studied first, sites that never name it last. The queue with a score,
+  mentions and a status/reason per site (saved, product not confirmed, rejected, did not open, not reached) is stored in the run
+  stats (`stats.candidates`), shown under the run ("Очередь кандидатов") and written to the eval results.
+- Page loading: timeout 45 s (was 20), one retry on a timeout, connection reset or HTTP 5xx; 403/404 are not retried.
+- Yandex Search is called at most once per 1.1 s across all searches (including `site:` ones), whatever the number of sites studied in parallel (5).
+- The "Изучена только 1 страница сайта" warning is removed: one-page sites (Tilda) hold the whole site on one page.
+
 ## Simplification: one catalog product, no extras, statuses or cost
 
 - Search takes exactly one product from the catalog: free-text products and multi-product searches are gone

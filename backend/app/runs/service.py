@@ -60,6 +60,7 @@ def limits_from(settings: Settings) -> Limits:
         max_total_tokens=settings.agent_max_total_tokens,
         target_suppliers=settings.agent_target_suppliers,
         max_fetches=settings.agent_max_fetches,
+        auto_discovery=settings.agent_auto_discovery,
     )
 
 
@@ -108,7 +109,7 @@ async def execute_run(
             request = RunRequest(
                 category=run.category_name,
                 synonyms=tuple(category.synonyms or []) if category else (),
-                regions=tuple(RegionRef(r["name"], r["role"]) for r in run.regions),
+                regions=tuple(RegionRef(r["name"], r["role"], yandex_region("region", r.get("id"))) for r in run.regions),
                 target=settings.agent_target_suppliers,
                 search_region=yandex_region(run.location_kind, run.location_key),
                 city=run.location_key.split("|", 1)[1] if run.location_kind == "city" and run.location_key else None,

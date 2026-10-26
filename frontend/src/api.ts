@@ -108,6 +108,8 @@ export async function resolveLocation(selected: LocationMatch, neighbors: boolea
 // --- запуски агента ---
 
 export type RunStatus = "queued" | "running" | "done" | "failed";
+export type CandidateStatus = "pending" | "studying" | "saved" | "unconfirmed" | "rejected" | "failed" | "no_contacts";
+export type RunCandidate = { domain: string; score: number; mentions: number | null; status: CandidateStatus; reason: string };
 export type RunStats = {
   turns?: number;
   tool_calls?: number;
@@ -117,6 +119,7 @@ export type RunStats = {
   prompt_tokens?: number;
   completion_tokens?: number;
   seconds?: number;
+  candidates?: RunCandidate[];
 };
 export type Run = {
   id: number;

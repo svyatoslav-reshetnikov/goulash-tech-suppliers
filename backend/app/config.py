@@ -57,10 +57,11 @@ class Settings(BaseSettings):
     # Ограничения одного запуска агента (деньги и время). Приоритет — полнота данных по ТЗ, поэтому
     # лимит токенов высокий, а запусков в сутки немного: запуск платный.
     agent_max_turns: int = 24
-    agent_max_seconds: int = 600
-    agent_max_total_tokens: int = 200_000
-    agent_target_suppliers: int = 5
-    agent_max_fetches: int = 70  # загрузка страниц бесплатна; расход ограничен бюджетом токенов
+    agent_max_seconds: int = 1800
+    agent_max_total_tokens: int = 800_000  # главный предохранитель расхода: сайтов изучается столько, сколько нашлось кандидатов
+    agent_target_suppliers: int = 20  # на стольких подтверждённых поставщиках поиск останавливается
+    agent_max_fetches: int = 500  # загрузка страниц бесплатна; расход ограничен бюджетом токенов
+    agent_auto_discovery: bool = True  # код сам перебирает регионы и формулировки и изучает всех найденных кандидатов
     agent_max_runs_per_day: int = 10
 
     crawl_delay_seconds: float = 1.0

@@ -109,17 +109,34 @@ async def run_agent(request: RunRequest, llm: ChatModel, toolbox: ToolBox, emit:
             "prompt_tokens": prompt_tokens + toolbox.extra_prompt_tokens,
             "completion_tokens": completion_tokens + toolbox.extra_completion_tokens,
             "seconds": round(time.monotonic() - started, 1),
+            "candidates": toolbox.candidate_report(),  # очередь изучения с итогом по каждому сайту
         }
+
+    def over_budget() -> str | None:
+        if time.monotonic() - started > limits.max_seconds:
+            return "time_limit"
+        if prompt_tokens + completion_tokens + toolbox.extra_prompt_tokens + toolbox.extra_completion_tokens > limits.max_total_tokens:
+            return "token_limit"
+        return None
 
     await emit("run_started", "Запуск агента", category=request.category,
                regions=[r.name for r in request.regions], limits={"turns": limits.max_turns, "seconds": limits.max_seconds})
 
-    while turns < limits.max_turns:
-        if time.monotonic() - started > limits.max_seconds:
-            stop_reason = "time_limit"
-            break
-        if prompt_tokens + completion_tokens + toolbox.extra_prompt_tokens + toolbox.extra_completion_tokens > limits.max_total_tokens:
-            stop_reason = "token_limit"
+    finished_early = False
+    if limits.auto_discovery and toolbox.llm is not None:
+        # код сам перебирает регионы и формулировки и изучает всех найденных кандидатов; модель подключается после
+        reason = await toolbox.auto_research(over_budget)
+        if reason or toolbox.counters.saved >= request.target:
+            stop_reason, finished_early = reason or "target_reached", True
+        else:
+            messages.append({"role": "user", "content": (
+                toolbox.digest() + "\nМожешь поискать ещё другими формулировками (другие названия продукта, другие города "
+                "выбранных регионов) и передать новые сайты в research_suppliers. Уже изученные сайты не повторяй. "
+                "Если новых подходящих сайтов нет, вызови finish с кратким итогом.")})
+
+    while not finished_early and turns < limits.max_turns:
+        if reason := over_budget():
+            stop_reason = reason
             break
 
         compact(messages, limits.keep_recent_tool_results)

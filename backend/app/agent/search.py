@@ -4,6 +4,7 @@ import asyncio
 import base64
 import json
 import threading
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -80,6 +81,9 @@ def http_error(status: int, body: str, request_id: str | None) -> SearchError:
 # запросы к поиску идут строго по одному на весь процесс: агент изучает сайты параллельно, а одновременные
 # запросы Яндекс отбивает ответом 429. Замок берётся в потоке запроса, поэтому общий для всех запусков
 _ONE_AT_A_TIME = threading.Lock()
+# квота Яндекса — один запрос в секунду; код перебирает регионы и страницы подряд, и без паузы половина запросов получала 429
+MIN_INTERVAL = 1.1
+_last_started = 0.0
 
 
 class YandexSearch:
@@ -97,10 +101,10 @@ class YandexSearch:
         self._ssl = build_ssl_context(settings.extra_ca_bundle)
         self.errors: list[dict] = []  # неудачные попытки с подробностями; инструменты забирают их через drain_errors
 
-    def _request(self, query: str, region: int | None = None) -> tuple[str, str | None]:
+    def _request(self, query: str, region: int | None = None, page: int = 0) -> tuple[str, str | None]:
         """Возвращает (XML выдачи, request-id). Бросает SearchError с подробностями."""
         body = {
-            "query": {"searchType": "SEARCH_TYPE_RU", "queryText": query, "familyMode": "FAMILY_MODE_NONE", "page": "0"},
+            "query": {"searchType": "SEARCH_TYPE_RU", "queryText": query, "familyMode": "FAMILY_MODE_NONE", "page": str(page)},
             "groupSpec": {"groupMode": "GROUP_MODE_DEEP", "groupsOnPage": str(self._per_page), "docsInGroup": "1"},
             "maxPassages": "2",
             **({"region": str(region)} if region else {}),  # код региона (lr): выдача ранжируется для этого места
@@ -114,7 +118,10 @@ class YandexSearch:
             headers={"Authorization": f"Api-Key {self._key}", "Content-Type": "application/json"},
             method="POST",
         )
+        global _last_started
         with _ONE_AT_A_TIME:
+            time.sleep(max(0.0, _last_started + MIN_INTERVAL - time.monotonic()))
+            _last_started = time.monotonic()
             try:
                 with urllib.request.urlopen(request, timeout=40, context=self._ssl) as response:
                     data = json.loads(response.read())
@@ -123,16 +130,16 @@ class YandexSearch:
                 raise http_error(exc.code, exc.read().decode("utf-8", "replace"), exc.headers.get("x-request-id")) from None
         return base64.b64decode(data["rawData"]).decode("utf-8", "replace"), request_id
 
-    async def search(self, query: str, region: int | None = None) -> list[SearchHit]:
+    async def search(self, query: str, region: int | None = None, page: int = 0) -> list[SearchHit]:
         """Запрос с повтором при временном отказе: без него один всплеск лимита срывал весь запуск.
         Каждая неудачная попытка записывается в errors с HTTP-статусом, кодом и request-id."""
         for attempt, delay in enumerate((*self.retry_delays, None), start=1):
             try:
-                xml, request_id = await asyncio.to_thread(self._request, query, region)
+                xml, request_id = await asyncio.to_thread(self._request, query, region, page)
                 return parse_yandex_xml(xml, request_id)
             except SearchError as exc:
                 retry = isinstance(exc, SearchLimited) and delay is not None
-                self.errors.append({"query": query, "attempt": attempt, "retried": retry, **exc.details()})
+                self.errors.append({"query": query, "page": page, "attempt": attempt, "retried": retry, **exc.details()})
                 if not retry:
                     raise
                 await asyncio.sleep(delay)

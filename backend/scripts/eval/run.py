@@ -38,7 +38,7 @@ def build_request(case: dict, target: int) -> RunRequest:
         selected = locations.resolve(case["location_kind"], case["location_key"])
         if selected is None:
             raise ValueError(f"{case['id']}: неизвестное место {case['location_key']}")
-        regions = tuple(RegionRef(r.name, role) for r, role in locations.expand(selected.region_id, case.get("include_neighbors", False)))
+        regions = tuple(RegionRef(r.name, role, yandex_region("region", r.id)) for r, role in locations.expand(selected.region_id, case.get("include_neighbors", False)))
     return RunRequest(category=case["category"], synonyms=tuple(case.get("synonyms", [])), regions=regions,
                       target=target,
                       search_region=yandex_region(case.get("location_kind"), case.get("location_key")),

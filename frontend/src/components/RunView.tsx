@@ -20,6 +20,16 @@ const KINDS: Record<string, { label: string; style: string }> = {
   run_finished: { label: "Итог", style: "bg-cyan-100 text-cyan-800" },
   run_failed: { label: "Ошибка", style: "bg-red-100 text-red-800" },
 };
+const CANDIDATE: Record<string, string> = {
+  saved: "поставщик найден",
+  unconfirmed: "товара нет на сайте",
+  rejected: "не подходит",
+  failed: "сайт не открылся",
+  no_contacts: "нет контактов",
+  studying: "изучается",
+  pending: "не дошли",
+};
+
 const STOP: Record<string, string> = {
   finished: "Агент завершил поиск",
   target_reached: "Найдено нужное число поставщиков",
@@ -140,6 +150,21 @@ export default function RunView({ runId, onFinished }: { runId: number; onFinish
             );
           })}
         </ul>
+
+        {!live && run && (run.stats?.candidates?.length ?? 0) > 0 && (
+          <details className="mt-3 text-sm text-slate-600">
+            <summary className="cursor-pointer text-slate-700">Очередь кандидатов: {run.stats?.candidates?.length}</summary>
+            <ul className="mt-2 max-h-72 space-y-1 overflow-y-auto rounded-lg bg-slate-50 p-3">
+              {run.stats?.candidates?.map((c) => (
+                <li key={c.domain} className="grid grid-cols-[minmax(0,12rem)_8.5rem_minmax(0,1fr)] items-baseline gap-2">
+                  <span className="break-all text-slate-800">{c.domain}</span>
+                  <span className="text-xs text-slate-500">{CANDIDATE[c.status] ?? c.status}</span>
+                  <span className="break-words text-xs text-slate-500">{c.reason}</span>
+                </li>
+              ))}
+            </ul>
+          </details>
+        )}
 
         {!live && run && (
           <div className="mt-3 text-sm text-slate-600">

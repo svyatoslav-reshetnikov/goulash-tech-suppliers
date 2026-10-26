@@ -12,6 +12,7 @@
     {"id": "shrimp-vladivostok", "category": "Креветка", "location_kind": "city", "location_key": "RU-PRI|Владивосток"},
     {"id": "flour-rostov", "category": "Мука", "synonyms": ["Пшеничная мука"], "location_kind": "city", "location_key": "RU-ROS|Ростов-на-Дону"},
     {"id": "tuna-tatarstan-neighbors", "category": "Тунец", "location_kind": "region", "location_key": "RU-TA", "include_neighbors": true},
+    {"id": "champignons-moscow-neighbors", "category": "Шампиньоны", "location_kind": "region", "location_key": "RU-MOW", "include_neighbors": true},
     {"id": "ginger-ufa", "category": "Имбирь маринованный", "synonyms": ["Имбирь"], "location_kind": "city", "location_key": "RU-BA|Уфа"}
   ]
 }

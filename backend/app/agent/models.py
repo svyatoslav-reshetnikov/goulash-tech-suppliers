@@ -10,6 +10,7 @@ from app.agent.pages import Page
 class RegionRef:
     name: str
     role: str  # primary | neighbor
+    lr: int | None = None  # код региона Яндекс Поиска: свой поиск на каждый регион
 
 
 @dataclass(frozen=True)
@@ -46,6 +47,7 @@ class AcceptedField:
     value: str
     quote: str
     source_url: str
+    snapped: bool = False  # цитата заменена дословным фрагментом страницы: модель исказила свою
 
 
 @dataclass
@@ -67,7 +69,7 @@ class SaveOutcome:
 
 
 class SearchProvider(Protocol):
-    async def search(self, query: str, region: int | None = None) -> list[SearchHit]: ...
+    async def search(self, query: str, region: int | None = None, page: int = 0) -> list[SearchHit]: ...
 
 
 class PlacesProvider(Protocol):

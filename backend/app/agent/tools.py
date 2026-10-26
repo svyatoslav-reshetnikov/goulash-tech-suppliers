@@ -4,10 +4,11 @@ import asyncio
 import json
 import time
 from collections.abc import Awaitable, Callable
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from urllib.parse import urlsplit
 
 from app.agent.config import Limits, is_blocked
+from app.agent.discovery import build_plan
 from app.agent.memory import MemoryPageCache
 from app.agent.models import (
     AcceptedField,
@@ -36,12 +37,15 @@ from app.agent.validation import (
     CONTACT_FIELDS,
     FIELDS,
     fact_problem,
+    count_product,
     host_of,
+    mentions_product,
     norm_text,
     normalize_value,
     product_stems,
     quote_in_text,
     same_site,
+    snap_quote,
     split_phones,
     text_around,
     value_supported_by_quote,
@@ -141,6 +145,27 @@ class Counters:
 
 
 @dataclass
+class Candidate:
+    """Сайт из выдачи: оценка очерёдности изучения и что с ним стало."""
+
+    url: str
+    order: int  # порядок появления в выдаче: при равной оценке раньше тот, кто выше в выдаче
+    title_hits: int = 0  # сколько раз продукт назван в заголовке выдачи
+    snippet_hits: int = 0  # ... в отрывке выдачи
+    appearances: int = 0  # сколько раз сайт встретился в выдаче
+    mentions: int | None = None  # сколько раз продукт назван на главной странице (None: страница не загружалась)
+    status: str = "pending"  # pending | studying | saved | unconfirmed | rejected | failed | no_contacts
+    reason: str = ""
+
+    @property
+    def score(self) -> float:
+        """Продукт в заголовке и отрывке выдачи, затем число его упоминаний на главной странице сайта.
+        Сайт, на главной которого продукт не назван вовсе, изучается последним."""
+        home = 0 if self.mentions is None else (min(self.mentions, 10) if self.mentions else -10)
+        return 2 * min(self.title_hits, 3) + min(self.snippet_hits, 3) + 0.5 * min(self.appearances, 6) + home
+
+
+@dataclass
 class ToolResult:
     text: str
     ok: bool = True
@@ -181,6 +206,8 @@ class ToolBox:
         self.qualifications: dict[str, dict] = {}  # домен → итог проверки сайта (для отчёта и разбора качества)
         self.supplier_values: dict[str, dict[str, list[str]]] = {}  # домен → поле → принятые значения
         self.unconfirmed: set[str] = set()  # сохранены, но товар на сайте не подтверждён: в результаты и в цель не идут
+        self.candidates: dict[str, Candidate] = {}  # домен → сайт из выдачи, который нужно изучить
+        self.queries_done: set[tuple[str, int | None, int]] = set()
 
     def schemas(self) -> list[dict]:
         return tool_schemas(self.places is not None, research_enabled=self.llm is not None)
@@ -229,14 +256,22 @@ class ToolBox:
         query = str(args.get("query", "")).strip()
         if not query:
             return {"ошибка": "пустой запрос"}
+        return await self._search_candidates(query, self.request.search_region, 0)
+
+    async def _search_candidates(self, query: str, region: int | None, page: int) -> dict:
+        """Поиск в Яндексе. Сайты из выдачи попадают в очередь кандидатов; повторный запрос не выполняется."""
+        if (query.lower(), region, page) in self.queries_done:
+            return {"ошибка": "такой запрос уже выполнялся: сформулируй по-другому (другое название продукта, другой регион)"}
         if self.counters.searches >= self.limits.max_searches:
             return {"ошибка": "лимит поисковых запросов исчерпан: переходи к сохранению или завершению"}
         self.counters.searches += 1
-        await self.emit("search", f"Ищу в Яндексе: {query}", query=query)
+        self.queries_done.add((query.lower(), region, page))
+        await self.emit("search", f"Ищу в Яндексе: {query}" + (f" (страница {page + 1})" if page else ""), query=query, page=page)
         try:
-            hits = await self._search(query, self.request.search_region, "web")
+            hits = await self._search(query, region, "web", page)
         except Exception as exc:  # поиск не ответил и после повторов: запрос в лимит не идёт, модель может продолжить
             self.counters.searches -= 1
+            self.queries_done.discard((query.lower(), region, page))
             return {"ошибка": (f"поиск временно не ответил ({str(exc)[:150]}). Это сбой поиска, а не отсутствие поставщиков: "
                                f"изучи уже найденные сайты через {'research_suppliers' if self.llm is not None else 'fetch_page'} "
                                "или повтори запрос другими словами")}
@@ -247,20 +282,65 @@ class ToolBox:
             elif hit.domain not in seen:
                 seen.add(hit.domain)
                 self.snippets.setdefault(hit.domain, f"{hit.title}. {hit.snippet}"[:400])
+                self._note_candidate(hit)
                 shown.append(
                     {"домен": hit.domain, "заголовок": hit.title, "адрес": hit.url, "отрывок": hit.snippet,
                      **({"уже_сохранён": True} if hit.domain in self.saved_domains else {})}
                 )
         await self.emit("search_result", f"Найдено сайтов: {len(shown)} (отфильтровано маркетплейсов и каталогов: {skipped})",
                         found=len(shown), skipped=skipped)
-        return {"результаты": shown[:8], "отфильтровано": skipped}
+        return {"результаты": shown[:10], "отфильтровано": skipped}
 
-    async def _search(self, query: str, region: int | None, kind: str) -> list:
+    def _note_candidate(self, hit) -> None:
+        """Запоминает сайт из выдачи. Чем чаще он встречается и чем яснее в заголовке назван продукт, тем раньше его изучат."""
+        found = self.candidates.get(hit.domain)
+        if found is None:
+            found = self.candidates[hit.domain] = Candidate(url=hit.url, order=len(self.candidates))
+        found.appearances += 1
+        found.title_hits += mentions_product(hit.title, self.product)
+        found.snippet_hits += mentions_product(hit.snippet, self.product)
+
+    def _mark(self, domain: str, status: str, reason: str = "") -> None:
+        found = self.candidates.get(domain)
+        if found is not None:
+            found.status, found.reason = status, reason[:200]
+
+    def candidate_report(self) -> list[dict]:
+        """Очередь кандидатов с оценкой и итогом по каждому: что изучено, что отсеяно и почему, до чего не дошли."""
+        ranked = sorted(self.candidates.items(), key=lambda item: (-item[1].score, item[1].order))
+        return [{"domain": d, "score": round(c.score, 1), "mentions": c.mentions, "status": c.status, "reason": c.reason}
+                for d, c in ranked]
+
+    async def _rank_by_homepage(self) -> None:
+        """Главные страницы всех кандидатов загружаются заранее (без модели) и считаются упоминания продукта на них:
+        сначала изучаются сайты, где продукт действительно встречается. Страницы остаются в кэше для изучения."""
+        gate = asyncio.Semaphore(8)
+
+        async def one(domain: str) -> None:
+            candidate = self.candidates[domain]
+            parts = urlsplit(normalize_url(candidate.url))
+            async with gate:
+                page, _, _ = await self._get_page(f"{parts.scheme}://{parts.netloc}/")
+            if page is not None:
+                candidate.mentions = count_product(f"{page.title} {page.text}", self.product)
+
+        try:
+            await asyncio.wait_for(asyncio.gather(*(one(d) for d in self.pending_candidates()), return_exceptions=True),
+                                   timeout=self.limits.research_timeout)
+        except TimeoutError:
+            pass  # то, что успело загрузиться, уже учтено
+
+    def pending_candidates(self) -> list[str]:
+        """Домены из выдачи, которые ещё не изучались, лучшие первыми."""
+        ranked = sorted(self.candidates.items(), key=lambda item: (-item[1].score, item[1].order))
+        return [domain for domain, _ in ranked if domain not in self.research_summaries and not is_blocked(domain)]
+
+    async def _search(self, query: str, region: int | None, kind: str, page: int = 0) -> list:
         """Поиск с отчётом о сбоях: каждая неудачная попытка (и повторённая, и последняя) попадает в ленту событием
         search_error с HTTP-статусом, кодом Яндекса и request-id. Раньше сбои поиска по сайту не было видно совсем."""
         drain = getattr(self.searcher, "drain_errors", None)
         try:
-            return await self.searcher.search(query, region=region)
+            return await (self.searcher.search(query, region=region, page=page) if page else self.searcher.search(query, region=region))
         except Exception as exc:
             reported = drain(query) if drain else []
             if not reported:  # провайдер без журнала попыток: сообщаем саму ошибку
@@ -370,7 +450,8 @@ class ToolBox:
             field_name = str(entry.get("field", "")).strip()
             reason = self._check_entry(field_name, entry, domain)
             if isinstance(reason, str):  # значение — для разбора отказов (в ленте и в eval) и чтобы модель видела, что отклонено
-                rejected.append({"поле": field_name or "?", "значение": str(entry.get("value", ""))[:150], "причина": reason})
+                rejected.append({"поле": field_name or "?", "значение": str(entry.get("value", ""))[:150],
+                                 "цитата": str(entry.get("quote", ""))[:200], "причина": reason})
                 continue
             # одна и та же цитата не сохраняется дважды; у телефонов и email из одной цитаты могут быть разные значения
             key = (reason.field, reason.value if reason.field in CONTACT_FIELDS else norm_text(reason.quote))
@@ -404,7 +485,7 @@ class ToolBox:
             "supplier_saved",
             f"{'Сохранён' if outcome.created else 'Дополнен'} поставщик: {outcome.name} ({domain})",
             domain=domain, name=outcome.name, created=outcome.created,
-            fields=sorted(fields_present), rejected=rejected,
+            fields=sorted(fields_present), rejected=rejected, snapped=sorted({f.field for f in accepted if f.snapped}),
         )
         result = {"сохранено": sorted(fields_present), "результат": "создан" if outcome.created else "дополнен"}
         if rejected:
@@ -423,7 +504,11 @@ class ToolBox:
         return result
 
     def _check_entry(self, field_name: str, entry: dict, domain: str) -> AcceptedField | str:
-        """Возвращает принятое поле или текст причины отказа."""
+        """Возвращает принятое поле или текст причины отказа.
+
+        Если модель исказила цитату (склеила два места страницы, исправила опечатку) или привела соседнее предложение,
+        вместо неё подбирается дословный фрагмент той же страницы. Он проходит те же проверки, что и цитата модели.
+        """
         if field_name not in FIELDS:
             return f"неизвестное поле, допустимо: {', '.join(sorted(FIELDS))}"
         value, quote = str(entry.get("value", "")), str(entry.get("quote", ""))
@@ -435,11 +520,24 @@ class ToolBox:
                     f"Открытые страницы: {', '.join(opened) or 'пока нет'}")
         if not page.site or not same_site(page.site, domain):
             return f"source_url не принадлежит сайту {domain}"
+        normalized, problem = normalize_value(field_name, value)
+        verdict = self._judge(field_name, normalized, quote, page)
+        if isinstance(verdict, AcceptedField):
+            return verdict
+        if normalized is None:
+            # некорректное значение перекрывает остальные причины, но только если цитата настоящая (прежний порядок проверок)
+            return problem or "некорректное значение" if quote_in_text(quote, page.text) else verdict
+        snapped = snap_quote(page.text, f"{quote} {normalized}", lambda piece: isinstance(self._judge(field_name, normalized, piece, page), AcceptedField))
+        if snapped is not None:
+            return replace(self._judge(field_name, normalized, snapped, page), snapped=True)  # type: ignore[type-var]
+        return verdict
+
+    def _judge(self, field_name: str, normalized: str | None, quote: str, page: Page) -> AcceptedField | str:
+        """Проверки одного поля с одной цитатой: цитата на странице, значение из цитаты, смысл."""
         if not quote_in_text(quote, page.text):
             return "цитата не найдена на странице дословно: цитируй текст именно со страницы source_url, а не из результатов поиска"
-        normalized, problem = normalize_value(field_name, value)
         if normalized is None:
-            return problem or "некорректное значение"
+            return "некорректное значение"
         if not value_supported_by_quote(field_name, normalized, quote):
             return "значение не следует из цитаты"
         if problem := fact_problem(field_name, normalized, quote, self.product, f"{page.title} {text_around(quote, page.text)}"):
@@ -447,20 +545,17 @@ class ToolBox:
         return AcceptedField(field=field_name, value=normalized, quote=quote.strip(), source_url=page.url)
 
     def _may_finish(self) -> bool:
-        """Завершать можно, если цель достигнута, поиск добросовестно выполнен или бюджет исчерпан."""
+        """Завершать можно, если цель достигнута, кандидаты кончились, поиск добросовестно выполнен или бюджет исчерпан."""
         # в режиме изучения сайтов страницы открывает код (6 и больше за сайт), поэтому считаются проверенные сайты
         checked = (self.counters.researched + self.counters.rejected >= 3) if self.llm is not None else self.counters.fetches >= 4
         thorough = self.counters.searches >= 3 and checked
-        spent = (
-            self.counters.searches >= self.limits.max_searches
-            or self.counters.fetches >= self.limits.max_fetches
-            or self.counters.researched >= self.limits.max_research
-        )
+        spent = self.counters.searches >= self.limits.max_searches or self.counters.fetches >= self.limits.max_fetches
         return self.counters.saved >= self.request.target or thorough or spent
 
     async def _finish(self, args: dict) -> dict:
         # Модель склонна сдаваться после первой находки: один раз просим продолжить, повторный finish принимаем
-        if not self._may_finish() and self.finish_refusals == 0:
+        waiting = self.pending_candidates() if self.llm is not None else []
+        if (not self._may_finish() or waiting) and self.finish_refusals == 0:
             self.finish_refusals += 1
             how = ("передай другие сайты из результатов поиска в research_suppliers" if self.llm is not None
                    else "открой их через fetch_page и сохрани подходящих")
@@ -512,7 +607,25 @@ class ToolBox:
         await self.emit_usage()
         return reply
 
-    async def _extract_and_save(self, origin: str, domain: str, pages: list[Page], focus: list[str] | None, split: int = 1) -> dict:
+    def _page_groups(self, pages: list[Page]) -> list[list[Page]]:
+        """Страницы по группам, чтобы текст одного запроса к модели не превышал её контекст; каждая группа — свой запрос."""
+        groups: list[list[Page]] = [[]]
+        size = 0
+        for page in pages:
+            weight = min(len(page.text), self.limits.evidence_chars_per_page)
+            if groups[-1] and size + weight > self.limits.extraction_group_chars:
+                groups.append([])
+                size = 0
+            groups[-1].append(page)
+            size += weight
+        return groups
+
+    async def _extract_and_save(self, origin: str, domain: str, pages: list[Page], focus: list[str] | None) -> dict:
+        """Извлечь поля из страниц сайта (группами, если текста много) и сохранить: те же проверки, что у save_supplier."""
+        results = [await self._extract_group(origin, domain, group, focus) for group in self._page_groups(pages)]
+        return next((r for r in results if "ошибка" not in r), results[0])
+
+    async def _extract_group(self, origin: str, domain: str, pages: list[Page], focus: list[str] | None, split: int = 1) -> dict:
         """Один вызов модели: извлечь поля из текстов страниц. Затем те же проверки, что у save_supplier.
 
         Если ответ обрезан по длине (много страниц и полей), страницы делятся на две половины и разбираются по отдельности.
@@ -526,8 +639,8 @@ class ToolBox:
                 if split <= 0 or len(pages) < 2:
                     return {"ошибка": "ответ модели обрезан по длине"}
                 half = len(pages) // 2
-                first = await self._extract_and_save(origin, domain, pages[:half], focus, split - 1)
-                second = await self._extract_and_save(origin, domain, pages[half:], focus, split - 1)
+                first = await self._extract_group(origin, domain, pages[:half], focus, split - 1)
+                second = await self._extract_group(origin, domain, pages[half:], focus, split - 1)
                 return second if "ошибка" in first else first
             extraction = parse_extraction(getattr(reply, "text", None))
             if not extraction.error:
@@ -555,11 +668,10 @@ class ToolBox:
             return {"сайт": domain, "результат": "маркетплейс, каталог или справочник: не поставщик"}
         if domain in self.research_summaries:
             return {**self.research_summaries[domain], "примечание": "этот сайт уже изучен в этом запуске"}
-        if self.counters.researched >= self.limits.max_research:
-            return {"сайт": domain, "результат": "лимит изучаемых сайтов исчерпан"}
         self.research_summaries[domain] = {"сайт": domain, "результат": "изучается"}  # второй такой же вызов не начнёт заново
         parts = urlsplit(normalize_url(website))
         origin = f"{parts.scheme}://{parts.netloc}/"
+        self._mark(domain, "studying")
         await self.emit("research", f"Изучаю сайт поставщика: {domain}", domain=domain)
 
         home, error, _ = await self._get_page(origin)
@@ -567,6 +679,7 @@ class ToolBox:
             await self.emit("research_failed", f"Сайт {domain} не открылся: {error}", domain=domain)
             failure = {"сайт": domain, "результат": f"главная страница не открылась: {error}. Этот сайт больше не пробуй"}
             self.research_summaries[domain] = failure  # повторно сайт не открываем: не тратим шаги
+            self._mark(domain, "failed", f"не открылась главная: {error}")
             return failure
 
         qualification = None
@@ -575,12 +688,18 @@ class ToolBox:
             qualification = {"supplier": verdict.supplier, "product": verdict.product, "reason": verdict.reason,
                              **({"error": verdict.error} if verdict.error else {})}
             self.qualifications[domain] = qualification
+            if not verdict.rejected and not verdict.error and verdict.product != "yes" and not mentions_product(
+                    f"{home.title} {home.text} {self.snippets.get(domain, '')}", self.product):
+                verdict.reason = verdict.reason or f"ни на главной странице, ни в выдаче не назван продукт «{self.request.category}»"
+                verdict.product = "no"
+                qualification["product"] = "no"
             if verdict.rejected:
                 self.counters.rejected += 1
                 reason = verdict.reason or "по главной странице не понять, продаёт ли компания нужный продукт бизнесу"
                 await self.emit("research_skipped", f"{domain}: не подходит — {reason}", domain=domain, reason=reason)
                 summary = {"сайт": domain, "результат": f"не подходит, не сохранён: {reason}. Ищи другие сайты"}
                 self.research_summaries[domain] = summary
+                self._mark(domain, "rejected", reason)
                 return summary
         self.counters.researched += 1
 
@@ -601,14 +720,27 @@ class ToolBox:
             summary = {"сайт": domain, "результат": "сохранён (данные изучения за последние дни)",
                        "сохранено_полей": sorted(reused.fields), "не_найдено_на_сайте": [FIELD_LABELS[f] for f in missing]}
             self.research_summaries[domain] = summary
+            self._mark(domain, "saved", "данные изучения за последние дни")
             return summary
 
         checked = [home]
         checked += await self._fetch_many(
-            select_pages(home.links, self.limits.research_pages_first, exclude={home.url, origin, normalize_url(origin)})
+            select_pages(home.links, self.limits.research_pages_first, exclude={home.url, origin, normalize_url(origin)},
+                         product=self.product)
         )
         await self.emit("research_extract", f"Выделяю данные с {len(checked)} страниц сайта {domain}", domain=domain, pages=len(checked))
         first = await self._extract_and_save(origin, domain, checked, None)
+
+        # товар на сайте не назван: до дополнительных поисков по сайту проверяем это одним поиском по названию товара,
+        # иначе поиски уходят на сайт, который в результаты всё равно не попадёт
+        if domain in self.saved_domains and not self._product_confirmed(domain):
+            checked += await self._probe_product(origin, domain)
+            if not self._product_confirmed(domain):
+                record = getattr(self.sink, "record_research", None)
+                if record is not None:
+                    await record(domain, sorted({p.url for p in checked}), missing_fields(self.supplier_fields.get(domain, set())),
+                                 qualification)
+                return await self._drop_unconfirmed(domain, len(checked))
 
         # второй проход: обязательные по ТЗ поля, которых не нашлось, ищем по самому сайту (site:домен …);
         # сайт, где не нашлось даже контакта, дальше не изучаем: это не поставщик или сайт не читается
@@ -618,7 +750,7 @@ class ToolBox:
             wanted = [f for f in group if f in missing]
             if not wanted:
                 continue
-            if used >= self.limits.max_site_searches_per_supplier or self.counters.site_searches >= self.limits.max_site_searches:
+            if used >= self.limits.max_site_searches_per_supplier:
                 break
             used += 1
             self.counters.site_searches += 1
@@ -656,12 +788,32 @@ class ToolBox:
         if not saved and isinstance(first, dict) and first.get("ошибка"):
             summary["причина"] = str(first["ошибка"])[:200]
         self.research_summaries[domain] = summary
+        self._mark(domain, "saved" if saved else "no_contacts", "" if saved else "на страницах нет подтверждённого телефона или email")
         await self.emit(
             "research_done",
             f"{domain}: изучено страниц {len(checked)}, не найдено: {', '.join(summary['не_найдено_на_сайте']) or 'всё нашлось'}",
             domain=domain, pages=len(checked), missing=missing,
         )
         return summary
+
+    async def _probe_product(self, origin: str, domain: str) -> list[Page]:
+        """Один поиск по сайту по названию товара: страницы с товаром (ассортимент, прайс, карточка) и извлечение с них."""
+        self.counters.site_searches += 1
+        await self.emit_usage()
+        await self.emit("research_more", f"Товар «{self.request.category}» на {domain} пока не назван. Ищу по сайту", domain=domain,
+                        missing=["assortment", "price_hint"])
+        try:
+            hits = await self._search(f"site:{domain} {self.request.category}", None, "site")
+        except Exception:  # сбой уже в ленте (search_error)
+            return []
+        urls = []
+        for hit in hits:
+            if same_site(hit.domain, domain) and normalize_url(hit.url) not in self.pages and hit.url not in urls:
+                urls.append(hit.url)
+        extra = await self._fetch_many(urls[: self.limits.research_pages_second])
+        if extra:
+            await self._extract_and_save(origin, domain, extra, ["assortment", "price_hint", "description"])
+        return extra
 
     def _product_confirmed(self, domain: str) -> bool:
         """Тот же критерий, что при показе результатов: товар назван в прайсе, ассортименте или описании."""
@@ -682,7 +834,41 @@ class ToolBox:
         summary = {"сайт": domain, "результат": f"не подходит: товар «{self.request.category}» на сайте не назван. Ищи другие сайты",
                    "изучено_страниц": pages}
         self.research_summaries[domain] = summary
+        self._mark(domain, "unconfirmed", f"товар «{self.request.category}» на сайте не назван")
         return summary
+
+    async def auto_research(self, over_budget: Callable[[], str | None]) -> str | None:
+        """Поиск кандидатов по плану (регионы × формулировки × страницы выдачи) и изучение всех найденных сайтов.
+
+        Останавливается, когда кандидаты кончились, набрана цель или сработал бюджет. Возвращает причину бюджетной
+        остановки (time_limit, token_limit) либо None.
+        """
+        for step in build_plan(self.request):
+            if over_budget() or self.counters.searches >= self.limits.max_searches:
+                break
+            await self._search_candidates(step.query, step.region, step.page)
+        if not over_budget():
+            await self._rank_by_homepage()
+        await self.emit("candidates", f"Найдено сайтов для изучения: {len(self.pending_candidates())}",
+                        candidates=self.candidate_report())
+        studied = 0
+        while self.counters.saved < self.request.target and studied < self.limits.max_candidates:
+            if reason := over_budget():
+                return reason
+            batch = self.pending_candidates()[: min(self.limits.research_parallel, self.limits.max_candidates - studied)]
+            if not batch:
+                break
+            studied += len(batch)
+            await asyncio.gather(*(self._research_one(self.candidates[d].url) for d in batch))
+        return None
+
+    def digest(self) -> str:
+        """Что уже изучено и что осталось: итог автоматического этапа для модели."""
+        lines = [f"- {d}: {s.get('результат', '')}" for d, s in self.research_summaries.items()]
+        left = self.pending_candidates()
+        return (f"Автоматически выполнено поисков: {self.counters.searches}, изучено сайтов: {len(self.research_summaries)}, "
+                f"подходящих поставщиков: {self.counters.saved}.\n" + "\n".join(lines[:40])
+                + (f"\nНе дошли до изучения: {', '.join(left[:15])}." if left else ""))
 
     async def _research_one(self, site: str) -> dict:
         """Один сайт со своим таймаутом: медленный сайт не отменяет изучение остальных, и повторно его не изучаем."""
@@ -695,12 +881,14 @@ class ToolBox:
                                                     else "не изучен: сайт отвечает слишком медленно. Больше не пробуй"),
                        "сохранено_полей": sorted(self.supplier_fields.get(domain, set()))}
             self.research_summaries[domain] = summary
+            self._mark(domain, "saved" if saved else "failed", f"не успел изучить за {self.limits.research_site_timeout} с")
             await self.emit("research_failed", f"{domain}: не успел изучить за {self.limits.research_site_timeout} с", domain=domain)
             return summary
         except Exception as exc:  # сбой на одном сайте не ломает остальные; сайт можно передать ещё раз
             domain = host_of(normalize_url(site)) or site
             if self.research_summaries.get(domain, {}).get("результат") == "изучается":
                 del self.research_summaries[domain]
+            self._mark(domain, "failed", f"ошибка при изучении: {str(exc)[:150] or type(exc).__name__}")
             return {"сайт": site, "результат": f"ошибка при изучении: {str(exc)[:150] or type(exc).__name__}"}
 
     async def _research_suppliers(self, args: dict) -> dict:

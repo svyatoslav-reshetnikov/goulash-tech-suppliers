@@ -45,14 +45,12 @@ def email_mismatches(emails: list[str], site_domain: str) -> list[str]:
 
 
 def build_warnings(
-    *, site_domain: str, emails: list[str], pages_studied: int | None, tier: str, has_inn: bool, substitute: bool = False,
+    *, site_domain: str, emails: list[str], tier: str, has_inn: bool, substitute: bool = False,
 ) -> list[dict]:
     result: list[Warning] = []
     for domain in email_mismatches(emails, site_domain)[:1]:
         result.append(Warning("email_domain_mismatch", "warn",
                               f"Домен почты ({domain}) не совпадает с сайтом ({registrable_domain(site_domain)}) — проверьте поставщика"))
-    if pages_studied is not None and pages_studied <= 1:
-        result.append(Warning("low_evidence", "warn", "Изучена только 1 страница сайта"))
     if tier == "unknown":
         result.append(Warning("region_unknown", "warn", "Регион неизвестен"))
     if substitute:

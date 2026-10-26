@@ -152,7 +152,7 @@ def script():
             tool("fetch_page", url=CONTACTS_URL), tool("save_supplier", website=HOME_URL, fields=GOOD_FIELDS)]
 
 
-SETTINGS = Settings(_env_file=None, agent_target_suppliers=1)
+SETTINGS = Settings(_env_file=None, agent_target_suppliers=1, agent_auto_discovery=False)
 
 
 @needs_db

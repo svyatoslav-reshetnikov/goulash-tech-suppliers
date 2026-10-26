@@ -29,21 +29,26 @@ USEFUL_LINK_WORDS = (
 
 @dataclass(frozen=True)
 class Limits:
+    """Предохранители запуска. Число изучаемых сайтов и поисков по сайту не ограничено: сколько кандидатов нашлось,
+    столько и изучается. Расход держат токены, время и общее число загрузок."""
+
     max_turns: int = 24
-    max_seconds: int = 600
-    max_total_tokens: int = 200_000  # вместе с вызовами модели при изучении сайтов
-    target_suppliers: int = 5
-    max_fetches: int = 70  # при 45 бюджет кончался на неудачных сайтах раньше, чем набиралось 5 поставщиков
-    max_searches: int = 8  # поиски кандидатов; поиски по сайту поставщика считаются отдельно
-    max_site_searches: int = 12
-    max_site_searches_per_supplier: int = 3
-    max_research: int = 8  # сколько сайтов можно изучить за запуск
-    research_pages_first: int = 6  # страниц сайта в первом проходе (главная и разделы)
+    max_seconds: int = 1800
+    max_total_tokens: int = 800_000  # вместе с вызовами модели при изучении сайтов
+    target_suppliers: int = 20  # на этом числе подтверждённых поставщиков поиск останавливается
+    max_fetches: int = 500
+    max_searches: int = 40  # поиски кандидатов; поиски по сайту поставщика считаются отдельно
+    max_site_searches_per_supplier: int = 4
+    max_candidates: int = 60  # сколько сайтов из выдачи изучается за запуск (лучшие по упоминаниям товара)
+    research_parallel: int = 5  # сайтов, изучаемых одновременно
+    auto_discovery: bool = False  # сначала код сам ищет по регионам и изучает всех кандидатов, затем подключается модель
+    research_pages_first: int = 8  # страниц сайта в первом проходе (главная, разделы, страницы с названием продукта)
     research_pages_second: int = 3  # страниц на один дополнительный поиск по сайту
-    evidence_chars_per_page: int = 3200
+    evidence_chars_per_page: int = 9000  # страница меньше этого размера уходит модели целиком
+    extraction_group_chars: int = 24000  # текста страниц в одном запросе к модели
     tool_timeout: int = 45
-    research_timeout: int = 240  # весь вызов research_suppliers (сайты изучаются параллельно)
-    research_site_timeout: int = 180  # один сайт: медленный сайт не отменяет изучение остальных
+    research_timeout: int = 900  # весь вызов research_suppliers (сайты изучаются параллельно)
+    research_site_timeout: int = 420  # один сайт: медленный сайт не отменяет изучение остальных
     qualify: bool = True  # перед подробным изучением короткая проверка главной: продаёт ли сайт нужное бизнесу
     reuse_days: int = 7  # поставщик, изученный за эти дни, берётся из базы без повторного извлечения
     extraction_max_tokens: int = 4096

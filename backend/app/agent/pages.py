@@ -5,6 +5,7 @@
 """
 
 import asyncio
+import http.client
 import ipaddress
 import re
 import socket
@@ -29,6 +30,10 @@ _BREAK = {"p", "div", "br", "li", "tr", "h1", "h2", "h3", "h4", "h5", "h6", "sec
 
 class UnsafeUrl(ValueError):
     """Адрес нельзя загружать: не http(s), внутренний или не разрешается."""
+
+
+class UnresolvedHost(UnsafeUrl):
+    """Имя сайта не удалось разрешить в адрес. Это бывает и при временном сбое DNS под нагрузкой, поэтому загрузку повторяют."""
 
 
 @dataclass
@@ -178,7 +183,7 @@ def check_public_url(url: str) -> str:
     try:
         addresses = {info[4][0] for info in socket.getaddrinfo(parts.hostname, parts.port or 443)}
     except socket.gaierror:
-        raise UnsafeUrl("адрес не разрешается") from None
+        raise UnresolvedHost("адрес не разрешается") from None
     if not addresses or any(not ipaddress.ip_address(a).is_global for a in addresses):
         raise UnsafeUrl("внутренние и локальные адреса запрещены")
     return parts.hostname
@@ -203,7 +208,7 @@ def _decode_html(body: bytes, content_encoding: str | None, header_charset: str 
         return decode_body(body, content_encoding, "utf-8")
 
 
-def fetch_html_sync(url: str, user_agent: str, context, timeout: float = 20) -> tuple[str, str]:
+def fetch_html_sync(url: str, user_agent: str, context, timeout: float = 45) -> tuple[str, str]:
     """Возвращает (итоговый адрес после редиректов, html). Бросает UnsafeUrl или RuntimeError."""
     check_public_url(url)
     request = urllib.request.Request(
@@ -230,6 +235,19 @@ def fetch_html_sync(url: str, user_agent: str, context, timeout: float = 20) -> 
     return final, _decode_html(body, encoding, charset)
 
 
+RETRIES = 1  # повторов при таймауте или обрыве
+DNS_RETRIES = 2  # повторов, если имя сайта не разрешилось
+RETRY_PAUSE = 2.0
+
+
+def is_transient(exc: Exception) -> bool:
+    """Сбой, после которого повтор имеет смысл: таймаут, обрыв, перегрузка сайта. 403, 404 и подобное повторять незачем."""
+    if isinstance(exc, (TimeoutError, ConnectionError, http.client.HTTPException)):
+        return True
+    text = str(exc)
+    return text.startswith("не удалось загрузить") or bool(re.match(r"HTTP 5\d\d", text))
+
+
 class HttpFetcher:
     """Загрузчик страниц для агента (интерфейс: async fetch(url) -> Page)."""
 
@@ -237,5 +255,16 @@ class HttpFetcher:
         self._user_agent, self._context = user_agent, context
 
     async def fetch(self, url: str) -> Page:
-        final, html = await asyncio.to_thread(fetch_html_sync, url, self._user_agent, self._context)
-        return extract_page(html, final)
+        """Страница с одним повтором при временном сбое сети (таймаут, обрыв соединения, 5xx): медленные сайты не теряются."""
+        attempt = 0
+        while True:
+            try:
+                final, html = await asyncio.to_thread(fetch_html_sync, url, self._user_agent, self._context)
+                return extract_page(html, final)
+            except Exception as exc:
+                dns = isinstance(exc, UnresolvedHost)
+                if (isinstance(exc, UnsafeUrl) and not dns) or attempt >= (DNS_RETRIES if dns else RETRIES) \
+                        or not (dns or is_transient(exc)):
+                    raise
+                attempt += 1
+                await asyncio.sleep(RETRY_PAUSE * attempt)

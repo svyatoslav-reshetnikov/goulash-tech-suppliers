@@ -217,14 +217,14 @@ def test_site_without_confirmed_name_and_contact_is_not_saved():
 
 
 def test_bad_sites_unreachable_home_duplicates_and_limits():
-    # в лимит идут только подробно изученные сайты: неоткрывшийся и отсеянный проверкой стоят одну загрузку
-    box, fetcher, sink, _ = make_box(ExtractLLM([FIRST_PASS_FULL]), limits=Limits(max_research=1), request=WIDE)
+    # число изучаемых сайтов не ограничено: неоткрывшийся и повторный сайт стоят не больше одной загрузки
+    box, fetcher, sink, _ = make_box(ExtractLLM([FIRST_PASS_FULL]), request=WIDE)
     out = research(box, "https://www.avito.ru/x", "https://missing.test/", BASE)["сайты"]
     assert "не поставщик" in out[0]["результат"] and "не открылась" in out[1]["результат"] and out[2]["результат"] == "сохранён"
     calls = len(fetcher.calls)
     again = research(box, BASE)["сайты"][0]
     assert again["примечание"].startswith("этот сайт уже изучен") and len(fetcher.calls) == calls  # повторно не изучаем
-    assert "лимит изучаемых" in research(box, "https://one.test/")["сайты"][0]["результат"]  # 1 из 1 уже использован
+    assert "не открылась" in research(box, "https://one.test/")["сайты"][0]["результат"]  # лимита на число сайтов нет
     assert "websites" in json.loads(asyncio.run(box.execute("research_suppliers", "{}")).text)["ошибка"]
 
 
@@ -237,7 +237,7 @@ def test_several_sites_are_researched_at_once_but_no_more_than_three():
         answers.append([{"field": "name", "value": f"ООО {host}", "quote": f"ООО {host}", "source_url": f"https://{host}.test/"},
                         {"field": "phone", "value": f"+7 (843) 555-01-2{ord(host) - 96}", "quote": f"Телефон: +7 (843) 555-01-2{ord(host) - 96}", "source_url": f"https://{host}.test/"}])
     llm = ExtractLLM(answers + [[]] * 12)
-    box, *_ = make_box(llm, pages=pages, limits=Limits(max_site_searches=0), request=WIDE)
+    box, *_ = make_box(llm, pages=pages, limits=Limits(max_site_searches_per_supplier=0), request=WIDE)
     out = research(box, "https://a.test/", "https://b.test/", "https://c.test/", "https://d.test/")["сайты"]
     assert len(out) == 3 and box.counters.researched == 3  # четвёртый адрес отброшен
 
@@ -530,7 +530,7 @@ def test_truncated_extraction_is_split_in_halves_and_its_tokens_are_counted():
             return await super().chat(messages, tools, **kwargs)
 
     llm = Truncating([FIRST_PASS_FULL[:6], FIRST_PASS_FULL[6:]])
-    box, _, sink, _ = make_box(llm, limits=Limits(max_site_searches=0))
+    box, _, sink, _ = make_box(llm, limits=Limits(max_site_searches_per_supplier=0))
     out = research(box, BASE)["сайты"][0]
     assert out["результат"] == "сохранён" and len(llm.seen) == 2  # две половины страниц
     assert box.extra_prompt_tokens == 50 + 3000 + 2000 and box.extra_completion_tokens == 10 + 4096 + 400
@@ -543,7 +543,7 @@ def test_slow_site_times_out_alone_and_is_not_retried():
                 await asyncio.sleep(5)
             return await super().fetch(url)
 
-    box = ToolBox(WIDE, Limits(research_site_timeout=0.3, max_site_searches=0), SiteSearch(), SlowFetcher(dict(PAGES)),
+    box = ToolBox(WIDE, Limits(research_site_timeout=0.3, max_site_searches_per_supplier=0), SiteSearch(), SlowFetcher(dict(PAGES)),
                   MemorySink(), make_box(None)[0].emit, llm=ExtractLLM([FIRST_PASS_FULL]))
     out = research(box, "https://slow.test/", BASE)["сайты"]
     assert "слишком медленно" in out[0]["результат"] and out[1]["результат"] == "сохранён"
@@ -553,7 +553,7 @@ def test_slow_site_times_out_alone_and_is_not_retried():
 def test_no_more_sites_are_researched_than_are_missing_to_the_target():
     request = RunRequest(category="Моцарелла", target=2)
     llm = ExtractLLM([[]] * 6)
-    box, *_ = make_box(llm, request=request, limits=Limits(max_site_searches=0))
+    box, *_ = make_box(llm, request=request, limits=Limits(max_site_searches_per_supplier=0))
     out = research(box, "https://a.test/", "https://b.test/", "https://c.test/")
     assert len(out["сайты"]) == 2 and "не хватало 2" in out["примечание"]
 
@@ -646,7 +646,8 @@ def test_rejected_field_keeps_its_value_for_review():
     fields = [entry("phone", "+7 (843) 555-01-23", "Телефон: +7 (843) 555-01-23", "/contacts"),
               entry("regions", "Татарстан", "Телефон: +7 (843) 555-01-23", "/contacts")]
     saved = json.loads(asyncio.run(box.execute("save_supplier", json.dumps({"website": BASE, "fields": fields}))).text)
-    assert saved["отклонено"] == [{"поле": "regions", "значение": "Татарстан", "причина": "значение не следует из цитаты"}]
+    assert saved["отклонено"] == [{"поле": "regions", "значение": "Татарстан", "цитата": "Телефон: +7 (843) 555-01-23",
+                                  "причина": "значение не следует из цитаты"}]
 
 
 # настоящий ответ Yandex Search API на превышение лимита (26.10.2026, 8 одновременных запросов)
@@ -680,7 +681,7 @@ def bare_search(answers):
     search = object.__new__(YandexSearch)
     search.retry_delays, search.errors = (0, 0, 0), []
 
-    def request(query, region):
+    def request(query, region, page=0):
         answer = answers.pop(0)
         if isinstance(answer, Exception):
             raise answer

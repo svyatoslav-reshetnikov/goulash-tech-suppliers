@@ -38,11 +38,12 @@ class RunCreate(BaseModel):
     include_neighbors: bool = False
 
 
-def _run_dict(run: Run) -> dict:
+def _run_dict(run: Run, with_candidates: bool = True) -> dict:
+    stats = run.stats if with_candidates or not run.stats else {k: v for k, v in run.stats.items() if k != "candidates"}
     return {
         "id": run.id, "status": run.status, "stop_reason": run.stop_reason, "category": run.category_name,
         "location": run.location_label, "include_neighbors": run.include_neighbors, "regions": run.regions,
-        "summary": run.summary, "error": run.error, "stats": run.stats,
+        "summary": run.summary, "error": run.error, "stats": stats,
         "created_at": run.created_at, "started_at": run.started_at, "finished_at": run.finished_at,
     }
 
@@ -83,7 +84,7 @@ async def create_run(body: RunCreate, session: AsyncSession = Depends(get_sessio
 @router.get("")
 async def list_runs(limit: int = Query(20, ge=1, le=200), session: AsyncSession = Depends(get_session)) -> dict:
     rows = (await session.execute(select(Run).order_by(Run.id.desc()).limit(limit))).scalars()
-    return {"runs": [_run_dict(r) for r in rows]}
+    return {"runs": [_run_dict(r, with_candidates=False) for r in rows]}
 
 
 @router.get("/previous")
@@ -104,7 +105,7 @@ async def previous_run(
         Run.location_key.is_(None) if location_key is None else Run.location_key == location_key,
     )
     run = (await session.execute(query.order_by(Run.id.desc()).limit(1))).scalar_one_or_none()
-    return {"run": _run_dict(run) if run else None}
+    return {"run": _run_dict(run, with_candidates=False) if run else None}
 
 
 @router.get("/{run_id}")
@@ -206,7 +207,6 @@ async def build_run_payload(session: AsyncSession, run_id: int) -> tuple[dict, R
         SupplierInfo(
             id=s.id, domain=s.domain, name=s.name, inn=s.inn,
             fields={name: [FieldInfo(f.value, f.source_url) for f in items] for name, items in by_supplier.get(s.id, {}).items()},
-            pages_studied=len(s.research["pages"]) if s.research else None,
         )
         for s in suppliers
     ]

@@ -12,7 +12,7 @@ from urllib.parse import urlsplit
 
 from app.agent.models import RunRequest
 from app.agent.pages import Page
-from app.agent.validation import FIELDS
+from app.agent.validation import FIELDS, mentions_product
 
 # разделы сайта, которые нужно изучить, в порядке важности
 TOPIC_WORDS: dict[str, tuple[str, ...]] = {
@@ -53,31 +53,49 @@ def classify_link(url: str, text: str) -> str | None:
     return None
 
 
+NAV_LABEL_CHARS = 40  # подпись длиннее — это заголовок новости или статьи, а не раздел сайта
+PRODUCT_PAGES = 2  # страниц, названных по искомому продукту: на карточке товара обычно цена и фасовка
+
+
 def select_pages(
-    links: list[tuple[str, str]], limit: int, exclude: set[str] | frozenset[str] = frozenset(), topics: list[str] | None = None
+    links: list[tuple[str, str]], limit: int, exclude: set[str] | frozenset[str] = frozenset(), topics: list[str] | None = None,
+    product: list[str] | None = None,
 ) -> list[str]:
-    """По одной лучшей ссылке на раздел, в порядке важности разделов; уже открытые адреса пропускаются."""
+    """По одной лучшей ссылке на раздел, в порядке важности разделов; затем страницы с названием продукта в подписи.
+
+    Лучшая ссылка раздела: с короткой подписью (пункт меню, а не заголовок новости про «сертификат на удобрение»),
+    затем с коротким путём (обычно главная страница раздела). Уже открытые адреса пропускаются.
+    """
     wanted = topics or TOPIC_ORDER
-    best: dict[str, tuple[int, str]] = {}
+    best: dict[str, tuple[tuple[bool, int], str]] = {}
     for url, text in links:
         if url in exclude:
             continue
         topic = classify_link(url, text)
         if topic in wanted:
-            rank = len(urlsplit(url).path)  # короче путь — обычно главная страница раздела
+            rank = (len(text) > NAV_LABEL_CHARS, len(urlsplit(url).path))
             if topic not in best or rank < best[topic][0]:
                 best[topic] = (rank, url)
-    return [best[t][1] for t in TOPIC_ORDER if t in best][:limit]
+    chosen = [best[t][1] for t in TOPIC_ORDER if t in best]
+    if product:
+        named = sorted(
+            {(len(text), url) for url, text in links if url not in exclude and url not in chosen and mentions_product(text, product)}
+        )
+        chosen += [url for _, url in named[:PRODUCT_PAGES]]
+    return chosen[:limit]
 
 
 def focus_text(text: str, chars: int) -> str:
-    """Начало страницы и окна вокруг слов про цены, заказ, доставку, сертификаты: так в запрос попадает главное."""
+    """Страница целиком, если помещается. Иначе начало, окна вокруг слов про цены, заказ, доставку, сертификаты
+    и конец страницы (контакты и реквизиты обычно в подвале): так в запрос попадает главное."""
     if len(text) <= chars:
         return text
     head = min(500, chars // 6)  # начало страницы (название, первый экран); меню навигации вырезает загрузчик
+    tail = min(1500, chars // 4)
+    budget = chars - tail
     ranges: list[list[int]] = []
-    for match in _FOCUS_WORDS.finditer(text, head):
-        start, end = max(head, match.start() - 160), min(len(text), match.end() + 240)
+    for match in _FOCUS_WORDS.finditer(text, head, len(text) - tail):
+        start, end = max(head, match.start() - 160), min(len(text) - tail, match.end() + 240)
         if ranges and start <= ranges[-1][1]:
             ranges[-1][1] = max(ranges[-1][1], end)
         else:
@@ -85,13 +103,14 @@ def focus_text(text: str, chars: int) -> str:
     parts, used = [text[:head]], head
     for start, end in ranges:
         piece = text[start:end]
-        if used + len(piece) > chars:
-            piece = piece[: max(0, chars - used)]
+        if used + len(piece) > budget:
+            piece = piece[: max(0, budget - used)]
         if piece:
             parts.append(piece)
             used += len(piece)
-        if used >= chars:
+        if used >= budget:
             break
+    parts.append(text[-tail:])
     return "\n…\n".join(parts)
 
 

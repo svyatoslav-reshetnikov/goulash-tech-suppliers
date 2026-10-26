@@ -31,6 +31,44 @@ def quote_in_text(quote: str, text: str) -> bool:
     return len(quote) >= MIN_QUOTE and quote in norm_text(text)
 
 
+SNAP_MAX = 400  # длиннее цитату не показать в карточке
+_SENTENCE = re.compile(r"(?<=[.!?])\s+")
+
+
+def _quote_candidates(text: str) -> list[str]:
+    """Фрагменты страницы, которые можно привести дословной цитатой: строки, предложения и пары соседних строк
+    (подпись «Телефон:» и номер часто стоят в разных строках)."""
+    lines = [line.strip() for line in text.split("\n") if line.strip()]
+    found: dict[str, None] = {}
+    for i, line in enumerate(lines):
+        pieces = [line, *_SENTENCE.split(line)]
+        if i + 1 < len(lines):
+            pieces.append(f"{line} {lines[i + 1]}")
+        for piece in pieces:
+            if MIN_QUOTE <= len(piece) <= SNAP_MAX:
+                found.setdefault(piece, None)
+    return list(found)
+
+
+def snap_quote(text: str, original: str, accept) -> str | None:
+    """Дословный фрагмент страницы вместо цитаты, которую модель исказила (склеила два места, исправила опечатку).
+
+    Подходит только фрагмент, который принял бы проверку как цитату (accept): подтверждение значения не ослабляется,
+    меняется лишь то, откуда взят текст. Из подходящих берётся самый похожий на цитату модели (больше совпавших слов, меньше лишних), при равенстве короткий.
+    """
+    wanted = set(re.findall(r"[a-zа-я0-9]+", norm_text(original)))
+    best: tuple[int, int, str] | None = None
+    for piece in _quote_candidates(text):
+        if not accept(piece):
+            continue
+        words = set(re.findall(r"[a-zа-я0-9]+", norm_text(piece)))
+        overlap = len(wanted & words)
+        key = (-(overlap - (len(words) - overlap)), len(piece), piece)  # совпавших слов больше, лишних меньше
+        if best is None or key < best:
+            best = key
+    return best[2] if best else None
+
+
 def digits(text: str) -> str:
     return re.sub(r"\D", "", text)
 
@@ -183,6 +221,7 @@ _DESCRIPTIVE = {"delivery_terms", "moq", "price_hint", "certificates", "regions"
 _FILLER = {
     "для", "без", "или", "под", "при", "над", "про", "как", "так", "также", "это", "что", "все", "всё", "вся", "весь",
     "всей", "всех", "наш", "наша", "наши", "ваш", "ваша", "ваши", "мы", "вы", "the", "and", "for",
+    "от", "до", "по", "на", "не", "из",  # «от 3 кг» следует из цитаты «минимум 3 кг»: предлог ничего не подтверждает
 }
 # организационно-правовые формы и общие слова в названиях: «ООО ТД Ромашка» подтверждается цитатой «Ромашка»
 _NAME_FILLER = _FILLER | {
@@ -204,8 +243,13 @@ _TYPE_WORDS = {
 }
 
 
+# число, слитное с единицей («3кг», «5000₽», «500г»), для сравнения слов разделяется: иначе «от 3 кг» не следует из «от 3кг»
+_GLUED = re.compile(r"(?<=\d)(?=[a-zа-я₽%])|(?<=[a-zа-я₽%])(?=\d)")
+
+
 def _words(text: str, filler: set[str]) -> list[str]:
-    return [w for w in re.findall(r"[a-zа-я0-9]+", norm_text(text)) if len(w) >= 2 and not w.isdigit() and w not in filler]
+    folded = _GLUED.sub(" ", norm_text(text))
+    return [w for w in re.findall(r"[a-zа-я0-9]+", folded) if len(w) >= 2 and not w.isdigit() and w not in filler]
 
 
 def _word_matches(word: str, others: list[str]) -> bool:
@@ -273,6 +317,12 @@ def product_stems(phrases: tuple[str, ...]) -> list[str]:
             elif len(word) >= 4:
                 stems.append(word[: max(4, len(word) - 2)])
     return stems
+
+
+def count_product(text: str, stems: list[str]) -> int:
+    """Сколько раз в тексте встречаются слова продукта (по основам): чем больше, тем вероятнее, что сайт его продаёт."""
+    folded = norm_text(text)
+    return sum(len(re.findall(rf"\b{re.escape(s)}", folded)) for s in stems)
 
 
 def mentions_product(text: str, stems: list[str]) -> bool:

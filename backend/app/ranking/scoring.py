@@ -60,7 +60,6 @@ class SupplierInfo:
     name: str
     inn: str | None
     fields: dict[str, list[FieldInfo]] = field(default_factory=dict)
-    pages_studied: int | None = None  # None: unknown (the supplier was saved before page counts were recorded)
 
     def values(self, name: str) -> list[str]:
         return [f.value for f in self.fields.get(name, [])]
@@ -227,7 +226,7 @@ def rank_suppliers(suppliers: list[SupplierInfo], ctx: RankContext) -> list[Rank
         missing = [FIELD_NAMES[f] for f in WANTED if not (info.inn if f == "inn" else info.fields.get(f))]
         substitute = _substitute(info)
         warnings = build_warnings(
-            site_domain=info.domain, emails=info.values("email"), pages_studied=info.pages_studied, tier=tier,
+            site_domain=info.domain, emails=info.values("email"), tier=tier,
             has_inn=bool(info.inn), substitute=substitute,
         )
         # the badge needs a phone and a known region
