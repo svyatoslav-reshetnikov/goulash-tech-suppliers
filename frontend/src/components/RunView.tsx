@@ -6,6 +6,7 @@ const KINDS: Record<string, { label: string; style: string }> = {
   run_started: { label: "Старт", style: "bg-slate-100 text-slate-700" },
   search: { label: "Поиск", style: "bg-blue-100 text-blue-800" },
   search_result: { label: "Выдача", style: "bg-blue-50 text-blue-700" },
+  search_error: { label: "Сбой поиска", style: "bg-red-50 text-red-700" },
   fetch: { label: "Страница", style: "bg-violet-100 text-violet-800" },
   research: { label: "Изучение", style: "bg-indigo-100 text-indigo-800" },
   research_extract: { label: "Анализ", style: "bg-indigo-50 text-indigo-700" },
@@ -76,7 +77,6 @@ export default function RunView({ runId, onFinished }: { runId: number; onFinish
   const pages = events.filter((e) => e.type === "fetch").length;
   const tokens = (run?.stats?.prompt_tokens ?? 0) + (run?.stats?.completion_tokens ?? 0);
   const usage = [...events].reverse().find((e) => e.type === "usage");
-  const liveCost = usage ? Number(usage.cost_rub) : (run?.stats?.cost_rub ?? null);
   const liveTokens = usage ? Number(usage.prompt_tokens) + Number(usage.completion_tokens) : tokens;
 
   return (
@@ -104,7 +104,6 @@ export default function RunView({ runId, onFinished }: { runId: number; onFinish
             {!expanded && suppliers.length > 0 && (
               <span className="text-sm text-slate-500">
                 поставщиков: {suppliers.length}
-                {liveCost !== null ? ` · ${liveCost.toLocaleString("ru-RU", { maximumFractionDigits: 1 })} ₽` : ""}
               </span>
             )}
             <span
@@ -118,16 +117,13 @@ export default function RunView({ runId, onFinished }: { runId: number; onFinish
         </button>
         {expanded && (
           <div className="border-t border-slate-100 px-5 pb-5 pt-3">
-        {run?.supplier_type && <p className="text-sm text-slate-500">Тип поставщика: {run.supplier_type}</p>}
         <p className="mt-1 text-sm text-slate-600">
           Поисков: <b>{searches}</b> · открыто страниц: <b>{pages}</b> · найдено поставщиков: <b>{suppliers.length}</b>
         </p>
 
         {liveTokens > 0 && (
           <p className="mt-1 text-sm text-slate-600">
-            Расход{live ? " сейчас" : ""}:{" "}
-            {liveCost !== null && <b>{liveCost.toLocaleString("ru-RU", { maximumFractionDigits: 1 })} ₽ · </b>}
-            <span className="text-slate-500">{liveTokens.toLocaleString("ru-RU")} токенов{liveCost !== null ? ", оценка по тарифу" : ""}</span>
+            Расход{live ? " сейчас" : ""}: <span className="text-slate-500">{liveTokens.toLocaleString("ru-RU")} токенов</span>
           </p>
         )}
 
@@ -150,7 +146,7 @@ export default function RunView({ runId, onFinished }: { runId: number; onFinish
             <p>
               {run.error ? <span className="text-red-600">Ошибка: {run.error}. </span> : null}
               {run.stop_reason ? `${STOP[run.stop_reason] ?? run.stop_reason}. ` : ""}
-              {tokens > 0 && `Использовано ${tokens.toLocaleString("ru-RU")} токенов за ${run.stats?.seconds ?? "?"} с${run.stats?.cost_rub != null ? `, примерно ${run.stats.cost_rub} ₽ (модель и поиск по тарифу)` : ""}.`}
+              {tokens > 0 && `Использовано ${tokens.toLocaleString("ru-RU")} токенов за ${run.stats?.seconds ?? "?"} с.`}
             </p>
             {run.summary && !run.summary.startsWith("[TOOL_CALL") && !run.summary.startsWith("Сохранено поставщиков:") && (
               <p className="mt-1 text-slate-500">{run.summary}</p>
@@ -167,7 +163,6 @@ export default function RunView({ runId, onFinished }: { runId: number; onFinish
           suppliers={suppliers}
           live={live}
           onNote={(id, note) => setSuppliers((prev) => prev.map((x) => (x.id === id ? { ...x, note } : x)))}
-          onStatus={(id, value, updatedAt) => setSuppliers((prev) => prev.map((x) => (x.id === id ? { ...x, status: { value, updated_at: updatedAt } } : x)))}
         />
       )}
       {!live && suppliers.length === 0 && run?.status !== "failed" && (

@@ -12,9 +12,8 @@ from app.ranking.commerce import compact_price
 
 NS = {"m": "http://schemas.openxmlformats.org/spreadsheetml/2006/main"}
 ITEMS = json.loads((Path(__file__).parents[2] / "frontend/src/test/fixtures/search-rice-moscow.json").read_text(encoding="utf-8"))["suppliers"]
-RUN = {"category": "Рис для суши", "location": "Москва", "include_neighbors": False, "supplier_type": None, "created_at": "2026-10-24T19:00:00+00:00"}
+RUN = {"category": "Рис для суши", "location": "Москва", "include_neighbors": False, "created_at": "2026-10-24T19:00:00+00:00"}
 for item in ITEMS:
-    item.setdefault("status", {"value": "new", "updated_at": None})
     item.setdefault("collected_at", "2026-10-24T19:05:00+00:00")
 
 
@@ -55,17 +54,16 @@ def test_export_columns_match_the_table_view():
         assert row[:5] == [r["rank"], item["name"], (item["fields"].get("supplier_type") or [{"value": ""}])[0]["value"], r["score"], r["tier_label"]]
         assert row[5] == (compact_price(commerce["price_headline"]) if commerce["price_headline"] else "")
         assert row[6] == (commerce["min_order"]["display"] if commerce["min_order"] else "")
-        assert row[10] == len([w for w in r["warnings"] if w["severity"] == "warn"]) and row[11] == "Новый"
+        assert row[10] == len([w for w in r["warnings"] if w["severity"] == "warn"])
     suomi = rows[0]
     assert suomi[5] == "≈84 ₽/кг" and "info@suomifish.ru" in suomi[HEADERS.index("Все email")]
     assert suomi[HEADERS.index("Адрес")].startswith("127224") and suomi[HEADERS.index("Сайт")] == "https://suomifish.ru/"
     assert suomi[HEADERS.index("Источники")].count("https://") >= 3
 
 
-def test_status_and_notes_are_exported():
-    items = [{**ITEMS[0], "status": {"value": "awaiting_price", "updated_at": "2026-10-25T10:00:00+00:00"}, "note": "Звонили 25.10"}]
-    row = export_rows(RUN, items)[0]
-    assert row[HEADERS.index("Статус")] == "Ждём прайс" and row[HEADERS.index("Заметка")] == "Звонили 25.10"
+def test_notes_are_exported_and_there_is_no_status_column():
+    row = export_rows(RUN, [{**ITEMS[0], "note": "Звонили 25.10"}])[0]
+    assert row[HEADERS.index("Заметка")] == "Звонили 25.10" and "Статус" not in HEADERS and len(row) == len(HEADERS)
 
 
 def test_xlsx_keeps_untrusted_text_as_text():
@@ -92,4 +90,4 @@ def test_file_name_pattern():
     name = file_name(RUN, "xlsx", datetime(2026, 10, 26))
     assert name == "suppliers_Рис_для_суши_Москва_2026-10-26.xlsx"
     assert file_name({"category": 'a/b:"c"', "location": None}, "csv", datetime(2026, 1, 2)) == "suppliers_a_b_c_Вся_Россия_2026-01-02.csv"
-    assert search_parameters({**RUN, "include_neighbors": True, "supplier_type": "оптовик"}) == "Рис для суши; Москва; с соседними регионами; тип: оптовик"
+    assert search_parameters({**RUN, "include_neighbors": True}) == "Рис для суши; Москва; с соседними регионами"

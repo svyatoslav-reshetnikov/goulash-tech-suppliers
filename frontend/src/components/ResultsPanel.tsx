@@ -1,32 +1,28 @@
 import { useEffect, useRef, useState } from "react";
-import { exportUrl, setSupplierStatus, type SupplierData, type SupplierStatus } from "../api";
+import { exportUrl, type SupplierData } from "../api";
 import { usePersistedState } from "../lib/persist";
 import { sortSuppliers, type SortState } from "../lib/results";
-import { STATUS_LABELS, STATUS_ORDER, statusOf } from "../lib/status";
 import ComparisonTable from "./ComparisonTable";
 import SupplierCard from "./SupplierCard";
 import SupplierTable from "./SupplierTable";
 
 export const MAX_COMPARE = 4;
 
-type UiState = { view: "cards" | "table"; expanded: number[]; sources: boolean; sort: SortState; statusFilter: "all" | SupplierStatus };
-const DEFAULT_UI: UiState = { view: "cards", expanded: [], sources: false, sort: { key: "rank", dir: "asc" }, statusFilter: "all" };
+type UiState = { view: "cards" | "table"; expanded: number[]; sources: boolean; sort: SortState };
+const DEFAULT_UI: UiState = { view: "cards", expanded: [], sources: false, sort: { key: "rank", dir: "asc" } };
 
 type Props = {
   runId: number;
   suppliers: SupplierData[];
   live: boolean;
   onNote: (supplierId: number, note: string | null) => void;
-  /** Called with the new status right away (optimistic) and with the previous one if saving fails. */
-  onStatus: (supplierId: number, status: SupplierStatus, updatedAt: string | null) => void;
 };
 
-/** Result list of one search: cards or table, expand/collapse, source toggle, status filter, export and comparison. UI state is remembered per search. */
-export default function ResultsPanel({ runId, suppliers, live, onNote, onStatus }: Props) {
+/** Result list of one search: cards or table, expand/collapse, source toggle, export and comparison. UI state is remembered per search. */
+export default function ResultsPanel({ runId, suppliers, live, onNote }: Props) {
   const [ui, setUi] = usePersistedState<UiState>(`goulash:results:${runId}`, DEFAULT_UI);
   const [selected, setSelected] = useState<number[]>([]);
   const [comparing, setComparing] = useState(false);
-  const [statusError, setStatusError] = useState(false);
   const comparison = useRef<HTMLDivElement>(null);
   const state = { ...DEFAULT_UI, ...ui }; // state saved by an older version of the page may lack newer keys
 
@@ -35,7 +31,7 @@ export default function ResultsPanel({ runId, suppliers, live, onNote, onStatus 
     setComparing(false);
   }, [runId]);
 
-  const shown = state.statusFilter === "all" ? suppliers : suppliers.filter((s) => statusOf(s) === state.statusFilter);
+  const shown = suppliers;
   const ordered = state.view === "table" ? sortSuppliers(shown, state.sort) : shown;
   const toggleSelect = (id: number) => setSelected((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : prev.length < MAX_COMPARE ? [...prev, id] : prev));
   const toggleExpanded = (id: number) =>
@@ -48,22 +44,9 @@ export default function ResultsPanel({ runId, suppliers, live, onNote, onStatus 
     setTimeout(() => comparison.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
   };
 
-  const changeStatus = async (supplierId: number, status: SupplierStatus) => {
-    const previous = suppliers.find((s) => s.id === supplierId)?.status;
-    setStatusError(false);
-    onStatus(supplierId, status, null);
-    try {
-      const saved = await setSupplierStatus(runId, supplierId, status);
-      onStatus(supplierId, saved.value, saved.updated_at);
-    } catch {
-      onStatus(supplierId, previous?.value ?? "new", previous?.updated_at ?? null);
-      setStatusError(true);
-    }
-  };
-
   // the file follows what is on the screen: chosen suppliers, otherwise the shown list, in the order of the table
   const exportIds = (selected.length > 0 ? ordered.filter((s) => selected.includes(s.id)) : ordered).map((s) => s.id);
-  const exportLabel = selected.length > 0 ? `выбранные: ${selected.length}` : state.statusFilter !== "all" ? `показанные: ${shown.length}` : `все: ${suppliers.length}`;
+  const exportLabel = selected.length > 0 ? `выбранные: ${selected.length}` : `все: ${suppliers.length}`;
 
   return (
     <div className="space-y-3">
@@ -80,7 +63,7 @@ export default function ResultsPanel({ runId, suppliers, live, onNote, onStatus 
         </p>
         {!live && !suppliers.some((s) => s.ranking.recommended) && (
           <p className="mt-2 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900">
-            Рекомендовать пока некого: ни у одного поставщика нет подтверждённого товара, телефона и известного региона одновременно.
+            Рекомендовать пока некого: ни у одного поставщика нет одновременно телефона и известного региона.
           </p>
         )}
       </div>
@@ -110,22 +93,6 @@ export default function ResultsPanel({ runId, suppliers, live, onNote, onStatus 
           <input type="checkbox" checked={state.sources} onChange={(e) => setUi((prev) => ({ ...prev, sources: e.target.checked }))} />
           Показывать источники
         </label>
-        <label className="flex items-center gap-1.5 text-slate-700">
-          Статус:
-          <select
-            value={state.statusFilter}
-            onChange={(e) => setUi((prev) => ({ ...prev, statusFilter: e.target.value as UiState["statusFilter"] }))}
-            aria-label="Фильтр по статусу"
-            className="rounded-lg border border-slate-300 bg-white px-2 py-1"
-          >
-            <option value="all">все</option>
-            {STATUS_ORDER.map((s) => (
-              <option key={s} value={s}>
-                {STATUS_LABELS[s]} ({suppliers.filter((x) => statusOf(x) === s).length})
-              </option>
-            ))}
-          </select>
-        </label>
         <span className="ml-auto inline-flex overflow-hidden rounded-lg border border-slate-300">
           <a
             href={exportUrl(runId, "xlsx", exportIds)}
@@ -140,11 +107,8 @@ export default function ResultsPanel({ runId, suppliers, live, onNote, onStatus 
           </a>
         </span>
       </div>
-      {statusError && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">Не удалось сохранить статус. Попробуйте ещё раз.</p>}
 
-      {shown.length === 0 ? (
-        <p className="rounded-lg bg-slate-50 px-3 py-4 text-sm text-slate-600">Нет поставщиков со статусом «{state.statusFilter === "all" ? "" : STATUS_LABELS[state.statusFilter]}».</p>
-      ) : state.view === "cards" ? (
+      {state.view === "cards" ? (
         <div className="space-y-3">
           {shown.map((s) => (
             <SupplierCard
@@ -156,7 +120,6 @@ export default function ResultsPanel({ runId, suppliers, live, onNote, onStatus 
               selected={selected.includes(s.id)}
               canSelect={selected.length < MAX_COMPARE}
               onToggleSelect={() => toggleSelect(s.id)}
-              onStatus={changeStatus}
               onNote={onNote}
             />
           ))}
@@ -169,7 +132,6 @@ export default function ResultsPanel({ runId, suppliers, live, onNote, onStatus 
           canSelectMore={selected.length < MAX_COMPARE}
           sort={state.sort}
           onSort={(sort) => setUi((prev) => ({ ...prev, sort }))}
-          onStatus={changeStatus}
         />
       )}
 

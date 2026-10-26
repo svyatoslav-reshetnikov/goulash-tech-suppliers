@@ -46,7 +46,7 @@ export const CATEGORIES = {
 };
 
 export const RUN = {
-  id: 1, status: "done", stop_reason: "target_reached", category: "Рис для суши", free_text: false, group_id: null, extras: null,
-  location: "Москва", include_neighbors: false, regions: [{ id: "RU-MOW", name: "Москва", role: "primary" }], supplier_type: null,
-  summary: null, error: null, stats: { suppliers_saved: 6, cost_rub: 76.8 }, created_at: "2026-10-24T19:00:00Z", started_at: null, finished_at: "2026-10-24T19:02:00Z",
+  id: 1, status: "done", stop_reason: "target_reached", category: "Рис для суши",
+  location: "Москва", include_neighbors: false, regions: [{ id: "RU-MOW", name: "Москва", role: "primary" }],
+  summary: null, error: null, stats: { suppliers_saved: 6 }, created_at: "2026-10-24T19:00:00Z", started_at: null, finished_at: "2026-10-24T19:02:00Z",
 };

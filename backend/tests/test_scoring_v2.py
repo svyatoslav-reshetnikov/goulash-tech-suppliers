@@ -10,7 +10,8 @@ from app.locations import get_locations
 from app.ranking import FieldInfo, RankContext, SupplierInfo, rank_suppliers
 from app.ranking.commerce import commerce_payload, parse_min_order, parse_prices
 from app.ranking.config import PRODUCT_POINTS, RECOMMEND_MIN_PRODUCT_SHARE, WEIGHTS
-from app.ranking.warnings import email_mismatches, registrable_domain
+from app.ranking.scoring import product_evidence
+from app.ranking.warnings import build_warnings, email_mismatches, registrable_domain
 
 FIXTURE = json.loads((Path(__file__).parent / "fixtures" / "search_rice_moscow.json").read_text(encoding="utf-8"))
 PHRASES = ("Рис для суши", "Рис")
@@ -50,30 +51,30 @@ def test_weights_sum_to_100_and_match_the_spec():
         assert ranked.breakdown_max == WEIGHTS and all(ranked.breakdown[k] <= WEIGHTS[k] for k in WEIGHTS)
 
 
-def test_suomifish_ranks_above_gfc_and_gfc_is_not_recommended():
+def test_suomifish_is_recommended_and_gfc_without_confirmed_rice_is_not_shown():
     ranked = ranked_by_name()
-    suomi, gfc = ranked["SuomiFish"], ranked["GFC-Russia"]
-    assert suomi.score > gfc.score and suomi.rank < gfc.rank
-    assert suomi.recommended and not gfc.recommended
+    suomi = ranked["SuomiFish"]
+    assert suomi.recommended and suomi.rank == 1
     assert suomi.evidence["kind"] == "price_list" and suomi.evidence["label"] == "найдено: Рис для суши — в прайс-листе"
-    assert gfc.breakdown["relevance"] < RECOMMEND_MIN_PRODUCT_SHARE * WEIGHTS["relevance"]  # "полный ассортимент" proves nothing
-    assert "product_unconfirmed" in [w["code"] for w in gfc.warnings]
+    gfc = next(i for i in fixture_infos() if i.name == "GFC-Russia")
+    assert product_evidence(gfc, CTX)[0] < RECOMMEND_MIN_PRODUCT_SHARE * WEIGHTS["relevance"]  # "полный ассортимент" proves nothing
+    assert "GFC-Russia" not in ranked  # товар не подтверждён: поставщика не показываем
 
 
 def test_recommendation_needs_confirmed_product_and_known_region():
     base = dict(phone="+7 (495) 123-45-67", email="a@s1.test", address="г. Москва, ул. Тверская, 1", supplier_type="оптовик")
     confirmed = rank_suppliers([make(**base, assortment="Рис, нори")], CTX)[0]
-    generic = rank_suppliers([make(**base, assortment="Полный ассортимент продуктов питания")], CTX)[0]
     unknown_region = rank_suppliers([make(phone=base["phone"], assortment="Рис для суши")], CTX)[0]
-    assert confirmed.recommended and not generic.recommended and not unknown_region.recommended
+    assert rank_suppliers([make(**base, assortment="Полный ассортимент продуктов питания")], CTX) == []  # не показывается
+    assert confirmed.recommended and not unknown_region.recommended
     assert unknown_region.tier == "unknown" and "region_unknown" in [w["code"] for w in unknown_region.warnings]
 
 
 def test_rice_vinegar_is_not_rice_and_generic_phrase_scores_low():
-    vinegar = rank_suppliers([make(assortment="Рисовый уксус, соевый соус")], CTX)[0]
-    generic = rank_suppliers([make(description="Полный ассортимент продуктов питания для ресторанов")], CTX)[0]
-    assert vinegar.evidence["kind"] != "assortment"
-    assert generic.breakdown["relevance"] == PRODUCT_POINTS["generic"] <= 0.25 * WEIGHTS["relevance"]
+    vinegar_points, vinegar = product_evidence(make(assortment="Рисовый уксус, соевый соус"), CTX)
+    generic_points, _ = product_evidence(make(description="Полный ассортимент продуктов питания для ресторанов"), CTX)
+    assert vinegar["kind"] != "assortment"
+    assert generic_points == PRODUCT_POINTS["generic"] <= 0.25 * WEIGHTS["relevance"]
 
 
 # --- warnings ---
@@ -83,8 +84,9 @@ def test_email_domain_mismatch_and_free_mail():
     assert registrable_domain("www.shop.example.ru") == "example.ru" and registrable_domain("a.b.msk.ru") == "b.msk.ru"
     assert email_mismatches(["zakaz@osttorg.ru"], "vosttorg.ru") == ["osttorg.ru"]
     assert email_mismatches(["me@gmail.com", "x@mail.ru", "sales@mail.vosttorg.ru"], "vosttorg.ru") == []
-    vostorg = ranked_by_name()["Восторг"]
-    texts = {w["code"]: w["text"] for w in vostorg.warnings}
+    vostorg = next(i for i in fixture_infos() if i.name == "Восторг")
+    texts = {w["code"]: w["text"] for w in build_warnings(site_domain=vostorg.domain, emails=vostorg.values("email"),
+                                                         pages_studied=vostorg.pages_studied, tier="other", has_inn=bool(vostorg.inn))}
     assert texts["email_domain_mismatch"] == "Домен почты (osttorg.ru) не совпадает с сайтом (vosttorg.ru) — проверьте поставщика"
     assert "low_evidence" in texts and texts["no_inn"] == "ИНН не найден"
 

@@ -5,12 +5,17 @@ const LINK_CLASS = "text-cyan-700 hover:underline break-words";
 // сайт, email или российский телефон внутри текста
 const TOKEN = /(https?:\/\/[^\s<>"«»]*[^\s<>"«».,;:!?)])|([\w.+-]+@[\w-]+(?:\.[\w-]+)+)|((?:\+7|8)[\s\-()]*\d{3}[\s\-()]*\d{3}[\s-]*\d{2}[\s-]*\d{2})/g;
 
-/** Ссылка tel: из любого написания номера: +7 (843) 555-01-23, 8 800 555 35 35, 843 555-01-23. */
+// добавочный номер: «+7 (495) 133-00-60 доб. 105»
+const EXTENSION = /[\s,;]*\(?\s*(?:доб|доп|вн|ext)\.?\s*:?\s*(\d{1,6})\s*\)?/i;
+
+/** Ссылка tel: из любого написания номера: +7 (843) 555-01-23, 8 800 555 35 35, 843 555-01-23.
+ * Добавочный набирается после паузы (запятая в tel:). */
 export function phoneHref(value: string): string | null {
-  let digits = value.replace(/\D/g, "");
+  const ext = value.match(EXTENSION);
+  let digits = (ext ? value.slice(0, ext.index) : value).replace(/\D/g, "");
   if (digits.length === 11 && digits.startsWith("8")) digits = "7" + digits.slice(1);
   if (digits.length === 10) digits = "7" + digits;
-  return digits.length === 11 ? `tel:+${digits}` : null;
+  return digits.length === 11 ? `tel:+${digits}${ext ? `,${ext[1]}` : ""}` : null;
 }
 
 /** Текст, в котором сайты, email и телефоны стали ссылками (открываются, пишутся, набираются одним кликом). */

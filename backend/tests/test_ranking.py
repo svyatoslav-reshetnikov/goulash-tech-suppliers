@@ -14,7 +14,12 @@ CTX = RankContext(category="Моцарелла", synonyms=("Сыр моцаре�
 detector = detector_for(frozenset({TA, *L.regions[TA].neighbors}))
 
 
-def supplier(sid=1, name="ООО Тест", inn=None, **fields: str | list[str]) -> SupplierInfo:
+def supplier(sid=1, name="ООО Тест", inn=None, **fields: str | list[str] | None) -> SupplierInfo:
+    """Поставщик для тестов. Без подтверждённого товара его не показывают, поэтому по умолчанию в ассортименте моцарелла;
+    assortment=None — товар не назван."""
+    if "assortment" not in fields:
+        fields["assortment"] = "Сыр моцарелла"
+    fields = {k: v for k, v in fields.items() if v is not None}
     return SupplierInfo(
         id=sid, domain=f"s{sid}.test", name=name, inn=inn,
         fields={k: [FieldInfo(v, f"https://s{sid}.test/{k}/{i}") for i, v in enumerate([val] if isinstance(val, str) else val)]
@@ -91,9 +96,10 @@ def test_without_selected_location_region_does_not_matter():
 
 def test_tier_labels_and_explanations_name_the_regions():
     other = only(supplier(address="г. Москва"))
-    assert other.tier_label == "В другом регионе" and any("Москва" in r and "Республика Татарстан" in r for r in other.reasons)
+    assert other.tier_label == "В другом регионе: Москва" and any("Москва" in r and "Республика Татарстан" in r for r in other.reasons)
     near = only(supplier(address="г. Ижевск"))
-    assert any("Удмуртская Республика" in r for r in near.reasons)
+    assert near.tier_label == "В соседнем регионе: Удмуртская Республика" and any("Удмуртская Республика" in r for r in near.reasons)
+    assert only(supplier(address="г. Казань")).tier_label == "В вашем регионе"
 
 
 # --- баллы ---
@@ -124,11 +130,19 @@ def test_more_confirmed_data_gives_a_higher_score_and_perfect_supplier_gets_100(
 
 
 def test_relevance_and_reliability_components():
-    mentions = only(supplier(description="Поставляем сыр моцарелла оптом"))
-    in_name = only(supplier(name="Моцарелла-Маркет"))
-    nothing = only(supplier(description="Разные продукты"))
-    assert (mentions.breakdown["relevance"], in_name.breakdown["relevance"], nothing.breakdown["relevance"]) == (20, 10, 0)
-    assert only(supplier(description="Моцарелла")).breakdown["reliability"] == 0
+    mentions = only(supplier(description="Поставляем сыр моцарелла оптом", assortment=None))
+    in_assortment = only(supplier(assortment="Моцарелла для пиццы"))
+    assert (mentions.breakdown["relevance"], in_assortment.breakdown["relevance"]) == (20, 32)
+    assert only(supplier(description="Моцарелла", assortment=None)).breakdown["reliability"] == 0
+
+
+def test_supplier_without_confirmed_product_is_not_shown():
+    # товар только в названии компании или вовсе не назван: звонить такому поставщику не о чем
+    in_name = supplier(1, name="Моцарелла-Маркет", assortment=None)
+    nothing = supplier(2, description="Разные продукты", assortment=None)
+    generic = supplier(3, description="Полный ассортимент продуктов питания", assortment=None)
+    shown = supplier(4, description="Поставляем сыр моцарелла оптом")
+    assert [r.supplier_id for r in rank_suppliers([in_name, nothing, generic, shown], CTX)] == [4]
     two_pages = supplier(phone="+7 (843) 555-01-23", email="a@b.ru", inn="7707083893")
     assert only(two_pages).breakdown["reliability"] == 8 + 4 + 3
 
@@ -140,7 +154,8 @@ def test_explanation_lists_what_is_missing_and_what_to_ask():
     result = only(supplier(phone="+7 (843) 555-01-23", address="г. Москва"))
     assert result.missing[:3] == ["минимальный заказ", "цены", "условия доставки"]
     questions = " ".join(result.questions)
-    assert "минимальный заказ и цены" in questions and "Республика Татарстан" in questions and "ИНН" in questions
+    assert "минимальный заказ и цены" in questions and "ИНН" in questions
+    assert "доставляют ли" not in questions and "Республика Татарстан" not in questions  # про регион не спрашиваем: он в метке
     full = only(supplier(inn="7707083893", phone="+7 (843) 555-01-23", moq="20 кг", price_hint="500", delivery_terms="бесплатно", regions="Татарстан",
                          certificates="ХАССП", address="г. Казань"))
     assert full.missing == [] and full.questions == []
@@ -158,12 +173,12 @@ def test_reasons_use_only_saved_facts():
 
 def test_top_three_are_recommended_only_above_threshold():
     rich = dict(phone="+7 (843) 555-01-23", email="a@b.ru", address="г. Казань", description="Моцарелла")
-    infos = [supplier(i, name=f"Поставщик {i}", **rich) for i in range(1, 5)] + [supplier(9, name="Бедный")]
+    infos = [supplier(i, name=f"Поставщик {i}", **rich) for i in range(1, 5)] + [supplier(9, name="Бедный", assortment=None, description="Моцарелла")]
     ranked = rank_suppliers(infos, CTX)
     assert [r.rank for r in ranked] == [1, 2, 3, 4, 5]
     assert [r.recommended for r in ranked] == [True, True, True, False, False]
     assert ranked[-1].supplier_id == 9 and ranked[-1].score < 40
-    weak = rank_suppliers([supplier(1, name="Один")], CTX)
+    weak = rank_suppliers([supplier(1, name="Один", assortment=None, description="Моцарелла")], CTX)
     assert weak[0].score < 40 and not weak[0].recommended  # данных слишком мало: рекомендовать нечего
 
 
@@ -200,18 +215,6 @@ def test_supplier_without_phone_is_not_recommended_and_the_next_one_is():
     assert any("Телефона на сайте нет" in r for r in ranked[0].reasons) and "телефон" in ranked[0].missing
 
 
-def test_requested_supplier_type_counts_in_score_and_recommendation():
-    ctx = RankContext(category="Моцарелла", primary_region_id=TA, neighbor_region_ids=CTX.neighbor_region_ids, supplier_type="производитель")
-    base = dict(phone="+7 (843) 555-01-23", email="a@b.ru", address="г. Казань, ул. Бухарская 4В", description="Моцарелла")
-    maker = only(supplier(1, supplier_type="производитель", **base), ctx)
-    dealer = only(supplier(2, supplier_type="дистрибьютор", **base), ctx)
-    unknown = only(supplier(3, **base), ctx)
-    assert "supplier_type" not in maker.breakdown  # the type is a gate for the badge, not points
-    assert maker.recommended and unknown.recommended and not dealer.recommended
-    assert any("вы искали: производитель" in r for r in dealer.reasons)
-    assert only(supplier(4, supplier_type="дистрибьютор", **base)).recommended  # тип не важен
-
-
 def test_local_producer_outranks_moscow_wholesaler_who_only_promises_delivery_across_russia():
     """Данные запуска №5 («Моцарелла», Казань) после проверки полей."""
     gfc = supplier(1, name="GFC", inn="7726410031", phone=["+7 (800) 550-41-83", "+7 (903) 410-60-20"], email="msk@gfc-russia.ru",
@@ -244,7 +247,7 @@ def test_address_served_through_a_branch_elsewhere_is_delivery_not_local():
     real = "г. Казань обслуживается через филиал г. Тула Одоевское шоссе 130, склад №7"
     assert split_served_via(real) == ("г. Казань", "г. Тула Одоевское шоссе 130, склад №7")
     assert split_served_via("г. Казань, ул. Бухарская, 4В") == ("", "г. Казань, ул. Бухарская, 4В")
-    fields = {"address": [FieldInfo(real)], "phone": [FieldInfo("+7 (800) 707-94-42")]}
+    fields = {"address": [FieldInfo(real)], "phone": [FieldInfo("+7 (800) 707-94-42")], "assortment": [FieldInfo("Сыр моцарелла")]}
     ranked = rank_suppliers([SupplierInfo(1, "kazan.gostpp.ru", "ИП Ховренок", None, fields)],
                             RankContext(category="Моцарелла", primary_region_id="RU-TA"))[0]
     assert ranked.tier == "delivers"

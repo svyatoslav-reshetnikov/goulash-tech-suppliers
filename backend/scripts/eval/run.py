@@ -4,8 +4,7 @@
     python -m scripts.eval.run --yes --only nori-ekb  # один случай
 
 Агент работает без базы приложения (хранилище в памяти), поэтому прогон не смешивается с историей запусков.
-Результаты: scripts/eval/out/<время>/results.json. Новые поставщики добавляются в scripts/eval/labels.csv с пустой
-разметкой: заполните is_supplier, has_product, in_region (1 или 0) и посчитайте метрики:
+Результаты: scripts/eval/out/<время>/results.json. Отчёт (что найдено, каких данных не хватает, что отсеяно и почему):
 
     python -m scripts.eval.score
 """
@@ -24,12 +23,12 @@ from app.agent.models import RegionRef, RunRequest
 from app.agent.tools import ToolBox
 from app.config import get_settings
 from app.locations import get_locations, yandex_region
-from app.runs.service import default_deps, estimate_cost, limits_from
+from app.runs.service import default_deps, limits_from
 
-from .metrics import HERE, LABELS, OUT_DIR, merge_labels
+from .metrics import HERE, OUT_DIR
 
 CASES = HERE / "cases.json"
-SHOWN = {"search", "research_skipped", "research_failed", "supplier_saved", "supplier_rejected", "run_finished"}
+SHOWN = {"search", "search_error", "research_skipped", "research_failed", "supplier_saved", "supplier_rejected", "run_finished"}
 
 
 def build_request(case: dict, target: int) -> RunRequest:
@@ -41,7 +40,7 @@ def build_request(case: dict, target: int) -> RunRequest:
             raise ValueError(f"{case['id']}: неизвестное место {case['location_key']}")
         regions = tuple(RegionRef(r.name, role) for r, role in locations.expand(selected.region_id, case.get("include_neighbors", False)))
     return RunRequest(category=case["category"], synonyms=tuple(case.get("synonyms", [])), regions=regions,
-                      supplier_type=case.get("supplier_type"), target=target,
+                      target=target,
                       search_region=yandex_region(case.get("location_kind"), case.get("location_key")),
                       city=case["location_key"].split("|", 1)[1] if case.get("location_kind") == "city" else None)
 
@@ -57,6 +56,9 @@ async def run_case(case: dict, settings, cache: MemoryPageCache) -> dict:
         if type_ in ("supplier_rejected", "research_skipped", "research_failed"):
             problems.append({"type": type_, "domain": data.get("domain"), "message": message,
                              **({"rejected": data["rejected"]} if data.get("rejected") else {})})
+        elif type_ == "search_error":  # код и request-id: по ним видно, лимит это или другое, и есть что передать в поддержку
+            problems.append({"type": type_, "message": message,
+                             **{k: data.get(k) for k in ("kind", "query", "attempt", "retried", "final", "status", "code", "request_id", "text")}})
         elif type_ == "supplier_saved" and data.get("rejected"):  # сохранён, но часть полей отклонена
             problems.append({"type": "fields_rejected", "domain": data.get("domain"), "rejected": data["rejected"]})
 
@@ -64,7 +66,7 @@ async def run_case(case: dict, settings, cache: MemoryPageCache) -> dict:
     toolbox = ToolBox(request, limits, deps.searcher, deps.fetcher, sink, emit, places=deps.places, cache=cache, llm=deps.llm)
     started = time.monotonic()
     result = await run_agent(request, deps.llm, toolbox, emit, limits)
-    stats = {**result.stats, **estimate_cost(result.stats, settings), "seconds": round(time.monotonic() - started, 1)}
+    stats = {**result.stats, "seconds": round(time.monotonic() - started, 1)}
     suppliers = []
     for domain, draft in sink.suppliers.items():
         fields: dict[str, list[dict]] = {}
@@ -88,8 +90,7 @@ async def main() -> int:
     if args.only:
         cases = [c for c in cases if c["id"] in args.only]
     settings = get_settings()
-    worst = settings.agent_max_total_tokens / 1000 * settings.llm_price_per_1k_tokens_rub
-    print(f"Случаев: {len(cases)}. Обычно 70–100 ₽ за случай, не больше ~{worst:.0f} ₽ на модель.", file=sys.stderr)
+    print(f"Случаев: {len(cases)}. Каждый — полноценный платный запуск поиска.", file=sys.stderr)
     if not args.yes:
         print("Прогон платный. Повторите с --yes.", file=sys.stderr)
         return 1
@@ -106,8 +107,7 @@ async def main() -> int:
             results.append({"id": case["id"], "request": case, "stop_reason": "error", "error": str(exc)[:300],
                             "summary": None, "stats": {}, "suppliers": []})
         (out / "results.json").write_text(json.dumps(results, ensure_ascii=False, indent=1), encoding="utf-8")
-    added = merge_labels(LABELS, results)
-    print(f"Результаты: {out / 'results.json'}. Новых поставщиков для разметки: {added} ({LABELS}).", file=sys.stderr)
+    print(f"Результаты: {out / 'results.json'}. Отчёт: python -m scripts.eval.score", file=sys.stderr)
     return 0
 
 

@@ -45,13 +45,33 @@ def numbers_supported(value: str, quote: str) -> bool:
     return _numbers(value) <= _numbers(quote)
 
 
+# добавочный: «+7 (495) 133-00-60 доб. 105», «(доп. 2)», «вн. 12», «ext 7»
+_EXTENSION = re.compile(r"[\s,;]*\(?\s*(?:доб|доп|вн|ext)\.?\s*:?\s*(\d{1,6})\s*\)?", re.I)
+# граница между номерами в одной строке: запятая, точка с запятой, косая черта или «или», за которыми идёт новый номер
+_PHONE_SPLIT = re.compile(r"\s*(?:[,;/]|\bили\b)\s*(?=(?:\+?7|8)?[\s\-()]*\d{3}[\s\-()]*\d{3}[\s-]*\d{2}[\s-]*\d{2})", re.I)
+
+
+def split_phones(value: str) -> list[str]:
+    """Несколько номеров в одной строке («+7 (495) 133-00-60, +7 (495) 640-24-94») — отдельными значениями."""
+    parts = [p.strip() for p in _PHONE_SPLIT.split(value) if p.strip()]
+    return parts or [value]
+
+
+def phone_main_digits(value: str) -> str:
+    """Цифры самого номера без добавочного."""
+    match = _EXTENSION.search(value)
+    return digits(value[: match.start()] if match else value)
+
+
 def normalize_phone(value: str) -> str | None:
-    d = digits(value)
+    match = _EXTENSION.search(value)
+    d = phone_main_digits(value)
     if len(d) == 11 and d[0] in "78":
         d = d[1:]
     if len(d) != 10 or d[0] not in "3489":  # коды городов 3xx-4xx-8xx, мобильные 9xx, бесплатные 800
         return None
-    return f"+7 ({d[:3]}) {d[3:6]}-{d[6:8]}-{d[8:]}"
+    extension = f" доб. {match.group(1)}" if match else ""
+    return f"+7 ({d[:3]}) {d[3:6]}-{d[6:8]}-{d[8:]}{extension}"
 
 
 def normalize_email(value: str) -> str | None:
@@ -223,8 +243,9 @@ def units_supported(value: str, quote: str) -> bool:
 
 def value_supported_by_quote(field: str, value: str, quote: str) -> bool:
     """Значение должно следовать из цитаты, а не быть выдумано рядом с настоящей цитатой."""
-    if field == "phone":
-        return digits(value)[-10:] in digits(quote)
+    if field == "phone":  # номер и добавочный, если он есть, должны быть в цитате
+        match = _EXTENSION.search(value)
+        return phone_main_digits(value)[-10:] in digits(quote) and (match is None or match.group(1) in digits(quote))
     if field == "email":
         return value.lower() in quote.lower()
     if field == "inn":

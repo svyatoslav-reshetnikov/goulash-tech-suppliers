@@ -167,7 +167,6 @@
     ],
     "questions": [
      "Уточните минимальный заказ на «Рис для суши».",
-     "Узнайте, доставляют ли в регион «Москва» и на каких условиях.",
      "Попросите реквизиты (ИНН)."
     ],
     "warnings": [
@@ -191,10 +190,6 @@
      "completeness": 25,
      "reliability": 15
     }
-   },
-   "status": {
-    "value": "new",
-    "updated_at": null
    },
    "collected_at": "2026-10-24T22:13:01.164730+00:00",
    "commerce": {
@@ -345,7 +340,6 @@
     ],
     "questions": [
      "Уточните цены на «Рис для суши».",
-     "Узнайте, доставляют ли в регион «Москва» и на каких условиях.",
      "Попросите сертификаты и реквизиты (ИНН)."
     ],
     "warnings": [
@@ -375,10 +369,6 @@
      "reliability": 15
     }
    },
-   "status": {
-    "value": "new",
-    "updated_at": null
-   },
    "collected_at": "2026-10-24T21:03:42.241407+00:00",
    "commerce": {
     "price_headline": null,
@@ -389,223 +379,6 @@
      "raw": "2000 рублей",
      "source_ref": "https://sushimag.ru/dostavka/",
      "display": "от 2 000 ₽",
-     "note": null
-    }
-   }
-  },
-  {
-   "id": 3,
-   "domain": "gfc-russia.ru",
-   "website": "https://gfc-russia.ru/",
-   "name": "GFC-Russia",
-   "inn": "7726410031",
-   "note": null,
-   "research": {
-    "pages": [
-     "https://gfc-russia.ru/",
-     "https://gfc-russia.ru/about",
-     "https://gfc-russia.ru/catalog",
-     "https://gfc-russia.ru/catalog/moloko-syr-yaytsa/syr",
-     "https://gfc-russia.ru/catalog/ovoshchi-i-frukty",
-     "https://gfc-russia.ru/contacts/moskva",
-     "https://gfc-russia.ru/delivery/[cityCode]",
-     "https://gfc-russia.ru/delivery/moskva",
-     "https://gfc-russia.ru/favorites",
-     "https://gfc-russia.ru/personal",
-     "https://gfc-russia.ru/wiki/market/suppliers",
-     "https://gfc-russia.ru/wiki/payment"
-    ],
-    "missing": [
-     "delivery_terms",
-     "price_hint",
-     "certificates"
-    ],
-    "researched_at": "2026-10-24T21:53:25.212192+00:00"
-   },
-   "fields": {
-    "name": [
-     {
-      "value": "GFC-Russia",
-      "quote": "Продукты для ресторанов и кафе купить оптом от поставщика HoReCa - GFC-Russia",
-      "source_url": "https://gfc-russia.ru/delivery/[cityCode]",
-      "verified_at": "2026-10-24T21:53:25.205443Z"
-     }
-    ],
-    "phone": [
-     {
-      "value": "+7 (800) 550-41-83",
-      "quote": "78005504183 +7 (800) 550-41-83",
-      "source_url": "https://gfc-russia.ru/delivery/[cityCode]",
-      "verified_at": "2026-10-24T21:53:25.205443Z"
-     },
-     {
-      "value": "+7 (903) 410-60-20",
-      "quote": "Телефон управляющей компании +7 903 410 60 20",
-      "source_url": "https://gfc-russia.ru/contacts/moskva",
-      "verified_at": "2026-10-24T21:53:06.191854Z"
-     }
-    ],
-    "email": [
-     {
-      "value": "msk@gfc-russia.ru",
-      "quote": "Отдел продаж msk@gfc-russia.ru msk@gfc-russia.ru",
-      "source_url": "https://gfc-russia.ru/contacts/moskva",
-      "verified_at": "2026-10-24T21:53:06.191854Z"
-     },
-     {
-      "value": "zakupadr@gfc-russia.ru",
-      "quote": "Поставщикам по вопросу сотрудничества zakupadr@gfc-russia.ru zakupadr@gfc-russia.ru",
-      "source_url": "https://gfc-russia.ru/contacts/moskva",
-      "verified_at": "2026-10-24T21:53:06.191854Z"
-     }
-    ],
-    "inn": [
-     {
-      "value": "7726410031",
-      "quote": "ИНН 7726410031",
-      "source_url": "https://gfc-russia.ru/contacts/moskva",
-      "verified_at": "2026-10-24T21:53:06.191854Z"
-     }
-    ],
-    "address": [
-     {
-      "value": "123022, г. Москва, Звенигородское шоссе, д. 9/27с1",
-      "quote": "Адрес для корреспонденции 123022, г. Москва, Звенигородское шоссе, д. 9/27с1",
-      "source_url": "https://gfc-russia.ru/contacts/moskva",
-      "verified_at": "2026-10-24T21:53:06.191854Z"
-     }
-    ],
-    "assortment": [
-     {
-      "value": "Полный ассортимент продуктов питания: от мяса и рыбы до бакалеи, молочной продукции и готовых блюд.",
-      "quote": "Вы можете заказать полный ассортимент продуктов питания: от мяса и рыбы до бакалеи, молочной продукции и готовых блюд.",
-      "source_url": "https://gfc-russia.ru/",
-      "verified_at": "2026-10-24T21:53:06.191854Z"
-     },
-     {
-      "value": "Продукты для ресторанов и кафе",
-      "quote": "Продукты для ресторанов и кафе купить оптом от поставщика HoReCa - GFC-Russia",
-      "source_url": "https://gfc-russia.ru/catalog/moloko-syr-yaytsa/syr",
-      "verified_at": "2026-10-24T21:53:13.949455Z"
-     },
-     {
-      "value": "Водоросли Нори, филе форели, сыры твердые, топпинги для напитков, кунжут черный, кукуруза консервированная и другие.",
-      "quote": "Водоросли Нори Филе форели Сыры твердые Топпинги для напитков Кунжут черный Кукуруза консервированная",
-      "source_url": "https://gfc-russia.ru/catalog",
-      "verified_at": "2026-10-24T21:43:15.233207Z"
-     }
-    ],
-    "supplier_type": [
-     {
-      "value": "оптовик",
-      "quote": "Продукты для ресторанов и кафе купить оптом",
-      "source_url": "https://gfc-russia.ru/delivery/[cityCode]",
-      "verified_at": "2026-10-24T21:53:25.205443Z"
-     }
-    ],
-    "regions": [
-     {
-      "value": "16 регионов России",
-      "quote": "Федеральная Компания с присутствием в 16 регионах России",
-      "source_url": "https://gfc-russia.ru/about",
-      "verified_at": "2026-10-24T21:03:19.499281Z"
-     },
-     {
-      "value": "Москва",
-      "quote": "HoReCaКрупный Опт Москва",
-      "source_url": "https://gfc-russia.ru/favorites",
-      "verified_at": "2026-10-24T21:53:18.451342Z"
-     }
-    ],
-    "moq": [
-     {
-      "value": "от 11 000 ₽",
-      "quote": "Сумма для оформления заказа от 11 000 ₽",
-      "source_url": "https://gfc-russia.ru/delivery/moskva",
-      "verified_at": "2026-10-24T21:53:06.191854Z"
-     },
-     {
-      "value": "1 шт.",
-      "quote": "Водоросли Нори Tidori 100л, 40шт/кор, Корея Минимальный заказ: 1 шт.",
-      "source_url": "https://gfc-russia.ru/personal-recommendations",
-      "verified_at": "2026-10-24T21:43:26.023897Z"
-     }
-    ],
-    "description": [
-     {
-      "value": "Маркетплейс для HoReCa",
-      "quote": "Маркетплейс для HORECA",
-      "source_url": "https://gfc-russia.ru/catalog",
-      "verified_at": "2026-10-24T21:53:13.949455Z"
-     }
-    ]
-   },
-   "ranking": {
-    "supplier_id": 3,
-    "rank": 3,
-    "score": 60,
-    "tier": "local",
-    "tier_label": "В вашем регионе",
-    "breakdown": {
-     "relevance": 8,
-     "location": 20,
-     "completeness": 17,
-     "reliability": 15
-    },
-    "reasons": [
-     "Товар не назван: только общие формулировки.",
-     "Адрес в вашем регионе (Москва).",
-     "Есть контакты со ссылкой на источник: телефон и email.",
-     "Указан ИНН 7726410031, он прошёл проверку контрольной суммы.",
-     "Тип: оптовик.",
-     "Минимальный заказ: от 11 000 ₽."
-    ],
-    "missing": [
-     "цены",
-     "условия доставки",
-     "сертификаты"
-    ],
-    "questions": [
-     "Уточните цены на «Рис для суши».",
-     "Уточните условия и стоимость доставки до вашей точки.",
-     "Попросите сертификаты."
-    ],
-    "warnings": [
-     {
-      "code": "product_unconfirmed",
-      "severity": "warn",
-      "text": "Товар не подтверждён на сайте"
-     }
-    ],
-    "recommended": false,
-    "evidence": {
-     "kind": "generic",
-     "phrase": null,
-     "where": null,
-     "text": null,
-     "label": "товар не назван: только общие формулировки"
-    },
-    "breakdown_max": {
-     "relevance": 40,
-     "location": 20,
-     "completeness": 25,
-     "reliability": 15
-    }
-   },
-   "status": {
-    "value": "new",
-    "updated_at": null
-   },
-   "collected_at": "2026-10-24T21:53:25.212192+00:00",
-   "commerce": {
-    "price_headline": null,
-    "prices_other": [],
-    "min_order": {
-     "value": 11000.0,
-     "unit": "RUB",
-     "raw": "от 11 000 ₽",
-     "source_ref": "https://gfc-russia.ru/delivery/moskva",
-     "display": "от 11 000 ₽ (также: от 1 шт.)",
      "note": null
     }
    }
@@ -677,10 +450,10 @@
    },
    "ranking": {
     "supplier_id": 6,
-    "rank": 4,
+    "rank": 3,
     "score": 53,
     "tier": "neighbor",
-    "tier_label": "В соседнем регионе",
+    "tier_label": "В соседнем регионе: Московская область",
     "breakdown": {
      "relevance": 32,
      "location": 12,
@@ -704,7 +477,7 @@
     ],
     "questions": [
      "Уточните минимальный заказ и цены на «Рис для суши».",
-     "Узнайте, доставляют ли в регион «Москва» и на каких условиях.",
+     "Уточните условия и стоимость доставки до вашей точки.",
      "Попросите сертификаты и реквизиты (ИНН)."
     ],
     "warnings": [
@@ -729,310 +502,7 @@
      "reliability": 15
     }
    },
-   "status": {
-    "value": "new",
-    "updated_at": null
-   },
    "collected_at": "2026-10-24T21:04:02.027053+00:00",
-   "commerce": {
-    "price_headline": null,
-    "prices_other": [],
-    "min_order": null
-   }
-  },
-  {
-   "id": 5,
-   "domain": "vosttorg.ru",
-   "website": "https://vosttorg.ru/",
-   "name": "Восторг",
-   "inn": null,
-   "note": null,
-   "research": {
-    "pages": [
-     "https://vosttorg.ru/"
-    ],
-    "missing": [
-     "delivery_terms",
-     "moq",
-     "price_hint",
-     "certificates"
-    ],
-    "researched_at": "2026-10-24T21:04:01.264132+00:00"
-   },
-   "fields": {
-    "name": [
-     {
-      "value": "Восторг",
-      "quote": "Восторг — оптовый поставщик продуктов питания для HoReCa и бизнеса",
-      "source_url": "https://vosttorg.ru/",
-      "verified_at": "2026-10-24T21:04:00.697309Z"
-     }
-    ],
-    "phone": [
-     {
-      "value": "+7 (499) 499-66-88",
-      "quote": "+7(499)499-66-88 +7(499)499-66-88",
-      "source_url": "https://vosttorg.ru/",
-      "verified_at": "2026-10-24T21:04:00.697309Z"
-     }
-    ],
-    "email": [
-     {
-      "value": "zakaz@osttorg.ru",
-      "quote": "Email zakaz@osttorg.ru zakaz@osttorg.ru",
-      "source_url": "https://vosttorg.ru/",
-      "verified_at": "2026-10-24T21:04:00.697309Z"
-     }
-    ],
-    "address": [
-     {
-      "value": "Россия, Москва, Коровинское шоссе, 35с4",
-      "quote": "Адрес Россия, Москва, Коровинское шоссе, 35с4",
-      "source_url": "https://vosttorg.ru/",
-      "verified_at": "2026-10-24T21:04:00.697309Z"
-     }
-    ],
-    "description": [
-     {
-      "value": "Оптовый поставщик продуктов питания для HoReCa и бизнеса",
-      "quote": "Восторг — оптовый поставщик продуктов питания для HoReCa и бизнеса",
-      "source_url": "https://vosttorg.ru/",
-      "verified_at": "2026-10-24T21:04:00.697309Z"
-     }
-    ],
-    "supplier_type": [
-     {
-      "value": "оптовик",
-      "quote": "Оптовые поставки продуктов для HoReCa и производств",
-      "source_url": "https://vosttorg.ru/",
-      "verified_at": "2026-10-24T21:04:00.697309Z"
-     }
-    ],
-    "regions": [
-     {
-      "value": "Москва",
-      "quote": "Город: Москва",
-      "source_url": "https://vosttorg.ru/",
-      "verified_at": "2026-10-24T21:04:00.697309Z"
-     }
-    ]
-   },
-   "ranking": {
-    "supplier_id": 5,
-    "rank": 5,
-    "score": 45,
-    "tier": "local",
-    "tier_label": "В вашем регионе",
-    "breakdown": {
-     "relevance": 8,
-     "location": 20,
-     "completeness": 13,
-     "reliability": 4
-    },
-    "reasons": [
-     "Товар не назван: только общие формулировки.",
-     "Адрес в вашем регионе (Москва).",
-     "Есть контакты со ссылкой на источник: телефон и email.",
-     "Тип: оптовик."
-    ],
-    "missing": [
-     "минимальный заказ",
-     "цены",
-     "условия доставки",
-     "сертификаты",
-     "ИНН"
-    ],
-    "questions": [
-     "Уточните минимальный заказ и цены на «Рис для суши».",
-     "Уточните условия и стоимость доставки до вашей точки.",
-     "Попросите сертификаты и реквизиты (ИНН)."
-    ],
-    "warnings": [
-     {
-      "code": "email_domain_mismatch",
-      "severity": "warn",
-      "text": "Домен почты (osttorg.ru) не совпадает с сайтом (vosttorg.ru) — проверьте поставщика"
-     },
-     {
-      "code": "low_evidence",
-      "severity": "warn",
-      "text": "Изучена только 1 страница сайта"
-     },
-     {
-      "code": "product_unconfirmed",
-      "severity": "warn",
-      "text": "Товар не подтверждён на сайте"
-     },
-     {
-      "code": "no_inn",
-      "severity": "info",
-      "text": "ИНН не найден"
-     }
-    ],
-    "recommended": false,
-    "evidence": {
-     "kind": "generic",
-     "phrase": null,
-     "where": null,
-     "text": null,
-     "label": "товар не назван: только общие формулировки"
-    },
-    "breakdown_max": {
-     "relevance": 40,
-     "location": 20,
-     "completeness": 25,
-     "reliability": 15
-    }
-   },
-   "status": {
-    "value": "new",
-    "updated_at": null
-   },
-   "collected_at": "2026-10-24T21:04:01.264132+00:00",
-   "commerce": {
-    "price_headline": null,
-    "prices_other": [],
-    "min_order": null
-   }
-  },
-  {
-   "id": 4,
-   "domain": "gurman-llc.ru",
-   "website": "https://gurman-llc.ru/",
-   "name": "ТД «Гурман»",
-   "inn": null,
-   "note": null,
-   "research": {
-    "pages": [
-     "https://gurman-llc.ru/"
-    ],
-    "missing": [
-     "phone",
-     "address",
-     "regions",
-     "moq",
-     "price_hint",
-     "certificates"
-    ],
-    "researched_at": "2026-10-24T21:04:01.038418+00:00"
-   },
-   "fields": {
-    "name": [
-     {
-      "value": "ТД «Гурман»",
-      "quote": "Продукты для ресторанов и кафе оптом от поставщика ТД «Гурман»",
-      "source_url": "https://gurman-llc.ru/",
-      "verified_at": "2026-10-24T21:03:59.910158Z"
-     }
-    ],
-    "email": [
-     {
-      "value": "office@gurman-llc.ru",
-      "quote": "office@gurman-llc.ru office@gurman-llc.ru",
-      "source_url": "https://gurman-llc.ru/",
-      "verified_at": "2026-10-24T21:03:59.910158Z"
-     }
-    ],
-    "description": [
-     {
-      "value": "Поставщик продуктов для ресторанов и кафе",
-      "quote": "Продукты для ресторанов и кафе оптом от поставщика ТД «Гурман»",
-      "source_url": "https://gurman-llc.ru/",
-      "verified_at": "2026-10-24T21:03:59.910158Z"
-     }
-    ],
-    "assortment": [
-     {
-      "value": "Свыше 1 500 товаров",
-      "quote": "Свыше 1 500 товаров",
-      "source_url": "https://gurman-llc.ru/",
-      "verified_at": "2026-10-24T21:03:59.910158Z"
-     }
-    ],
-    "delivery_terms": [
-     {
-      "value": "Бесплатная доставка от 20 000 рублей",
-      "quote": "Бесплатная доставка от 20 000 рублей",
-      "source_url": "https://gurman-llc.ru/",
-      "verified_at": "2026-10-24T21:03:59.910158Z"
-     }
-    ]
-   },
-   "ranking": {
-    "supplier_id": 4,
-    "rank": 6,
-    "score": 22,
-    "tier": "unknown",
-    "tier_label": "Регион неизвестен",
-    "breakdown": {
-     "relevance": 8,
-     "location": 7,
-     "completeness": 7,
-     "reliability": 0
-    },
-    "reasons": [
-     "Товар не назван: только общие формулировки.",
-     "Адрес и регионы доставки не найдены: расположение неизвестно.",
-     "Есть контакты со ссылкой на источник: email.",
-     "Телефона на сайте нет: позвонить некуда, поэтому в рекомендации не попадает.",
-     "Доставка: Бесплатная доставка от 20 000 рублей."
-    ],
-    "missing": [
-     "телефон",
-     "минимальный заказ",
-     "цены",
-     "регионы поставки",
-     "сертификаты",
-     "ИНН",
-     "адрес"
-    ],
-    "questions": [
-     "Уточните минимальный заказ и цены на «Рис для суши».",
-     "Узнайте, доставляют ли в регион «Москва» и на каких условиях.",
-     "Попросите сертификаты и реквизиты (ИНН)."
-    ],
-    "warnings": [
-     {
-      "code": "low_evidence",
-      "severity": "warn",
-      "text": "Изучена только 1 страница сайта"
-     },
-     {
-      "code": "region_unknown",
-      "severity": "warn",
-      "text": "Регион неизвестен"
-     },
-     {
-      "code": "product_unconfirmed",
-      "severity": "warn",
-      "text": "Товар не подтверждён на сайте"
-     },
-     {
-      "code": "no_inn",
-      "severity": "info",
-      "text": "ИНН не найден"
-     }
-    ],
-    "recommended": false,
-    "evidence": {
-     "kind": "generic",
-     "phrase": null,
-     "where": null,
-     "text": null,
-     "label": "товар не назван: только общие формулировки"
-    },
-    "breakdown_max": {
-     "relevance": 40,
-     "location": 20,
-     "completeness": 25,
-     "reliability": 15
-    }
-   },
-   "status": {
-    "value": "new",
-    "updated_at": null
-   },
-   "collected_at": "2026-10-24T21:04:01.038418+00:00",
    "commerce": {
     "price_headline": null,
     "prices_other": [],

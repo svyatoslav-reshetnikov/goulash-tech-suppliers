@@ -88,9 +88,7 @@ class Run(Base):
     location_label: Mapped[str | None] = mapped_column(String(200))
     include_neighbors: Mapped[bool] = mapped_column(Boolean, default=False)
     regions: Mapped[list] = mapped_column(JSONB, default=list)  # [{id, name, role}]
-    supplier_type: Mapped[str | None] = mapped_column(String(32))
-    extras: Mapped[dict | None] = mapped_column(JSONB)  # optional requirements: volume, documents, storage, delivery
-    group_id: Mapped[int | None] = mapped_column(index=True)  # id of the first run of a multi-product search; None for a single search
+    supplier_type: Mapped[str | None] = mapped_column(String(32))  # фильтр старых запусков; в форме его больше нет
     status: Mapped[str] = mapped_column(String(16), default="queued")  # queued | running | done | failed
     stop_reason: Mapped[str | None] = mapped_column(String(32))
     summary: Mapped[str | None] = mapped_column(Text)
@@ -147,17 +145,6 @@ class SupplierField(Base):
     # запуск, в котором поле впервые найдено: результаты прошлого запуска не меняются от того, что нашли позже
     first_run_id: Mapped[int | None] = mapped_column(index=True)
     verified_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-
-
-class SupplierStatus(Base):
-    """Work status of a supplier within one search (new when there is no row)."""
-
-    __tablename__ = "supplier_statuses"
-
-    run_id: Mapped[int] = mapped_column(ForeignKey("runs.id", ondelete="CASCADE"), primary_key=True)
-    supplier_id: Mapped[int] = mapped_column(ForeignKey("suppliers.id", ondelete="CASCADE"), primary_key=True)
-    status: Mapped[str] = mapped_column(String(20))
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
 
 class RunSupplier(Base):

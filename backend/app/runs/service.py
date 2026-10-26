@@ -82,20 +82,6 @@ async def mark_interrupted(session_factory: async_sessionmaker[AsyncSession] = S
         await session.commit()
 
 
-async def start_next_in_group(session_factory: async_sessionmaker[AsyncSession], finished_run_id: int) -> None:
-    """Multi-product search: when a run ends, the next queued run of its group starts (one at a time)."""
-    async with session_factory() as session:
-        group_id = await session.scalar(select(Run.group_id).where(Run.id == finished_run_id))
-        if group_id is None:
-            return
-        running = await session.scalar(select(func.count()).select_from(Run).where(Run.group_id == group_id, Run.status == "running"))
-        following = await session.scalar(
-            select(Run.id).where(Run.group_id == group_id, Run.status == "queued", Run.id > finished_run_id).order_by(Run.id).limit(1)
-        )
-    if following is not None and not running:
-        await start_run(following)
-
-
 async def start_run(run_id: int) -> None:
     task = asyncio.create_task(execute_run(SessionLocal, run_id))
     _tasks.add(task)
@@ -107,15 +93,6 @@ async def shutdown() -> None:
         task.cancel()
     if _tasks:
         await asyncio.gather(*_tasks, return_exceptions=True)
-
-
-def estimate_cost(stats: dict, settings: Settings) -> dict:
-    """Оценка стоимости запуска по счётчикам агента и тарифам из настроек; реальный счёт смотрите в биллинге Yandex Cloud."""
-    tokens = stats.get("prompt_tokens", 0) + stats.get("completion_tokens", 0)
-    requests = stats.get("searches", 0) + stats.get("site_searches", 0)
-    llm = tokens / 1000 * settings.llm_price_per_1k_tokens_rub
-    search = requests * settings.search_price_per_request_rub
-    return {"cost_llm_rub": round(llm, 1), "cost_search_rub": round(search, 1), "cost_rub": round(llm + search, 1)}
 
 
 async def execute_run(
@@ -132,8 +109,6 @@ async def execute_run(
                 category=run.category_name,
                 synonyms=tuple(category.synonyms or []) if category else (),
                 regions=tuple(RegionRef(r["name"], r["role"]) for r in run.regions),
-                supplier_type=run.supplier_type,
-                extras=run.extras,
                 target=settings.agent_target_suppliers,
                 search_region=yandex_region(run.location_kind, run.location_key),
                 city=run.location_key.split("|", 1)[1] if run.location_kind == "city" and run.location_key else None,
@@ -141,20 +116,14 @@ async def execute_run(
             run.status, run.started_at = "running", datetime.now(UTC)
             await session.commit()
 
-        async def emit_with_cost(type_: str, message: str = "", **data) -> None:
-            if type_ == "usage":  # цену считаем здесь: агент про тарифы не знает
-                data.update(estimate_cost(data, settings))
-            await emit(type_, message, **data)
-
         deps = deps_factory(settings)
         limits = limits_from(settings)
-        toolbox = ToolBox(request, limits, deps.searcher, deps.fetcher, DbSink(session_factory, run_id), emit_with_cost,
+        toolbox = ToolBox(request, limits, deps.searcher, deps.fetcher, DbSink(session_factory, run_id), emit,
                           places=deps.places, cache=DbPageCache(session_factory), llm=deps.llm)
-        result = await run_agent(request, deps.llm, toolbox, emit_with_cost, limits)
+        result = await run_agent(request, deps.llm, toolbox, emit, limits)
         # сбой модели в середине запуска не перечёркивает уже найденных поставщиков: запуск завершён с причиной
         status = "failed" if result.stop_reason == "llm_error" and not result.stats.get("suppliers_saved") else "done"
         stop_reason, summary, error, stats = result.stop_reason, result.summary, result.error, result.stats
-        stats = {**stats, **estimate_cost(stats, settings)}
     except asyncio.CancelledError:
         error = "остановлено"
         raise
@@ -171,11 +140,6 @@ async def execute_run(
                 )
             )
             await session.commit()
-        if error != "остановлено":  # not on shutdown: the app restarts and closes queued runs itself
-            try:
-                await start_next_in_group(session_factory, run_id)
-            except Exception:
-                log.exception("Не удалось запустить следующий поиск группы после запуска %s", run_id)
 
 
 async def stream_events(

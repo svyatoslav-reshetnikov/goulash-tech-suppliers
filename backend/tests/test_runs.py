@@ -69,6 +69,8 @@ def draft(domain="syrmaster-kazan.test", **kwargs) -> SupplierDraft:
         AcceptedField("name", "ООО «СырМастер Казань»", "ООО «СырМастер Казань»", f"https://{domain}/"),
         AcceptedField("phone", "+7 (843) 555-01-23", "Телефон: +7 (843) 555-01-23", f"https://{domain}/contacts"),
         AcceptedField("inn", "7707083893", "ИНН 7707083893", f"https://{domain}/contacts"),
+        # без подтверждённого товара поставщика в результатах не показывают
+        AcceptedField("assortment", "Моцарелла для пиццы", "Моцарелла для пиццы", f"https://{domain}/"),
     ]
     return SupplierDraft(website=f"https://{domain}/", domain=domain, fields=fields)
 
@@ -92,7 +94,7 @@ async def test_db_sink_creates_merges_updates_quote_and_links_run(factory):
         fields = (await session.execute(select(SupplierField).where(SupplierField.supplier_id == first.supplier_id))).scalars().all()
         phone = [f for f in fields if f.field == "phone"]
         assert len(phone) == 1 and phone[0].quote.startswith("Новая цитата") and phone[0].source_url.endswith("/about")
-        assert {f.field for f in fields} == {"name", "phone", "inn", "email"}
+        assert {f.field for f in fields} == {"name", "phone", "inn", "email", "assortment"}
         assert (await session.scalar(select(Supplier).where(Supplier.id == first.supplier_id))).inn == "7707083893"
         assert len((await session.execute(select(RunSupplier))).scalars().all()) == 1  # связь с запуском одна
 
@@ -169,7 +171,7 @@ async def test_execute_run_end_to_end_and_second_run_uses_page_cache(factory, mo
             fields = (await session.execute(select(SupplierField).where(SupplierField.supplier_id == supplier.id))).scalars().all()
         assert run.status == "done" and run.stop_reason == "target_reached" and run.started_at and run.finished_at
         assert run.stats["suppliers_saved"] == 1 and run.stats["fetches"] == 2 and len(fetcher.calls) == 2
-        assert run.stats["cost_rub"] >= 0 and "cost_search_rub" in run.stats
+        assert "cost_rub" not in run.stats  # стоимость больше не оцениваем: тарифы Яндекса считались неверно
         types = [e.type for e in events]
         assert types[0] == "run_started" and types[-1] == "run_finished" and "supplier_saved" in types
         assert [e.seq for e in events] == list(range(1, len(events) + 1))
@@ -277,7 +279,7 @@ async def test_concurrent_saves_of_the_same_new_supplier_do_not_collide(factory)
     async with factory() as session:
         assert len((await session.execute(select(Supplier))).scalars().all()) == 1
         fields = (await session.execute(select(SupplierField))).scalars().all()
-        assert len(fields) == 3  # name, phone, inn: одинаковые значения не размножились
+        assert len(fields) == 4  # name, phone, inn, assortment: одинаковые значения не размножились
         assert len((await session.execute(select(RunSupplier))).scalars().all()) == 2  # поставщик привязан к обоим запускам
 
 
@@ -297,7 +299,11 @@ async def test_run_suppliers_endpoint_returns_ranking_in_order_with_recommendati
     sink = DbSink(factory, run_id)
     await sink.save(draft(domain="far.test", fields=[
         AcceptedField("name", "Далёкий", "Далёкий", "https://far.test/"),
-        AcceptedField("email", "a@far.test", "a@far.test", "https://far.test/")]))
+        AcceptedField("email", "a@far.test", "a@far.test", "https://far.test/"),
+        AcceptedField("assortment", "Сыр моцарелла", "Сыр моцарелла", "https://far.test/")]))
+    await sink.save(draft(domain="nothing.test", fields=[  # товар на сайте не назван: в результатах его нет
+        AcceptedField("name", "Без товара", "Без товара", "https://nothing.test/"),
+        AcceptedField("phone", "+7 (843) 555-01-24", "Телефон: +7 (843) 555-01-24", "https://nothing.test/")]))
     await sink.save(draft(domain="near.test", fields=[
         AcceptedField("name", "Местный", "Местный", "https://near.test/"),
         AcceptedField("phone", "+7 (843) 555-01-23", "Телефон: +7 (843) 555-01-23", "https://near.test/c"),
@@ -425,7 +431,7 @@ async def test_previous_run_finds_the_same_search_and_ignores_failed_or_differen
     first = await new_run(factory, location_kind="city", location_key="RU-TA|Казань", include_neighbors=False)
     async with factory() as session:
         category_id = (await session.get(Run, first)).category_id
-        same = dict(category_id=category_id, location_kind="city", location_key="RU-TA|Казань", include_neighbors=False, supplier_type=None)
+        same = dict(category_id=category_id, location_kind="city", location_key="RU-TA|Казань", include_neighbors=False)
         assert (await previous_run(session=session, **same))["run"]["id"] == first  # в очереди тоже считается
         await session.execute(update(Run).where(Run.id == first).values(status="failed"))
         await session.commit()
@@ -434,7 +440,6 @@ async def test_previous_run_finds_the_same_search_and_ignores_failed_or_differen
         await session.commit()
         assert (await previous_run(session=session, **same))["run"]["id"] == first
         assert (await previous_run(session=session, **{**same, "include_neighbors": True}))["run"] is None
-        assert (await previous_run(session=session, **{**same, "supplier_type": "оптовик"}))["run"] is None
         assert (await previous_run(session=session, **{**same, "location_kind": None, "location_key": None}))["run"] is None  # вся Россия — другой поиск
         newer = await new_run(factory, location_kind="city", location_key="RU-TA|Казань", include_neighbors=False)
         assert (await previous_run(session=session, **same))["run"]["id"] == newer  # берётся самый свежий
@@ -456,45 +461,6 @@ async def test_db_sink_does_not_store_the_same_address_twice_and_keeps_the_fulle
         )).scalars().all()
         assert len(addresses) == 1
         assert addresses[0].value == full.value and addresses[0].quote == full.quote and addresses[0].source_url.endswith("/cart/checkout/")
-
-
-@needs_db
-@with_db
-async def test_supplier_status_is_saved_per_search_validated_and_exported(factory):
-    import io
-    import zipfile
-
-    from fastapi import HTTPException
-
-    from app.routes.runs import StatusBody, build_run_payload, export_run, set_supplier_status
-
-    run_a, run_b = await new_run(factory), await new_run(factory)
-    saved = await DbSink(factory, run_a).save(draft())
-    await DbSink(factory, run_b).save(draft())  # the same supplier found by another search
-    async with factory() as session:
-        payload, _ = await build_run_payload(session, run_a)
-        assert payload["suppliers"][0]["status"] == {"value": "new", "updated_at": None}
-        first = await set_supplier_status(run_a, saved.supplier_id, StatusBody(status="called"), session)
-        assert first["value"] == "called" and first["updated_at"]
-        second = await set_supplier_status(run_a, saved.supplier_id, StatusBody(status="shortlisted"), session)
-        assert second["value"] == "shortlisted" and second["updated_at"] >= first["updated_at"]  # replaced, not duplicated
-        assert (await build_run_payload(session, run_a))[0]["suppliers"][0]["status"]["value"] == "shortlisted"
-        assert (await build_run_payload(session, run_b))[0]["suppliers"][0]["status"]["value"] == "new"  # a status belongs to one search
-
-        for bad, code in ((StatusBody(status="купили"), 422),):
-            with pytest.raises(HTTPException) as error:
-                await set_supplier_status(run_a, saved.supplier_id, bad, session)
-            assert error.value.status_code == code
-        with pytest.raises(HTTPException) as error:
-            await set_supplier_status(run_a, 99999, StatusBody(status="called"), session)
-        assert error.value.status_code == 404
-
-        response = await export_run(run_a, format="xlsx", ids=None, session=session)
-        assert response.media_type.endswith("spreadsheetml.sheet") and "filename*=UTF-8''suppliers_" in response.headers["content-disposition"]
-        sheet = zipfile.ZipFile(io.BytesIO(response.body)).read("xl/worksheets/sheet1.xml").decode()
-        assert "В шорт-листе" in sheet and "СырМастер" in sheet
-        csv_response = await export_run(run_a, format="csv", ids=f"{saved.supplier_id},99999", session=session)
-        assert csv_response.body.startswith(b"\xef\xbb\xbf") and csv_response.body.decode("utf-8-sig").count("\r\n") == 2  # header + one supplier
 
 
 @needs_db

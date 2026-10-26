@@ -151,6 +151,25 @@ def normalize_url(url: str) -> str:
     return url
 
 
+def url_variants(url: str) -> list[str]:
+    """Одна и та же страница в разной записи: модель пишет «https://site.ru» вместо открытой «https://site.ru/»,
+    теряет или добавляет www, путает http и https. Первым идёт сам адрес."""
+    parts = urlsplit(url)
+    host = parts.netloc.lower()
+    hosts = [host, host.removeprefix("www.") if host.startswith("www.") else f"www.{host}"]
+    path = parts.path or "/"
+    paths = [path, path.rstrip("/") or "/", path if path.endswith("/") else path + "/"]
+    query = f"?{parts.query}" if parts.query else ""
+    variants = [url]
+    for scheme in (parts.scheme, "https" if parts.scheme == "http" else "http"):
+        for h in hosts:
+            for p in paths:
+                for candidate in (f"{scheme}://{h}{p}{query}", f"{scheme}://{h}{query}" if p == "/" else None):
+                    if candidate and candidate not in variants:
+                        variants.append(candidate)
+    return variants
+
+
 def check_public_url(url: str) -> str:
     """Бросает UnsafeUrl, если адрес ведёт не в публичный интернет. Возвращает имя хоста."""
     parts = urlsplit(url)

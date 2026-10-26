@@ -117,22 +117,15 @@ export type RunStats = {
   prompt_tokens?: number;
   completion_tokens?: number;
   seconds?: number;
-  cost_rub?: number;
 };
 export type Run = {
   id: number;
   status: RunStatus;
   stop_reason: string | null;
   category: string;
-  /** true for a product typed in by hand (not in the catalog) */
-  free_text?: boolean;
-  /** id of the first run of a multi-product search; null for a single search */
-  group_id?: number | null;
-  extras?: Extras | null;
   location: string | null;
   include_neighbors: boolean;
   regions: SearchRegion[];
-  supplier_type: string | null;
   summary: string | null;
   error: string | null;
   stats: RunStats | null;
@@ -194,36 +187,15 @@ export type SupplierData = {
   ranking: Ranking;
   /** Optional: absent in old responses; the UI then falls back to the raw field strings. */
   commerce?: Commerce;
-  /** Work status within this search; absent in old responses (treated as "new"). */
-  status?: { value: SupplierStatus; updated_at: string | null };
   /** When the supplier's site was crawled (the search finish date for old records). */
   collected_at?: string | null;
 };
-export type SupplierStatus = "new" | "called" | "awaiting_price" | "shortlisted" | "declined";
-/** Optional search requirements as stored by the server. */
-export type Extras = {
-  volume?: { value: number; unit: string };
-  documents?: ("haccp" | "iso" | "mercury")[];
-  storage?: "chilled" | "frozen";
-  delivery?: string;
-};
-/** Optional requirements as sent by the form. */
-export type ExtrasInput = {
-  volume_value?: number | null;
-  volume_unit?: "кг" | "т" | "л" | "шт" | null;
-  documents?: ("haccp" | "iso" | "mercury")[];
-  storage?: "chilled" | "frozen" | null;
-  delivery?: string | null;
-};
-/** A catalog category or a free-text product. */
-export type ProductInput = { category_id: number | null; product_text: string | null };
-
-export type RunRequest = ProductInput & {
+/** Один товар из справочника и место поиска. */
+export type RunRequest = {
+  category_id: number;
   location_kind: "city" | "region" | null;
   location_key: string | null;
   include_neighbors: boolean;
-  supplier_type: string | null;
-  extras?: ExtrasInput | null;
 };
 
 /** Запускает поиск. Возвращает id запуска или текст ошибки (например, «уже идут другие запуски»). */
@@ -238,33 +210,6 @@ export async function createRun(body: RunRequest): Promise<{ runId: number } | {
   return { error: detail ?? `Не удалось запустить поиск (HTTP ${response.status})` };
 }
 
-/** Several products with the same place, type and requirements: separate searches that run one after another. */
-export async function createRuns(body: Omit<RunRequest, "category_id" | "product_text"> & { products: ProductInput[] }): Promise<{ runIds: number[]; groupId: number | null } | { error: string }> {
-  const response = await apiFetch("/api/runs/batch", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  if (response.ok) {
-    const data = (await response.json()) as { run_ids: number[]; group_id: number | null };
-    return { runIds: data.run_ids, groupId: data.group_id };
-  }
-  const detail = ((await response.json().catch(() => ({}))) as { detail?: string }).detail;
-  return { error: detail ?? `Не удалось запустить поиск (HTTP ${response.status})` };
-}
-
-export async function fetchGroup(groupId: number): Promise<Run[]> {
-  const response = await apiFetch(`/api/runs/group/${groupId}`);
-  if (!response.ok) throw new Error(`HTTP ${response.status}`);
-  return ((await response.json()) as { runs: Run[] }).runs;
-}
-
-export async function fetchLimits(): Promise<{ max_products: number }> {
-  const response = await apiFetch("/api/runs/limits");
-  if (!response.ok) throw new Error(`HTTP ${response.status}`);
-  return (await response.json()) as { max_products: number };
-}
-
 export async function fetchRun(id: number): Promise<Run> {
   const response = await apiFetch(`/api/runs/${id}`);
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -277,16 +222,13 @@ export async function fetchRuns(limit = 200): Promise<Run[]> {
   return ((await response.json()) as { runs: Run[] }).runs;
 }
 
-/** Последний такой же поиск (категория, место, соседи, тип поставщика), если он уже был и не завершился ошибкой. */
+/** Последний такой же поиск (товар, место, соседи), если он уже был и не завершился ошибкой. */
 export async function fetchPreviousRun(body: RunRequest): Promise<Run | null> {
-  const params = new URLSearchParams({ include_neighbors: String(body.include_neighbors) });
-  if (body.category_id !== null) params.set("category_id", String(body.category_id));
-  else if (body.product_text) params.set("product_text", body.product_text);
+  const params = new URLSearchParams({ category_id: String(body.category_id), include_neighbors: String(body.include_neighbors) });
   if (body.location_kind && body.location_key) {
     params.set("location_kind", body.location_kind);
     params.set("location_key", body.location_key);
   }
-  if (body.supplier_type) params.set("supplier_type", body.supplier_type);
   const response = await apiFetch(`/api/runs/previous?${params}`);
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
   return ((await response.json()) as { run: Run | null }).run;
@@ -327,17 +269,6 @@ export async function saveSupplierNote(supplierId: number, note: string): Promis
   });
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
   return ((await response.json()) as { note: string | null }).note;
-}
-
-/** Sets the work status of a supplier within one search. */
-export async function setSupplierStatus(runId: number, supplierId: number, status: SupplierStatus): Promise<{ value: SupplierStatus; updated_at: string }> {
-  const response = await apiFetch(`/api/runs/${runId}/suppliers/${supplierId}/status`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ status }),
-  });
-  if (!response.ok) throw new Error(`HTTP ${response.status}`);
-  return (await response.json()) as { value: SupplierStatus; updated_at: string };
 }
 
 /** Download address of the export; the session cookie authorizes a plain link. `ids` fixes the suppliers and their order. */

@@ -29,7 +29,6 @@ describe("opening or reloading a page by its address restores the matching view"
       "/api/auth/me": () => ({ auth_required: false, authenticated: true, user: null }),
       "/api/health": () => ({ status: "ok", database: "ok" }),
       "/api/categories": () => CATEGORIES,
-      "/api/runs/limits": () => ({ max_products: 3 }),
       "/api/runs/1": () => RUN,
       "/api/runs/1/suppliers": () => ({ suppliers: fixture.suppliers, recommended_ids: [] }),
       "/api/runs": () => ({ runs: [RUN] }),
@@ -43,7 +42,7 @@ describe("opening or reloading a page by its address restores the matching view"
   it("#history/<id> shows that result, not the search form", async () => {
     window.location.hash = "#history/1";
     render(<App />);
-    expect(await screen.findByRole("heading", { name: "Найденные поставщики (6)" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Найденные поставщики (3)" })).toBeInTheDocument();
     expect(screen.getByText("← К истории поисков")).toBeInTheDocument();
     expect(screen.queryByText("Что закупаем")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "История поисков" })).toBeInTheDocument();
@@ -59,13 +58,12 @@ describe("opening or reloading a page by its address restores the matching view"
     window.location.hash = "#search/1";
     render(<App />);
     expect(await screen.findByText("Что закупаем")).toBeInTheDocument();
-    expect(await screen.findByRole("heading", { name: "Найденные поставщики (6)" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Найденные поставщики (3)" })).toBeInTheDocument();
   });
 
   it("#search?product=<id> opens the form with that product chosen", async () => {
     window.location.hash = "#search?product=36";
     render(<App />);
-    const chosen = await screen.findByRole("list", { name: "Выбранные товары" });
-    expect(chosen).toHaveTextContent("Моцарелла");
+    expect(await screen.findByRole("button", { name: "Убрать: Моцарелла" })).toBeInTheDocument();
   });
 });

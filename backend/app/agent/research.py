@@ -198,9 +198,8 @@ class Qualification:
 
 def build_qualify_messages(request: RunRequest, home: Page, snippet: str | None) -> list[dict]:
     product = request.category + (f" (также: {', '.join(request.synonyms)})" if request.synonyms else "")
-    kind = f"\nНужный тип поставщика: {request.supplier_type}." if request.supplier_type else ""
     found = f"\nОтрывок из поиска: {snippet}" if snippet else ""
-    user = (f"Нужный продукт: {product}.{kind}{found}\n\n=== {home.url} ===\nЗаголовок: {home.title}\n"
+    user = (f"Нужный продукт: {product}.{found}\n\n=== {home.url} ===\nЗаголовок: {home.title}\n"
             f"{home.text[:QUALIFY_CHARS]}")
     return [{"role": "system", "content": QUALIFY_SYSTEM}, {"role": "user", "content": user}]
 

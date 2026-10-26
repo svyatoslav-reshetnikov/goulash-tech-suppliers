@@ -17,11 +17,9 @@ class RunRequest:
     category: str
     synonyms: tuple[str, ...] = ()
     regions: tuple[RegionRef, ...] = ()  # пусто — вся Россия
-    supplier_type: str | None = None
     target: int = 5
     search_region: int | None = None  # код региона Яндекс Поиска (lr): выдача ранжируется для этого места
     city: str | None = None  # выбранный город: по нему ищут в первую очередь (иначе в запросах только регион)
-    extras: dict | None = None  # optional requirements: volume, documents, storage, delivery (see routes.runs.Extras)
 
 
 @dataclass(frozen=True)
@@ -95,7 +93,7 @@ class SupplierSink(Protocol):
 @dataclass(frozen=True)
 class Reused:
     name: str
-    fields: frozenset[str]
+    fields: dict[str, tuple[str, ...]]  # поле → значения: по ним проверяется, подтверждён ли товар
 
 
 class PageCache(Protocol):

@@ -12,17 +12,15 @@ import zipfile
 from datetime import datetime
 from xml.sax.saxutils import escape
 
-from app.extras import describe
 from app.ranking.commerce import compact_price
 
-STATUS_LABELS = {"new": "Новый", "called": "Позвонили", "awaiting_price": "Ждём прайс", "shortlisted": "В шорт-листе", "declined": "Отказались"}
 HEADERS = [
     "#", "Поставщик", "Тип", "Оценка", "Регион", "Цена на искомый товар (за ед.)", "Минимальный заказ", "Доставка", "Телефон", "Email",
-    "Предупреждений", "Статус",
+    "Предупреждений",
     "Цена на искомый товар (полностью)", "Прочие цены", "Все телефоны", "Все email", "Адрес", "Сайт", "ИНН", "Заметка", "Предупреждения",
     "Источники", "Данные собраны", "Параметры поиска", "Дата поиска",
 ]
-_WIDTHS = [5, 30, 14, 8, 24, 22, 22, 40, 20, 28, 10, 14, 44, 44, 30, 34, 40, 28, 14, 40, 50, 60, 14, 40, 12]
+_WIDTHS = [5, 30, 14, 8, 24, 22, 22, 40, 20, 28, 10, 44, 44, 30, 34, 40, 28, 14, 40, 50, 60, 14, 40, 12]
 _ILLEGAL = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
 _PHONE_LIKE = re.compile(r"^\+\d[\d\s()\-]+$")
 
@@ -42,8 +40,7 @@ def _date(value: str | None) -> str:
 
 def search_parameters(run: dict) -> str:
     where = run.get("location") or "Вся Россия"
-    parts = [run["category"], where, "с соседними регионами" if run.get("include_neighbors") else "без соседних регионов",
-             f"тип: {run['supplier_type']}" if run.get("supplier_type") else "тип: любой", *describe(run.get("extras"))]
+    parts = [run["category"], where, "с соседними регионами" if run.get("include_neighbors") else "без соседних регионов"]
     return "; ".join(parts)
 
 
@@ -55,11 +52,10 @@ def export_rows(run: dict, items: list[dict]) -> list[list[str | int]]:
         headline, order = commerce.get("price_headline"), commerce.get("min_order")
         warns = [w["text"] for w in ranking["warnings"] if w["severity"] == "warn"]
         sources = list(dict.fromkeys(v["source_url"] for values in item["fields"].values() for v in values))
-        status = (item.get("status") or {}).get("value", "new")
         rows.append([
             ranking["rank"], item["name"], (_values(item, "supplier_type") or [""])[0], ranking["score"], ranking["tier_label"],
             compact_price(headline) if headline else "", order["display"] if order else "", (_values(item, "delivery_terms") or [""])[0],
-            (_values(item, "phone") or [""])[0], (_values(item, "email") or [""])[0], len(warns), STATUS_LABELS.get(status, status),
+            (_values(item, "phone") or [""])[0], (_values(item, "email") or [""])[0], len(warns),
             headline["display"] if headline else "",
             "\n".join(p["display"] for p in commerce.get("prices_other", [])),
             "\n".join(_values(item, "phone")), "\n".join(_values(item, "email")), "\n".join(_values(item, "address")),

@@ -67,9 +67,7 @@ export default function App() {
       {route.tab === "catalog" && <CatalogPage />}
 
       <footer className="text-xs text-slate-400">
-        {health === null && "Проверяем сервис…"}
         {health === "unreachable" && <span className="text-red-600">Сервер не отвечает</span>}
-        {health && health !== "unreachable" && `Сервер: ${health.status} · база данных: ${health.database}`}
       </footer>
     </div>
   );

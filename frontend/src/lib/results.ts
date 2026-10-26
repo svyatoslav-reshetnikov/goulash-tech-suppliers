@@ -1,7 +1,6 @@
 import type { Price, SupplierData } from "../api";
-import { STATUS_ORDER, statusOf } from "./status";
 
-export type SortKey = "rank" | "supplier" | "type" | "score" | "region" | "price" | "moq" | "delivery" | "phone" | "email" | "warnings" | "status";
+export type SortKey = "rank" | "supplier" | "type" | "score" | "region" | "price" | "moq" | "delivery" | "phone" | "email" | "warnings";
 export type SortState = { key: SortKey; dir: "asc" | "desc" };
 
 const UNIT_RANK = { RUB: 0, kg: 1, l: 1, pcs: 2 } as const;
@@ -45,8 +44,6 @@ export function sortValue(s: SupplierData, key: SortKey): string | number | null
       return s.fields.email?.[0]?.value.toLowerCase() ?? null;
     case "warnings":
       return warnCount(s);
-    case "status":
-      return STATUS_ORDER.indexOf(statusOf(s));
   }
 }
 

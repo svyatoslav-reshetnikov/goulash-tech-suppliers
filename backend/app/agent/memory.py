@@ -45,4 +45,7 @@ class MemorySink:
         research, draft = self.research.get(domain), self.suppliers.get(domain)
         if research is None or draft is None or time.time() - research["at"] > max_age_days * 86400:
             return None
-        return Reused(name=(draft.values("name") or [domain])[0], fields=frozenset(f.field for f in draft.fields))
+        fields: dict[str, tuple[str, ...]] = {}
+        for f in draft.fields:
+            fields[f.field] = (*fields.get(f.field, ()), f.value)
+        return Reused(name=(draft.values("name") or [domain])[0], fields=fields)

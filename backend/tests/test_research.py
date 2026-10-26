@@ -202,6 +202,7 @@ def test_fields_absent_on_the_site_are_reported_not_invented_and_searches_are_bo
 
 def test_fabricated_quote_from_the_extraction_is_rejected_by_the_same_checks():
     bad = [entry("name", "ООО «СырМастер Казань»", "ООО «СырМастер Казань»"), entry("phone", "+7 (843) 555-01-23", "Телефон: +7 (843) 555-01-23", "/contacts"),
+           entry("description", "Производим моцареллу для пиццы", "Производим моцареллу для пиццы и сыр для роллов."),
            entry("moq", "от 5 кг", "Минимальный заказ — от 5 кг")]  # такой цитаты на страницах нет
     box, _, sink, _ = make_box(ExtractLLM([bad, [], [], []]))
     result = research(box, BASE)["сайты"][0]
@@ -328,15 +329,6 @@ def test_unexpected_exception_inside_one_research_is_isolated():
     box, *_ = make_box(Exploding([]))
     out = research(box, BASE)["сайты"]
     assert "ошибка при изучении" in out[0]["результат"] and "модель недоступна" in out[0]["результат"]
-
-
-def test_cost_estimate_uses_tariffs():
-    from app.config import Settings
-    from app.runs.service import estimate_cost
-
-    s = Settings(llm_price_per_1k_tokens_rub=1.2, search_price_per_request_rub=0.5)
-    cost = estimate_cost({"prompt_tokens": 40000, "completion_tokens": 10000, "searches": 2, "site_searches": 8}, s)
-    assert cost == {"cost_llm_rub": 60.0, "cost_search_rub": 5.0, "cost_rub": 65.0}
 
 
 def test_usage_events_report_growing_spend_during_research():
@@ -607,3 +599,178 @@ def test_truncated_reply_in_main_loop_stops_with_tokens_counted():
     result = run(main, box)
     assert result.stop_reason == "llm_error" and "обрезан" in result.error
     assert result.stats["prompt_tokens"] == 100 + 700 and result.stats["completion_tokens"] == 20 + 2048
+
+
+# --- по итогам второго прогона eval: адрес страницы, телефоны, лимит поиска ---
+
+
+def test_source_url_without_slash_or_www_finds_the_opened_page():
+    box, *_ = make_box(ExtractLLM([]))
+    asyncio.run(box._get_page(f"{BASE}/"))
+    asyncio.run(box._get_page(f"{BASE}/contacts"))
+    fields = [entry("name", "ООО «СырМастер Казань»", "ООО «СырМастер Казань»"),
+              entry("phone", "+7 (843) 555-01-23", "Телефон: +7 (843) 555-01-23", "/contacts")]
+    fields[0]["source_url"] = BASE  # модель не поставила слеш у главной
+    fields[1]["source_url"] = "http://www.syrmaster-kazan.test/contacts/"  # и перепутала http, www и слеш
+    saved = json.loads(asyncio.run(box.execute("save_supplier", json.dumps({"website": BASE, "fields": fields}))).text)
+    assert saved["сохранено"] == ["name", "phone"] and "отклонено" not in saved
+
+
+def test_phone_with_extension_and_several_numbers_in_one_value():
+    from app.agent.validation import normalize_phone, split_phones, value_supported_by_quote
+
+    assert normalize_phone("+7 (495) 133-00-60 доб. 105") == "+7 (495) 133-00-60 доб. 105"
+    assert normalize_phone("8 (843) 555-01-23 (доп. 2)") == "+7 (843) 555-01-23 доб. 2"
+    assert normalize_phone("+7 (495) 133-00-60, +7 (495) 640-24-94") is None  # два номера сразу — не один телефон
+    assert split_phones("+7 (495) 133-00-60, +7 (495) 640-24-94 или 8 800 550 41 83") == [
+        "+7 (495) 133-00-60", "+7 (495) 640-24-94", "8 800 550 41 83"]
+    assert split_phones("+7 (495) 133-00-60, доб. 105") == ["+7 (495) 133-00-60, доб. 105"]  # добавочный не отдельный номер
+    assert value_supported_by_quote("phone", "+7 (495) 133-00-60 доб. 105", "Тел.: +7 (495) 133-00-60, доб. 105")
+    assert not value_supported_by_quote("phone", "+7 (495) 133-00-60 доб. 105", "Тел.: +7 (495) 133-00-60")  # добавочный выдуман
+
+
+def test_several_phones_in_one_value_are_saved_separately():
+    pages = dict(PAGES)
+    pages[f"{BASE}/contacts"] = "<html><body><p>Телефоны: +7 (843) 555-01-23, +7 (843) 555-01-24 доб. 7</p></body></html>"
+    box, _, sink, _ = make_box(ExtractLLM([]), pages=pages)
+    asyncio.run(box._get_page(f"{BASE}/contacts"))
+    quote = "Телефоны: +7 (843) 555-01-23, +7 (843) 555-01-24 доб. 7"
+    fields = [entry("phone", "+7 (843) 555-01-23, +7 (843) 555-01-24 доб. 7", quote, "/contacts")]
+    asyncio.run(box.execute("save_supplier", json.dumps({"website": BASE, "fields": fields})))
+    assert sink.suppliers["syrmaster-kazan.test"].values("phone") == ["+7 (843) 555-01-23", "+7 (843) 555-01-24 доб. 7"]
+
+
+def test_rejected_field_keeps_its_value_for_review():
+    box, *_ = make_box(ExtractLLM([]))
+    asyncio.run(box._get_page(f"{BASE}/contacts"))
+    fields = [entry("phone", "+7 (843) 555-01-23", "Телефон: +7 (843) 555-01-23", "/contacts"),
+              entry("regions", "Татарстан", "Телефон: +7 (843) 555-01-23", "/contacts")]
+    saved = json.loads(asyncio.run(box.execute("save_supplier", json.dumps({"website": BASE, "fields": fields}))).text)
+    assert saved["отклонено"] == [{"поле": "regions", "значение": "Татарстан", "причина": "значение не следует из цитаты"}]
+
+
+# настоящий ответ Yandex Search API на превышение лимита (26.10.2026, 8 одновременных запросов)
+REAL_429 = ('{"code":8, "message":"search API backends are overloaded: web search rate limit exceeded, retry later", '
+            '"details":[{"@type":"type.googleapis.com/google.rpc.RequestInfo", "requestId":"bcf8209f-6d21-4e59-8c24-9d0166ceb744"}]}')
+OK_XML = "<yandexsearch><response><results><grouping><group><doc><url>https://a.test/</url><title>A</title></doc></group></grouping></results></response></yandexsearch>"
+RPS_XML = '<yandexsearch><response><error code="55">Превышено ограничение на число запросов в секунду</error></response></yandexsearch>'
+
+
+def test_yandex_errors_carry_status_code_and_request_id():
+    from app.agent.search import SearchError, SearchLimited, http_error, parse_yandex_xml
+
+    limited = http_error(429, REAL_429, None)
+    assert isinstance(limited, SearchLimited) and limited.status == 429 and limited.code == "8"
+    assert limited.request_id == "bcf8209f-6d21-4e59-8c24-9d0166ceb744" and "rate limit exceeded" in str(limited)
+    assert isinstance(http_error(503, "<html>", "rid-1"), SearchLimited) and http_error(503, "<html>", "rid-1").request_id == "rid-1"
+    forbidden = http_error(403, '{"code":7, "message":"Permission denied"}', None)
+    assert type(forbidden) is SearchError and forbidden.code == "7"  # не повторяется
+    assert parse_yandex_xml('<yandexsearch><response><error code="15">Ничего не нашлось</error></response></yandexsearch>') == []
+    with pytest.raises(SearchLimited):
+        parse_yandex_xml(RPS_XML)
+    with pytest.raises(SearchError, match="ошибка 32") as daily:
+        parse_yandex_xml('<yandexsearch><response><error code="32">Лимит запросов на сутки</error></response></yandexsearch>', "rid-2")
+    assert daily.value.request_id == "rid-2" and not isinstance(daily.value, SearchLimited)
+
+
+def bare_search(answers):
+    """YandexSearch без ключей и сети: _request отдаёт заготовленные ответы или бросает ошибки."""
+    from app.agent.search import YandexSearch
+
+    search = object.__new__(YandexSearch)
+    search.retry_delays, search.errors = (0, 0, 0), []
+
+    def request(query, region):
+        answer = answers.pop(0)
+        if isinstance(answer, Exception):
+            raise answer
+        return answer, "rid-ok"
+
+    search._request = request
+    return search
+
+
+def test_yandex_rate_limit_is_retried_and_every_failed_attempt_is_logged():
+    from app.agent.search import SearchLimited, http_error
+
+    search = bare_search([http_error(429, REAL_429, None), http_error(429, REAL_429, None), (OK_XML)])
+    assert [h.domain for h in asyncio.run(search.search("моцарелла"))] == ["a.test"]
+    log = search.drain_errors("моцарелла")
+    assert [(e["attempt"], e["retried"], e["status"], e["code"]) for e in log] == [(1, True, 429, "8"), (2, True, 429, "8")]
+    assert log[0]["request_id"] == "bcf8209f-6d21-4e59-8c24-9d0166ceb744" and search.errors == []
+
+    search = bare_search([http_error(429, REAL_429, None)] * 4)
+    with pytest.raises(SearchLimited):
+        asyncio.run(search.search("моцарелла"))  # после трёх повторов ошибка доходит до инструмента
+    assert [e["retried"] for e in search.errors] == [True, True, True, False]
+
+
+def test_search_requests_never_overlap_across_threads():
+    import threading
+    import time
+
+    from app.agent import search as S
+
+    active, peak = [0], [0]
+
+    def request():
+        with S._ONE_AT_A_TIME:
+            active[0] += 1
+            peak[0] = max(peak[0], active[0])
+            time.sleep(0.02)
+            active[0] -= 1
+
+    threads = [threading.Thread(target=request) for _ in range(4)]
+    [t.start() for t in threads]
+    [t.join() for t in threads]
+    assert peak[0] == 1
+
+
+def test_search_errors_reach_the_feed_with_code_and_request_id_even_for_site_search():
+    from app.agent.search import http_error
+
+    events = []
+
+    async def emit(type_, message="", **data):
+        events.append((type_, message, data))
+
+    # основной поиск: два отказа и успех; поиск по сайту: отказ без повтора (403) — раньше он пропадал молча
+    searcher = bare_search([http_error(429, REAL_429, None), OK_XML.replace("a.test", "syrmaster-kazan.test"),
+                            http_error(403, '{"code":7, "message":"Permission denied"}', "rid-403")])
+    searcher.retry_delays = (0,)
+    box = ToolBox(REQUEST, Limits(max_site_searches_per_supplier=1), searcher, FakeFetcher(dict(PAGES)), MemorySink(), emit,
+                  llm=ExtractLLM([FIRST_PASS_FULL[:4]]))
+    asyncio.run(box.execute("search_web", '{"query": "моцарелла оптом Казань"}'))
+    research(box, BASE)
+    failures = [(m, d) for t, m, d in events if t == "search_error"]
+    assert len(failures) == 2 and box.counters.search_errors == 2
+    assert "HTTP 429, код 8, повторяю" in failures[0][0] and failures[0][1]["request_id"] == "bcf8209f-6d21-4e59-8c24-9d0166ceb744"
+    assert failures[1][1]["kind"] == "site" and failures[1][1]["final"] and failures[1][1]["request_id"] == "rid-403"
+    assert "поиск по сайту" in failures[1][0] and "не ответил" in failures[1][0]
+
+
+def test_failed_search_tells_the_model_it_is_an_outage_and_does_not_use_the_budget():
+    from app.agent.search import SearchLimited
+
+    class Down(SiteSearch):
+        async def search(self, query, region=None):
+            raise SearchLimited("Yandex Search: HTTP 429")
+
+    box, *_ = make_box(ExtractLLM([]), searcher=Down())
+    out = json.loads(asyncio.run(box.execute("search_web", '{"query": "креветка оптом Владивосток"}')).text)
+    assert "сбой поиска" in out["ошибка"] and "research_suppliers" in out["ошибка"] and box.counters.searches == 0
+
+
+def test_supplier_whose_site_does_not_name_the_product_does_not_count_toward_the_target():
+    no_product = [entry("name", "ООО «СырМастер Казань»", "ООО «СырМастер Казань»"),
+                  entry("phone", "+7 (843) 555-01-23", "Телефон: +7 (843) 555-01-23", "/contacts")]
+    events = []
+    box, _, sink, _ = make_box(ExtractLLM([no_product, [], [], []]))
+    box.emit = lambda t, m="", **d: _record(events, t, m)
+    result = research(box, BASE)["сайты"][0]
+    assert "товар «Моцарелла» на сайте не назван" in result["результат"] and box.counters.saved == 0
+    assert "syrmaster-kazan.test" in box.unconfirmed and any(t == "research_skipped" for t, _ in events)
+
+
+async def _record(events, type_, message):
+    events.append((type_, message))

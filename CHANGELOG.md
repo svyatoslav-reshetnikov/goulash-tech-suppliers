@@ -1,5 +1,31 @@
 # Changelog
 
+## Simplification: one catalog product, no extras, statuses or cost
+
+- Search takes exactly one product from the catalog: free-text products and multi-product searches are gone
+  (`/api/runs/batch`, `/api/runs/group/{id}`, `/api/runs/limits` removed).
+- No supplier type filter and no "Дополнительно" requirements block in the form; the agent prompt no longer mentions them.
+- Suppliers whose site does not confirm the searched product are not shown at all (and do not count toward the agent's target);
+  the "Товар не подтверждён на сайте" warning is gone.
+- No "find out whether they deliver to <region>" question: the location is already in the score and the label. Neighbouring and other
+  regions are named in the label ("В соседнем регионе: Московская область").
+- Card details open with an arrow instead of the "Подробнее" button.
+- Work statuses (new, called, …) removed together with their filter and export column; migration 0010 drops `supplier_statuses`,
+  `runs.extras` and `runs.group_id`.
+- The page footer no longer shows "Сервер: ok · база данных: ok" (only an error when the server is unreachable).
+- No search cost in rubles anywhere (UI, run stats, eval, settings): the estimate did not match Yandex Cloud billing.
+- Eval: no manual labeling; the report shows field coverage, timing, rejections and search failures.
+
+## Agent: losses found by the second eval run
+
+- Source page is found under any spelling of its address (no trailing slash, www, http/https): supplier type and certificates were
+  systematically rejected as "page not opened".
+- Phones with an extension ("доб. 105") are kept with the extension; several numbers in one value are saved as separate phones;
+  `tel:` links dial the extension after a pause.
+- Yandex Search: temporary refusals (HTTP 429/5xx, XML error 55) are retried 3 times with 2/5/10 s pauses; error 15 means no results;
+  a search that still fails does not use the search budget and the model is told it is an outage.
+- Rejected fields keep their value (tool result, feed, eval report).
+
 ## Phase 4: search form
 
 - Free-text product: «Такой позиции нет в справочнике — искать как есть» (2–80 characters, sanitized on the server; category stays null,

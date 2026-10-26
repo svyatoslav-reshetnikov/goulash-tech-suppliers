@@ -99,14 +99,16 @@ class DbSink:
             researched = (supplier.research or {}).get("researched_at") if supplier is not None else None
             if not researched or datetime.now(UTC) - datetime.fromisoformat(researched) > timedelta(days=max_age_days):
                 return None
-            names = set((await session.execute(
-                select(SupplierField.field).where(SupplierField.supplier_id == supplier.id).distinct()
-            )).scalars())
+            fields: dict[str, tuple[str, ...]] = {}
+            for name, value in (await session.execute(
+                select(SupplierField.field, SupplierField.value).where(SupplierField.supplier_id == supplier.id)
+            )).all():
+                fields[name] = (*fields.get(name, ()), value)
             await session.execute(
                 insert(RunSupplier).values(run_id=self._run_id, supplier_id=supplier.id).on_conflict_do_nothing()
             )
             await session.commit()
-            return Reused(name=supplier.name, fields=frozenset(names))
+            return Reused(name=supplier.name, fields=fields)
 
 
 class DbPageCache:

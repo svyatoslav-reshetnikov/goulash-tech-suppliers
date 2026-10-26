@@ -10,27 +10,14 @@ const STATUS_STYLE: Record<string, string> = {
   failed: "bg-red-100 text-red-800",
 };
 
-/** Consecutive runs of one multi-product search form a group; every other run stands alone. */
-export function groupRuns(runs: Run[]): Run[][] {
-  const groups: Run[][] = [];
-  for (const run of runs) {
-    const last = groups[groups.length - 1];
-    if (run.group_id && last && last[0].group_id === run.group_id) last.push(run);
-    else groups.push([run]);
-  }
-  return groups;
-}
-
 function RunRow({ run, onOpen }: { run: Run; onOpen: (id: number) => void }) {
   return (
     <button onClick={() => onOpen(run.id)} className="flex w-full flex-wrap items-baseline justify-between gap-x-3 gap-y-1 py-2.5 text-left text-sm hover:bg-slate-50">
       <span>
         <span className="font-medium">{run.category}</span>
-        {run.free_text && <span className="ml-1.5 rounded bg-slate-100 px-1.5 py-0.5 text-xs text-slate-600">свой товар</span>}
         <span className="ml-2 text-xs text-slate-500">
           {run.location ?? "Вся Россия"}
           {run.include_neighbors ? " + соседние" : ""}
-          {run.supplier_type ? ` · ${run.supplier_type}` : ""}
         </span>
       </span>
       <span className="flex items-center gap-2 text-xs text-slate-500">
@@ -41,7 +28,7 @@ function RunRow({ run, onOpen }: { run: Run; onOpen: (id: number) => void }) {
   );
 }
 
-/** Вкладка «История поисков»: все запуски; поиски по нескольким товарам собраны в группы. Результаты открываются без повторных затрат. */
+/** Вкладка «История поисков»: все запуски. Результаты открываются без повторного запуска. */
 export default function HistoryPage({ runId, onOpen, onBack }: { runId: number | null; onOpen: (id: number) => void; onBack: () => void }) {
   const [runs, setRuns] = useState<Run[] | null>(null);
 
@@ -68,26 +55,11 @@ export default function HistoryPage({ runId, onOpen, onBack }: { runId: number |
       <h2 className="mb-1 text-lg font-semibold">История поисков ({runs.length})</h2>
       <p className="mb-3 text-sm text-slate-600">Нажмите на поиск, чтобы открыть его результаты. Повторного платного запуска при этом не будет.</p>
       <ul className="divide-y divide-slate-100">
-        {groupRuns(runs).map((group) =>
-          group.length === 1 ? (
-            <li key={group[0].id}>
-              <RunRow run={group[0]} onOpen={onOpen} />
-            </li>
-          ) : (
-            <li key={`g${group[0].group_id}`} className="py-2">
-              <p className="text-xs font-medium text-slate-600">
-                Поиск по {group.length} товарам · {[...group].reverse().map((r) => r.category).join(", ")}
-              </p>
-              <ul className="ml-3 mt-1 divide-y divide-slate-100 border-l-2 border-cyan-200 pl-3">
-                {[...group].reverse().map((r) => (
-                  <li key={r.id}>
-                    <RunRow run={r} onOpen={onOpen} />
-                  </li>
-                ))}
-              </ul>
-            </li>
-          ),
-        )}
+        {runs.map((run) => (
+          <li key={run.id}>
+            <RunRow run={run} onOpen={onOpen} />
+          </li>
+        ))}
       </ul>
     </section>
   );

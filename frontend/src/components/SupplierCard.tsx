@@ -1,11 +1,10 @@
 import { useState } from "react";
-import { saveSupplierNote, type FieldValue, type SupplierData, type SupplierStatus } from "../api";
+import { saveSupplierNote, type FieldValue, type SupplierData } from "../api";
 import { safeUrl } from "../lib/safeUrl";
-import { formatDate, statusOf } from "../lib/status";
+import { formatDate } from "../lib/format";
 import { MinOrderLine, PriceBlock, PriceLine } from "./CommerceBlock";
 import { FieldText } from "./Linkified";
 import RankBadge from "./RankBadge";
-import StatusSelect from "./StatusSelect";
 
 const LABELS: Record<string, string> = {
   phone: "Телефон",
@@ -108,7 +107,6 @@ export type CardProps = {
   selected?: boolean;
   canSelect?: boolean;
   onToggleSelect?: () => void;
-  onStatus?: (supplierId: number, status: SupplierStatus) => void;
   onNote?: (supplierId: number, note: string | null) => void;
 };
 
@@ -124,7 +122,7 @@ export function mainContacts(supplier: SupplierData): { phone?: string; email?: 
 }
 
 /** Collapsed: one compact card (name, score, headline price, contacts, warnings). Expanded: everything the agent collected. */
-export default function SupplierCard({ supplier, expanded, onToggleExpanded, showSources, selected = false, canSelect = true, onToggleSelect, onStatus, onNote }: CardProps) {
+export default function SupplierCard({ supplier, expanded, onToggleExpanded, showSources, selected = false, canSelect = true, onToggleSelect, onNote }: CardProps) {
   const ranking = supplier.ranking;
   const type = supplier.fields.supplier_type?.[0];
   const names = supplier.fields.name ?? [];
@@ -196,7 +194,6 @@ export default function SupplierCard({ supplier, expanded, onToggleExpanded, sho
           {formatDate(supplier.collected_at) && <p className="text-xs text-slate-500">Данные собраны: {formatDate(supplier.collected_at)}</p>}
         </div>
         <div className="flex shrink-0 flex-wrap items-center gap-3">
-          {onStatus && <StatusSelect value={statusOf(supplier)} onChange={(s) => onStatus(supplier.id, s)} label={`Статус: ${supplier.name}`} />}
           {onToggleSelect && (
             <label className={`flex items-center gap-1.5 text-xs ${selected || canSelect ? "text-slate-700" : "text-slate-400"}`}>
               <input type="checkbox" checked={selected} disabled={!selected && !canSelect} onChange={onToggleSelect} aria-label={`Сравнить: ${supplier.name}`} />
@@ -207,9 +204,13 @@ export default function SupplierCard({ supplier, expanded, onToggleExpanded, sho
             onClick={onToggleExpanded}
             aria-expanded={expanded}
             aria-controls={detailsId}
-            className="rounded-lg border border-slate-300 px-3 py-1 text-sm text-slate-700 hover:bg-slate-50"
+            aria-label={expanded ? `Свернуть: ${supplier.name}` : `Развернуть: ${supplier.name}`}
+            title={expanded ? "Свернуть" : "Развернуть"}
+            className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800"
           >
-            {expanded ? "Свернуть ▴" : "Подробнее ▾"}
+            <svg viewBox="0 0 20 20" className={`h-5 w-5 fill-current transition-transform ${expanded ? "rotate-180" : ""}`} aria-hidden="true">
+              <path d="M5.3 7.3a1 1 0 0 1 1.4 0L10 10.6l3.3-3.3a1 1 0 1 1 1.4 1.4l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 0 1 0-1.4z" />
+            </svg>
           </button>
         </div>
       </div>

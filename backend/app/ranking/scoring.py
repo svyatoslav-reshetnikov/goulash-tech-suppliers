@@ -1,12 +1,11 @@
 """Scoring (0-100): product match 40, location 20, data completeness 25, reliability 15 (see `ranking/config.py`).
 
-The supplier type is not scored: a mismatching type only blocks the recommendation badge.
+Suppliers whose site does not confirm the searched product are not shown at all: there is nothing to call them about.
 """
 
 import re
 from dataclasses import dataclass, field
 
-from app import extras as extras_module
 from app.locations import fold, get_locations
 from app.ranking.config import (
     LOCATION_POINTS,
@@ -76,8 +75,6 @@ class RankContext:
     synonyms: tuple[str, ...] = ()
     primary_region_id: str | None = None  # None: «Вся Россия», локация не влияет на оценку
     neighbor_region_ids: tuple[str, ...] = ()
-    supplier_type: str | None = None  # None: тип не важен
-    extras: dict | None = None  # optional requirements of the search (see app/extras.py)
 
 
 @dataclass
@@ -102,10 +99,11 @@ def _region_names(ids: set[str]) -> str:
     return ", ".join(sorted(regions[i].name for i in ids if i in regions))
 
 
-def classify_location(info: SupplierInfo, ctx: RankContext, detector: PlaceDetector) -> tuple[str, str]:
-    """Возвращает (метка, пояснение). Метки: local, delivers, neighbor, nationwide, other, unknown, any."""
+def classify_location(info: SupplierInfo, ctx: RankContext, detector: PlaceDetector) -> tuple[str, str, str]:
+    """Возвращает (метка, подпись, пояснение). Метки: local, delivers, neighbor, nationwide, other, unknown, any.
+    У соседнего и другого региона подпись называет сам регион: «В соседнем регионе: Московская область»."""
     if ctx.primary_region_id is None:
-        return "any", "Локация поиска не выбрана: регион на оценку не влияет."
+        return "any", TIER_LABELS["any"], "Локация поиска не выбрана: регион на оценку не влияет."
     primary = ctx.primary_region_id
     # «Казань обслуживается через филиал г. Тула…»: регион адреса — Тульская область, а Казань — место доставки
     parts = [split_served_via(address) for address in info.values("address")]
@@ -122,29 +120,22 @@ def classify_location(info: SupplierInfo, ctx: RankContext, detector: PlaceDetec
     primary_name = regions[primary].name
 
     if primary in home:
-        return "local", f"{home_from} в вашем регионе ({primary_name})."
+        return "local", TIER_LABELS["local"], f"{home_from} в вашем регионе ({primary_name})."
     if primary in delivers:
-        return "delivers", f"Заявляет доставку в регион {primary_name}."
+        return "delivers", TIER_LABELS["delivers"], f"Заявляет доставку в регион {primary_name}."
     near = home & set(ctx.neighbor_region_ids)
     if near:
-        return "neighbor", f"{home_from} в соседнем регионе: {_region_names(near)}."
+        return "neighbor", f"В соседнем регионе: {_region_names(near)}", f"{home_from} в соседнем регионе: {_region_names(near)}."
     if nationwide:
         where = f" Адрес: {_region_names(home)}." if home else ""
-        return "nationwide", f"Заявляет доставку по всей России, но {primary_name} отдельно не называет.{where}"
+        return "nationwide", TIER_LABELS["nationwide"], f"Заявляет доставку по всей России, но {primary_name} отдельно не называет.{where}"
     if home:
-        return "other", f"{home_from} в другом регионе: {_region_names(home)}; доставка в {primary_name} не подтверждена."
+        return ("other", f"В другом регионе: {_region_names(home)}",
+                f"{home_from} в другом регионе: {_region_names(home)}; доставка в {primary_name} не подтверждена.")
     if delivers:
-        return "other", f"Работает в регионах: {_region_names(delivers)}; {primary_name} среди них не назван."
-    return "unknown", "Адрес и регионы доставки не найдены: расположение неизвестно."
-
-
-def _type_match(info: SupplierInfo, ctx: RankContext) -> str:
-    if not ctx.supplier_type:
-        return "match"
-    kinds = info.values("supplier_type")
-    if not kinds:
-        return "unknown"
-    return "match" if ctx.supplier_type in kinds else "mismatch"
+        return ("other", f"В другом регионе: {_region_names(delivers)}",
+                f"Работает в регионах: {_region_names(delivers)}; {primary_name} среди них не назван.")
+    return "unknown", TIER_LABELS["unknown"], "Адрес и регионы доставки не найдены: расположение неизвестно."
 
 
 def product_evidence(info: SupplierInfo, ctx: RankContext) -> tuple[int, dict]:
@@ -177,7 +168,7 @@ def _score(info: SupplierInfo, ctx: RankContext, tier: str) -> tuple[dict[str, i
     return breakdown, evidence
 
 
-def _reasons(info: SupplierInfo, ctx: RankContext, evidence: dict, location_note: str, type_match: str) -> list[str]:
+def _reasons(info: SupplierInfo, evidence: dict, location_note: str) -> list[str]:
     reasons = [evidence["label"][0].upper() + evidence["label"][1:] + "."]
     reasons.append(location_note)
     contacts = [label for key, label in (("phone", "телефон"), ("email", "email")) if info.fields.get(key)]
@@ -187,12 +178,7 @@ def _reasons(info: SupplierInfo, ctx: RankContext, evidence: dict, location_note
         reasons.append("Телефона на сайте нет: позвонить некуда, поэтому в рекомендации не попадает.")
     if info.inn:
         reasons.append(f"Указан ИНН {info.inn}, он прошёл проверку контрольной суммы.")
-    kind = info.values("supplier_type")
-    if type_match == "mismatch":
-        reasons.append(f"Тип: {kind[0]}, а вы искали: {ctx.supplier_type}. В рекомендации не попадает.")
-    elif type_match == "unknown":
-        reasons.append(f"Тип поставщика на сайте не указан, а вы искали: {ctx.supplier_type}.")
-    elif kind:
+    if kind := info.values("supplier_type"):
         reasons.append(f"Тип: {kind[0]}.")
     for name, label in (("moq", "Минимальный заказ"), ("delivery_terms", "Доставка")):
         if info.fields.get(name):
@@ -205,56 +191,53 @@ def _substitute(info: SupplierInfo) -> bool:
     return SUBSTITUTE.search(text) is not None
 
 
-def _questions(missing: list[str], ctx: RankContext, tier: str, regions, substitute: bool) -> list[str]:
+def _questions(missing: list[str], ctx: RankContext, tier: str, substitute: bool) -> list[str]:
+    """Что спросить при звонке. Про доставку в регион поиска не спрашиваем: расположение уже учтено в оценке и в метке."""
     asks = []
     if substitute:
         asks.append(f"Уточните, что «{ctx.category}» натуральный продукт, а не аналог с заменителем молочного жира (СЗМЖ).")
     if "минимальный заказ" in missing or "цены" in missing:
         parts = [p for p in ("минимальный заказ" if "минимальный заказ" in missing else "", "цены" if "цены" in missing else "") if p]
         asks.append(f"Уточните {' и '.join(parts)} на «{ctx.category}».")
-    if tier == "local":  # поставщик рядом: спрашивать, возят ли в наш регион, незачем
-        if "условия доставки" in missing:
-            asks.append("Уточните условия и стоимость доставки до вашей точки.")
-    elif tier in ("unknown", "other", "neighbor", "nationwide") or "условия доставки" in missing or "регионы поставки" in missing:
-        target = f"регион «{regions[ctx.primary_region_id].name}»" if ctx.primary_region_id else "вашу точку"
-        asks.append(f"Узнайте, доставляют ли в {target} и на каких условиях.")
+    if "условия доставки" in missing:
+        asks.append("Уточните условия и стоимость доставки до вашей точки.")
     extra = [p for p in ("сертификаты" if "сертификаты" in missing else "", "реквизиты (ИНН)" if "ИНН" in missing else "") if p]
     if extra:
         asks.append(f"Попросите {' и '.join(extra)}.")
     return asks
 
 
+def product_confirmed(info: SupplierInfo, ctx: RankContext) -> bool:
+    """Товар назван в прайсе, ассортименте или описании (не меньше половины баллов за товар). Название компании
+    и общие слова вроде «полный ассортимент» товар не подтверждают."""
+    return product_evidence(info, ctx)[0] >= RECOMMEND_MIN_PRODUCT_SHARE * WEIGHTS["relevance"]
+
+
 def rank_suppliers(suppliers: list[SupplierInfo], ctx: RankContext) -> list[Ranked]:
-    """Ranks the run's suppliers and marks the recommended ones: the first three with a score above the threshold that also have
-    a phone, a fitting type, a confirmed product (at least half of the product points) and a known region."""
+    """Ranks the run's suppliers with a confirmed product (the others are left out) and marks the recommended ones: the first
+    three with a score above the threshold that also have a phone and a known region."""
     focus = frozenset(({ctx.primary_region_id} if ctx.primary_region_id else set()) | set(ctx.neighbor_region_ids))
     detector = detector_for(focus)
-    regions = get_locations().regions
+    suppliers = [info for info in suppliers if product_confirmed(info, ctx)]
     ranked: list[Ranked] = []
     eligible: set[int] = set()
     for info in suppliers:
-        tier, location_note = classify_location(info, ctx, detector)
-        type_match = _type_match(info, ctx)
+        tier, tier_label, location_note = classify_location(info, ctx, detector)
         breakdown, evidence = _score(info, ctx, tier)
         missing = [FIELD_NAMES[f] for f in WANTED if not (info.inn if f == "inn" else info.fields.get(f))]
         substitute = _substitute(info)
-        confirmed = breakdown["relevance"] >= RECOMMEND_MIN_PRODUCT_SHARE * WEIGHTS["relevance"]
         warnings = build_warnings(
             site_domain=info.domain, emails=info.values("email"), pages_studied=info.pages_studied, tier=tier,
-            product_confirmed=confirmed, has_inn=bool(info.inn), substitute=substitute,
+            has_inn=bool(info.inn), substitute=substitute,
         )
-        missing_extras, extra_questions = extras_module.check(
-            ctx.extras, info.values("certificates") + info.values("description") + info.values("assortment") + info.values("delivery_terms")
-        )
-        warnings += [{"code": "extra_not_found", "severity": "warn", "text": f"Не найдено на сайте: {label}"} for label in missing_extras]
-        # the badge needs a phone, a fitting type, a confirmed product and a known region
-        if info.fields.get("phone") and type_match != "mismatch" and confirmed and tier != "unknown":
+        # the badge needs a phone and a known region
+        if info.fields.get("phone") and tier != "unknown":
             eligible.add(info.id)
         ranked.append(
             Ranked(
-                supplier_id=info.id, rank=0, score=sum(breakdown.values()), tier=tier, tier_label=TIER_LABELS[tier],
-                breakdown=breakdown, reasons=_reasons(info, ctx, evidence, location_note, type_match), missing=missing,
-                questions=extra_questions + _questions(missing, ctx, tier, regions, substitute), warnings=warnings, evidence=evidence,
+                supplier_id=info.id, rank=0, score=sum(breakdown.values()), tier=tier, tier_label=tier_label,
+                breakdown=breakdown, reasons=_reasons(info, evidence, location_note), missing=missing,
+                questions=_questions(missing, ctx, tier, substitute), warnings=warnings, evidence=evidence,
             )
         )
     names = {s.id: s.name for s in suppliers}

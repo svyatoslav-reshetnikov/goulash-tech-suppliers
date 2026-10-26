@@ -45,8 +45,7 @@ def email_mismatches(emails: list[str], site_domain: str) -> list[str]:
 
 
 def build_warnings(
-    *, site_domain: str, emails: list[str], pages_studied: int | None, tier: str, product_confirmed: bool, has_inn: bool,
-    substitute: bool = False, missing_extras: list[str] | None = None,
+    *, site_domain: str, emails: list[str], pages_studied: int | None, tier: str, has_inn: bool, substitute: bool = False,
 ) -> list[dict]:
     result: list[Warning] = []
     for domain in email_mismatches(emails, site_domain)[:1]:
@@ -56,12 +55,8 @@ def build_warnings(
         result.append(Warning("low_evidence", "warn", "Изучена только 1 страница сайта"))
     if tier == "unknown":
         result.append(Warning("region_unknown", "warn", "Регион неизвестен"))
-    if not product_confirmed:
-        result.append(Warning("product_unconfirmed", "warn", "Товар не подтверждён на сайте"))
     if substitute:
         result.append(Warning("substitute_product", "warn", "В ассортименте есть продукт с заменителем молочного жира: уточните, предлагают ли натуральный продукт"))
     if not has_inn:
         result.append(Warning("no_inn", "info", "ИНН не найден"))
-    for item in missing_extras or []:
-        result.append(Warning("extra_not_found", "info", f"Не найдено: {item}"))
     return [asdict(w) for w in result]
