@@ -13,7 +13,7 @@
   after the product are read too.
 - Candidates are found by code: every region with its own Yandex region code × 4 phrasings × two result pages (+ product synonyms),
   no repeated queries; the model joins afterwards and may search more. Sites are ranked by product in title/snippet.
-- No caps on the number of studied sites (8) or site searches (12): every found candidate is studied (up to 40), until 20 confirmed suppliers; token (800k), time (30 min) and fetch (500) budgets are the cost guards.
+- No caps on the number of studied sites (8) or site searches (12): every found candidate is studied (up to 60), until 20 confirmed suppliers; token (800k), time (30 min) and fetch (500) budgets are the cost guards.
 - A site that does not name the product is dropped after the first extraction and one product search instead of four searches for
   missing fields; the home page check also rejects a site whose home page and snippet never mention the product.
 - Candidate queue: before studying, the home pages of all candidates are loaded (no model) and the mentions of the product (and its
