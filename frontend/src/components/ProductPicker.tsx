@@ -16,20 +16,23 @@ type Props = {
 
 /** «Что закупаем»: one product from the catalog, found by name or synonym. */
 export default function ProductPicker({ onChange, initialCategoryId = null }: Props) {
-  const [all, setAll] = useState<Option[]>([]);
+  const [all, setAll] = useState<Option[] | null>(null); // null: справочник ещё загружается
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [product, setProduct] = useState<Picked | null>(null);
   const [failed, setFailed] = useState(false);
   const box = useRef<HTMLDivElement>(null);
-  const prefilled = useRef(false);
+  const [prefilled, setPrefilled] = useState(initialCategoryId === null);
 
   useEffect(() => {
     fetchCategories()
       .then((data) =>
         setAll(data.groups.flatMap((g) => g.categories.map((c) => ({ id: c.id, name: c.name, group: g.name, names: [c.name, ...c.synonyms].map(fold) })))),
       )
-      .catch(() => setFailed(true));
+      .catch(() => {
+        setAll([]);
+        setFailed(true);
+      });
   }, []);
 
   useEffect(() => {
@@ -38,11 +41,11 @@ export default function ProductPicker({ onChange, initialCategoryId = null }: Pr
 
   // a chip in the catalog opens the form with its product already chosen
   useEffect(() => {
-    if (prefilled.current || initialCategoryId === null || all.length === 0) return;
+    if (prefilled || initialCategoryId === null || all === null) return;
     const found = all.find((c) => c.id === initialCategoryId);
     if (found) setProduct({ id: found.id, name: found.name, group: found.group });
-    prefilled.current = true;
-  }, [all, initialCategoryId]);
+    setPrefilled(true);
+  }, [all, initialCategoryId, prefilled]);
 
   useEffect(() => {
     const close = (event: MouseEvent) => {
@@ -55,6 +58,7 @@ export default function ProductPicker({ onChange, initialCategoryId = null }: Pr
   const q = fold(query.trim());
   const browsing = q === "";
   const options = useMemo(() => {
+    if (all === null) return [];
     if (browsing) return all; // the field was just opened: show every category grouped by its group
     return all
       .map((c) => ({ c, rank: c.names.some((n) => n === q) ? 0 : c.names.some((n) => n.startsWith(q)) ? 1 : c.names.some((n) => n.includes(q)) ? 2 : 9 }))
@@ -63,6 +67,9 @@ export default function ProductPicker({ onChange, initialCategoryId = null }: Pr
       .slice(0, 20)
       .map((x) => x.c);
   }, [all, q, browsing]);
+
+  // товар пришёл из ссылки справочника: пока он не подставлен, вместо пустого поля видна загрузка
+  const prefilling = !prefilled;
 
   const choose = (c: Option) => {
     setProduct({ id: c.id, name: c.name, group: c.group });
@@ -75,7 +82,9 @@ export default function ProductPicker({ onChange, initialCategoryId = null }: Pr
       <label htmlFor="product-input" className="mb-1 block text-sm font-medium text-slate-700">
         Что закупаем
       </label>
-      {product ? (
+      {prefilling ? (
+        <p className="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-500">Загружаем справочник…</p>
+      ) : product ? (
         <div className="flex items-center gap-1 self-start">
           <span className="flex items-center gap-1 rounded-full bg-cyan-100 py-1 pl-3 pr-1 text-sm text-cyan-900">
             {product.name}
@@ -120,7 +129,9 @@ export default function ProductPicker({ onChange, initialCategoryId = null }: Pr
                 </li>
               ))}
               {options.length === 0 && (
-                <li className="px-3 py-2 text-sm text-slate-500">{failed ? "Справочник недоступен" : "В справочнике такой позиции нет"}</li>
+                <li className="px-3 py-2 text-sm text-slate-500">
+                  {all === null ? "Загружаем справочник…" : failed ? "Справочник недоступен" : "В справочнике такой позиции нет"}
+                </li>
               )}
             </ul>
           )}
