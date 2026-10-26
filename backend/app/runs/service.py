@@ -53,15 +53,10 @@ def default_deps(settings: Settings) -> Deps:
 deps_factory: Callable[[Settings], Deps] = default_deps
 
 
-def limits_from(settings: Settings) -> Limits:
-    return Limits(
-        max_turns=settings.agent_max_turns,
-        max_seconds=settings.agent_max_seconds,
-        max_total_tokens=settings.agent_max_total_tokens,
-        target_suppliers=settings.agent_target_suppliers,
-        max_fetches=settings.agent_max_fetches,
-        auto_discovery=settings.agent_auto_discovery,
-    )
+def default_limits() -> Limits:
+    """Лимиты рабочего запуска. Значения заданы в коде (app/agent/config.py), а не в .env: иначе забытая строка на сервере
+    тихо перекрывает их. Автоматический поиск кандидатов включён только здесь; в Limits() он выключен для юнит-тестов."""
+    return Limits(auto_discovery=True)
 
 
 async def active_runs(session: AsyncSession) -> int:
@@ -97,9 +92,10 @@ async def shutdown() -> None:
 
 
 async def execute_run(
-    session_factory: async_sessionmaker[AsyncSession], run_id: int, settings: Settings | None = None
+    session_factory: async_sessionmaker[AsyncSession], run_id: int, settings: Settings | None = None, limits: Limits | None = None
 ) -> None:
     settings = settings or get_settings()
+    limits = limits or default_limits()
     emit = EventWriter(session_factory, run_id)
     status, stop_reason, summary, error, stats = "failed", None, None, None, None
     try:
@@ -110,7 +106,7 @@ async def execute_run(
                 category=run.category_name,
                 synonyms=tuple(category.synonyms or []) if category else (),
                 regions=tuple(RegionRef(r["name"], r["role"], yandex_region("region", r.get("id"))) for r in run.regions),
-                target=settings.agent_target_suppliers,
+                target=limits.target_suppliers,
                 search_region=yandex_region(run.location_kind, run.location_key),
                 city=run.location_key.split("|", 1)[1] if run.location_kind == "city" and run.location_key else None,
             )
@@ -118,7 +114,6 @@ async def execute_run(
             await session.commit()
 
         deps = deps_factory(settings)
-        limits = limits_from(settings)
         toolbox = ToolBox(request, limits, deps.searcher, deps.fetcher, DbSink(session_factory, run_id), emit,
                           places=deps.places, cache=DbPageCache(session_factory), llm=deps.llm)
         result = await run_agent(request, deps.llm, toolbox, emit, limits)

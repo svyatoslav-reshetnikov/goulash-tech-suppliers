@@ -23,7 +23,7 @@ from app.agent.models import RegionRef, RunRequest
 from app.agent.tools import ToolBox
 from app.config import get_settings
 from app.locations import get_locations, yandex_region
-from app.runs.service import default_deps, limits_from
+from app.runs.service import default_deps, default_limits
 
 from .metrics import HERE, OUT_DIR
 
@@ -46,7 +46,8 @@ def build_request(case: dict, target: int) -> RunRequest:
 
 
 async def run_case(case: dict, settings, cache: MemoryPageCache) -> dict:
-    request, limits, deps = build_request(case, settings.agent_target_suppliers), limits_from(settings), default_deps(settings)
+    limits = default_limits()
+    request, deps = build_request(case, limits.target_suppliers), default_deps(settings)
 
     problems: list[dict] = []  # почему сайты отсеяны или не сохранены: без этого не разобрать, что пошло не так
 

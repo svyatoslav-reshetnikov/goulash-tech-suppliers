@@ -13,8 +13,7 @@
   after the product are read too.
 - Candidates are found by code: every region with its own Yandex region code × 4 phrasings × two result pages (+ product synonyms),
   no repeated queries; the model joins afterwards and may search more. Sites are ranked by product in title/snippet.
-- No caps on the number of studied sites (8) or site searches (12): every found candidate is studied (up to 40), until `AGENT_TARGET_SUPPLIERS`
-  (now 20) confirmed suppliers; token (800k), time (30 min) and fetch (500) budgets are the cost guards.
+- No caps on the number of studied sites (8) or site searches (12): every found candidate is studied (up to 40), until 20 confirmed suppliers; token (800k), time (30 min) and fetch (500) budgets are the cost guards.
 - A site that does not name the product is dropped after the first extraction and one product search instead of four searches for
   missing fields; the home page check also rejects a site whose home page and snippet never mention the product.
 - Candidate queue: before studying, the home pages of all candidates are loaded (no model) and the mentions of the product (and its
@@ -22,6 +21,9 @@
   mentions and a status/reason per site (saved, product not confirmed, rejected, did not open, not reached) is stored in the run
   stats (`stats.candidates`), shown under the run ("Очередь кандидатов") and written to the eval results.
 - Page loading: timeout 45 s (was 20), one retry on a timeout, connection reset or HTTP 5xx; 403/404 are not retried.
+- Run limits (`Limits` in `app/agent/config.py`) live in code only: the `AGENT_MAX_TURNS/SECONDS/TOTAL_TOKENS/TARGET_SUPPLIERS/MAX_FETCHES`
+  environment settings are gone (a stale line in a server `.env` silently overrode the defaults and is now ignored); only
+  `AGENT_MAX_RUNS_PER_DAY` stays configurable.
 - Yandex Search is called at most once per 1.1 s across all searches (including `site:` ones), whatever the number of sites studied in parallel (5).
 - The "Изучена только 1 страница сайта" warning is removed: one-page sites (Tilda) hold the whole site on one page.
 

@@ -9,6 +9,7 @@ import pytest
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
+from app.agent.config import Limits
 from app.agent.models import AcceptedField, SupplierDraft
 from app.agent.pages import Page
 from app.config import MissingSettingError, Settings
@@ -152,7 +153,8 @@ def script():
             tool("fetch_page", url=CONTACTS_URL), tool("save_supplier", website=HOME_URL, fields=GOOD_FIELDS)]
 
 
-SETTINGS = Settings(_env_file=None, agent_target_suppliers=1, agent_auto_discovery=False)
+SETTINGS = Settings(_env_file=None)
+LIMITS = Limits(target_suppliers=1)  # без автоматического поиска: ответы модели в тестах заготовлены по шагам
 
 
 @needs_db
@@ -162,7 +164,7 @@ async def test_execute_run_end_to_end_and_second_run_uses_page_cache(factory, mo
     try:
         fetcher = install(monkeypatch, ScriptedLLM(script()))
         run_id = await new_run(factory)
-        await service.execute_run(factory, run_id, SETTINGS)
+        await service.execute_run(factory, run_id, SETTINGS, LIMITS)
 
         async with factory() as session:
             run = await session.get(Run, run_id)
@@ -180,7 +182,7 @@ async def test_execute_run_end_to_end_and_second_run_uses_page_cache(factory, mo
         # второй запуск: страницы берутся из кэша базы, сеть не трогаем, поставщик дополняется, а не дублируется
         fetcher2 = install(monkeypatch, ScriptedLLM(script()))
         run2 = await new_run(factory)
-        await service.execute_run(factory, run2, SETTINGS)
+        await service.execute_run(factory, run2, SETTINGS, LIMITS)
         async with factory() as session:
             assert (await session.get(Run, run2)).status == "done"
             assert len((await session.execute(select(Supplier))).scalars().all()) == 1
@@ -200,7 +202,7 @@ async def test_execute_run_failure_paths_are_recorded(factory, monkeypatch=None)
 
         monkeypatch.setattr(service, "deps_factory", no_keys)
         run_id = await new_run(factory)
-        await service.execute_run(factory, run_id, SETTINGS)
+        await service.execute_run(factory, run_id, SETTINGS, LIMITS)
         async with factory() as session:
             run = await session.get(Run, run_id)
             events = (await session.execute(select(RunEvent).where(RunEvent.run_id == run_id))).scalars().all()
@@ -208,7 +210,7 @@ async def test_execute_run_failure_paths_are_recorded(factory, monkeypatch=None)
 
         install(monkeypatch, ScriptedLLM([RuntimeError("модель недоступна")]))
         run2 = await new_run(factory)
-        await service.execute_run(factory, run2, SETTINGS)
+        await service.execute_run(factory, run2, SETTINGS, LIMITS)
         async with factory() as session:
             run = await session.get(Run, run2)
         assert run.status == "failed" and run.stop_reason == "llm_error" and "недоступна" in run.error
